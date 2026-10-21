@@ -67,5 +67,6 @@ export async function POST(request: Request) {
     }
     return failure("No pudimos registrar la receta. El archivo no quedó asociado a una solicitud.", 502);
   }
-  return NextResponse.json({ id: record.id, status: "pending_review" }, { status: 201, headers: privateHeaders });
+  return NextResponse.json({ id: record.id, status: "pending" }, { status: 201, headers: privateHeaders });
 }
+
