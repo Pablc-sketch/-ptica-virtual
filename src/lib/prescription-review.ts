@@ -1,5 +1,6 @@
 // Revisión DOCUMENTAL de recetas: refleja supabase/pendientes/01_revision_documental_recetas.sql.
-// "Revisada" = el equipo comprobó que el documento sirve para cotizar. NO es aprobación médica ni activa pagos.
+// "Revisión completada" = el equipo comprobó que el archivo se puede leer y trae los datos necesarios para preparar una
+// cotización. NO valida, aprueba ni corrige la graduación (no es un acto clínico) y no activa pagos ni compras.
 
 export const REVIEW_STATUSES = ["pending", "in_review", "needs_new_file", "reviewed"] as const;
 export type ReviewStatus = (typeof REVIEW_STATUSES)[number];
@@ -20,11 +21,12 @@ export const canTransition = (from: ReviewStatus, to: ReviewStatus) => TRANSITIO
 /** Texto para la persona cliente. Nunca promete aprobación médica ni compra. */
 export const CLIENT_LABEL: Record<ReviewStatus, { title: string; detail: string }> = {
   pending: { title: "Recibida", detail: "Tu receta está en la fila para que una persona del equipo la revise." },
-  in_review: { title: "En revisión", detail: "Una persona del equipo está revisando que el documento sea legible y completo." },
+  in_review: { title: "En revisión", detail: "Una persona del equipo está revisando que el archivo se pueda leer y traiga los datos necesarios." },
   needs_new_file: { title: "Necesitamos un nuevo archivo", detail: "Revisa el motivo y sube un archivo nuevo para continuar." },
   reviewed: {
     title: "Revisión documental completada",
-    detail: "El documento es legible y completo para cotizar. Esto no es una evaluación médica ni confirma una compra.",
+    detail:
+      "Revisamos que el archivo se pueda leer y traiga los datos necesarios para preparar tu cotización. No es una evaluación médica: no valida ni corrige tu graduación, y no confirma una compra.",
   },
 };
 
