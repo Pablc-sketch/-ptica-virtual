@@ -17,16 +17,16 @@ async function LoginForm({ searchParams }: { searchParams: Promise<{ error?: str
   const { error } = await searchParams;
   return (
     <main className="mx-auto max-w-sm p-8">
-      <h1 className="mb-6 text-2xl font-semibold">Administración</h1>
+      <h1 className="mb-6 text-4xl">Administración</h1>
       {error && (
-        <p className="mb-4 text-sm text-red-600">
+        <p className="mb-4 text-sm text-red-700">
           {error === "no-admin" ? "Tu usuario no tiene permisos de administrador." : "Credenciales incorrectas."}
         </p>
       )}
       <form action={signIn} className="flex flex-col gap-3">
-        <input name="email" type="email" required placeholder="Email" className="rounded border p-2" />
-        <input name="password" type="password" required placeholder="Contraseña" className="rounded border p-2" />
-        <button className="rounded bg-black p-2 text-white">Entrar</button>
+        <input name="email" type="email" required placeholder="Email" className="field" />
+        <input name="password" type="password" required placeholder="Contraseña" className="field" />
+        <button className="btn">Entrar</button>
       </form>
     </main>
   );

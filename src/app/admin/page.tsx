@@ -1,45 +1,40 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
+import { AdminNav } from "@/components/admin-nav";
 
-async function AdminContent() {
+async function Summary() {
   const { supabase } = await requireAdmin();
-  const [{ data: products }, { data: quotes }] = await Promise.all([
-    supabase.from("products").select("id, name, price_clp, status").order("created_at", { ascending: false }).limit(50),
-    supabase.from("quotes").select("id, customer_name, status, created_at").order("created_at", { ascending: false }).limit(50),
+  const [drafts, published, quotes] = await Promise.all([
+    supabase.from("products").select("id", { count: "exact", head: true }).eq("status", "draft"),
+    supabase.from("products").select("id", { count: "exact", head: true }).eq("status", "published"),
+    supabase.from("quotes").select("id", { count: "exact", head: true }).eq("status", "new"),
   ]);
+  const cards: [string, number | null, string][] = [
+    ["Borradores", drafts.count, "/admin/productos"],
+    ["Publicados", published.count, "/admin/productos"],
+    ["Cotizaciones nuevas", quotes.count, "/admin/cotizaciones"],
+  ];
   return (
-    <main className="mx-auto max-w-4xl space-y-8 p-8">
-      <h1 className="text-2xl font-semibold">Administración</h1>
-      <section>
-        <h2 className="mb-2 text-lg font-medium">Productos ({products?.length ?? 0})</h2>
-        <ul className="divide-y">
-          {products?.map((p) => (
-            <li key={p.id} className="flex justify-between py-2">
-              <span>{p.name}</span>
-              <span>${p.price_clp.toLocaleString("es-CL")} · {p.status}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section>
-        <h2 className="mb-2 text-lg font-medium">Cotizaciones ({quotes?.length ?? 0})</h2>
-        <ul className="divide-y">
-          {quotes?.map((q) => (
-            <li key={q.id} className="flex justify-between py-2">
-              <span>{q.customer_name}</span>
-              <span>{q.status} · {new Date(q.created_at).toLocaleDateString("es-CL")}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-    </main>
+    <div className="grid gap-4 sm:grid-cols-3">
+      {cards.map(([t, n, href]) => (
+        <Link key={t} href={href} className="border border-line bg-white/60 p-5 hover:bg-sage/40">
+          <p className="eyebrow">{t}</p>
+          <p className="font-serif text-5xl">{n ?? "—"}</p>
+        </Link>
+      ))}
+    </div>
   );
 }
 
 export default function AdminPage() {
   return (
-    <Suspense fallback={<main className="p-8">Cargando…</main>}>
-      <AdminContent />
-    </Suspense>
+    <main className="container-page py-10">
+      <h1 className="mb-6 text-4xl">Administración</h1>
+      <AdminNav />
+      <Suspense fallback={<p role="status">Cargando…</p>}>
+        <Summary />
+      </Suspense>
+    </main>
   );
 }

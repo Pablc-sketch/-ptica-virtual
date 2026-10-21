@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { parseQuote } from "@/lib/quotes";
+import { quotesOpen } from "@/lib/flags";
 
 export async function POST(request: Request) {
+  if (!quotesOpen()) {
+    return NextResponse.json({ error: "Las cotizaciones aún no están abiertas" }, { status: 503 });
+  }
   const body = await request.json().catch(() => null);
   const parsed = parseQuote(body);
   if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });

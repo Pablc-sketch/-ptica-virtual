@@ -1,26 +1,74 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper: #f7f6f2;
+  --ink: #292e29;
+  --muted: #5f645d;
+  --line: #dedfd6;
+  --sage: #d9dfd0;
+  --olive: #424d3b;
+  --serif: Georgia, "Times New Roman", serif;
+  --sans: Arial, Helvetica, sans-serif;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-sage: var(--sage);
+  --color-olive: var(--olive);
+  --font-serif: var(--serif);
+  --font-sans: var(--sans);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(1200px 600px at 85% -10%, #e4e2ee66, transparent 60%),
+    radial-gradient(900px 500px at -5% 20%, #d9dfd055, transparent 60%),
+    var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
 }
+
+h1, h2, h3 { font-weight: 400; }
+h1, h2 { font-family: var(--serif); letter-spacing: -0.045em; line-height: 1.05; }
+
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, summary:focus-visible {
+  outline: 3px solid #788e6f;
+  outline-offset: 3px;
+}
+
+button, a, input, select, textarea, summary { touch-action: manipulation; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation: none !important; transition: none !important; }
+}
+
+/* Componentes reutilizables */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 0 22px; border: 1px solid var(--olive);
+  background: var(--olive); color: var(--paper); font-size: 14px; letter-spacing: 0.02em;
+  cursor: pointer; transition: background 0.2s;
+}
+.btn:hover { background: #343d2f; }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn-ghost { background: transparent; color: var(--ink); border-color: var(--ink); }
+.btn-ghost:hover { background: var(--sage); }
+.field {
+  min-height: 44px; width: 100%; padding: 0 12px; border: 1px solid var(--line);
+  background: #fff; color: var(--ink);
+}
+textarea.field { padding: 10px 12px; min-height: 96px; }
+.eyebrow { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.container-page { width: min(1240px, 100% - 40px); margin-inline: auto; }
