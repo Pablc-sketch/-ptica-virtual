@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f5f3ee">
+  <meta name="description" content="Encuentra tu próximo marco. Una óptica cercana, una selección cuidada y tu receta revisada antes de pagar. Óptica Global, Santiago.">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Óptica Global — Tu forma de ver</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./config.js" defer></script><script src="./app.js" type="module"></script>
+</head>
+<body>
+  <a href="#main" class="skip">Saltar al contenido</a>
+  <div class="announcement">Una nueva forma de elegir tus lentes <span>·</span> Santiago, Chile</div>
+  <header class="header">
+    <a href="#/" class="brand" aria-label="Óptica Global, inicio"><svg viewBox="0 0 48 24" aria-hidden="true"><path d="M2 8C2 3 18 3 18 8v5c0 8-16 8-16 0V8Zm28 0c0-5 16-5 16 0v5c0 8-16 8-16 0V8ZM18 9c3-4 9-4 12 0"/></svg><span>GLOBAL<small>ÓPTICA</small></span></a>
+    <nav aria-label="Navegación principal"><a href="#/catalogo">Marcos</a><a href="#/cristales">Cristales</a><a href="#/como-funciona">Cómo funciona</a></nav>
+    <div class="header-actions"><button class="icon-button" id="search-toggle" aria-label="Buscar marcos"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></button><a href="#/favoritos" class="icon-button" aria-label="Mis favoritos"><svg viewBox="0 0 24 24"><path d="M12 21 3 12C-3 4 7-1 12 6c5-7 15-2 9 6Z"/></svg><span id="fav-count" class="count"></span></a><a href="#/seleccion" class="bag-link" aria-label="Ver mi selección">Mi selección <span id="bag-count">0</span></a><button id="mobile-menu" class="icon-button mobile-only" aria-label="Abrir menú" aria-expanded="false">☰</button></div>
+  </header>
+  <div id="search-panel" class="search-panel" hidden><label for="global-search">Encuentra un marco</label><input id="global-search" type="search" placeholder="Código, modelo o color…" autocomplete="off"><button id="search-go">Buscar →</button></div>
+  <main id="main" tabindex="-1"></main>
+  <footer><div class="footer-top"><div><p class="wordmark">GLOBAL<span>ÓPTICA</span></p><p>Tu forma de ver.<br>Tu forma de ser.</p></div><div><p class="eyebrow">EXPLORA</p><a href="#/catalogo">Todos los marcos</a><a href="#/cristales">Elegir mis cristales</a><a href="#/como-funciona">Tu compra, paso a paso</a></div><div><p class="eyebrow">ESTAMOS CERCA</p><a href="#/ayuda">Preguntas y acompañamiento</a><a href="#/privacidad">Privacidad de tu receta</a><a href="#/admin">Administración</a></div></div><div class="footer-bottom"><span>© <span id="year"></span> Ópticas P&P SpA · Chile</span><span>Hecho para mirar distinto.</span></div></footer>
+  <dialog id="product-dialog" aria-labelledby="dialog-title"></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+</body></html>
