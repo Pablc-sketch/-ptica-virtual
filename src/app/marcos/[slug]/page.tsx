@@ -54,7 +54,7 @@ async function Detail({ params }: { params: PageProps<"/marcos/[slug]">["params"
             <div key={k}><dt className="eyebrow">{k}</dt><dd>{v}</dd></div>
           ))}
         </dl>
-        <SelectionButtons id={p.id} name={p.name} />
+        <SelectionButtons id={p.id} />
         <p className="mt-6 text-sm text-muted">
           La selección no es una compra: revisamos tu receta contigo y confirmamos el total antes de cualquier pago.{" "}
           <Link href="/como-funciona" className="underline">Cómo funciona</Link>

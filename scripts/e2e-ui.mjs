@@ -2,8 +2,10 @@
 // Uso: npm run test:e2e   (construye, levanta mock + next start y ejecuta Playwright)
 import { spawn, execSync } from "node:child_process";
 import { chromium } from "playwright-core";
-import { startMock, quoteCalls, rx, GOOD_PASSWORD } from "./mock-supabase.mjs";
+import { startMock, quoteCalls, rx, control, GOOD_PASSWORD } from "./mock-supabase.mjs";
 import { writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
+const axePath = createRequire(import.meta.url).resolve("axe-core/axe.min.js");
 
 const MOCK = 54399, APP = 3101;
 const env = {
@@ -33,6 +35,11 @@ try {
     const base = `http://localhost:${APP}`;
     const noOverflow = async (p) => !(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1));
 
+    control.productsDown = true;
+    await page.goto(`${base}/marcos`, { waitUntil: "networkidle" });
+    const down = await page.textContent("main");
+    check(`${label}: fallo de base en catálogo NO se muestra como catálogo vacío`, down.includes("No pudimos cargar el catálogo") && !down.includes("Estamos preparando el catálogo"));
+    control.productsDown = false;
     await page.goto(`${base}/marcos`, { waitUntil: "networkidle" });
     await hydrated(page, "#q");
     check(`${label}: catálogo muestra 3 marcos`, (await page.locator("article").count()) === 3);
@@ -129,6 +136,7 @@ try {
     await page.getByRole("button", { name: "Ingresar" }).click();
     await page.waitForSelector("text=Enviar mi receta");
     check(`${label}: ingreso correcto muestra la cuenta`, (await page.textContent("main")).includes("cliente@test.cl"));
+    check(`${label}: no muestra receta ni cotización ajenas (filtro de dueño)`, (await page.getByRole("button", { name: /Abrir \(enlace/ }).count()) === 0 && (await page.locator('select[name="quote_id"] option').count()) === 2, `(recetas visibles=${await page.getByRole("button", { name: /Abrir \(enlace/ }).count()}, opciones=${await page.locator('select[name="quote_id"] option').count()})`);
     await hydrated(page, 'input[name="file"]');
     const png = "/tmp/e2e-receta.png";
     writeFileSync(png, Buffer.from("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4", "hex"));
@@ -151,12 +159,55 @@ try {
     await popup.waitForURL(/object\/sign\/prescriptions/, { timeout: 8000 }).catch(() => {});
     check(`${label}: abrir receta usa URL firmada temporal`, /object\/sign\/prescriptions/.test(popup.url()), popup.url().slice(0, 90));
     await popup.close();
+    // ---- Borrado propio ----
+    await hydrated(page, "main li button");
+    await page.getByRole("button", { name: "Eliminar" }).first().click();
+    check(`${label}: eliminar pide confirmación y enfoca "Sí, eliminar"`, (await page.getByText("¿Eliminar esta receta definitivamente?").count()) === 1 && (await page.evaluate(() => document.activeElement?.textContent)) === "Sí, eliminar");
+    await page.getByRole("button", { name: "Cancelar" }).click();
+    check(`${label}: cancelar devuelve el foco a "Eliminar" y no borra`, (await page.evaluate(() => document.activeElement?.textContent)) === "Eliminar" && rx.some((r) => r.user_id === "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+    control.failStorageDelete = 1;
+    await page.getByRole("button", { name: "Eliminar" }).first().click();
+    await page.getByRole("button", { name: "Sí, eliminar" }).click();
+    await page.waitForSelector("text=Tu receta sigue guardada");
+    check(`${label}: si falla Storage el registro se conserva y se puede reintentar`, rx.some((r) => r.user_id === "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+    await page.getByRole("button", { name: "Sí, eliminar" }).click();
+    await page.waitForSelector("text=Aún no has enviado ninguna receta");
+    check(`${label}: reintento elimina la receta propia y deja la ajena intacta`, !rx.some((r) => r.user_id === "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa") && rx.some((r) => r.id.endsWith("0000000000ff")));
+    const delAnon = await page.request.delete(`${base}/api/recetas/bbbbbbbb-bbbb-4bbb-8bbb-0000000000ff`, { headers: { origin: "https://evil.example" } });
+    check(`${label}: DELETE con origen ajeno -> 403`, delAnon.status() === 403);
+    const delForeign = await page.request.delete(`${base}/api/recetas/bbbbbbbb-bbbb-4bbb-8bbb-0000000000ff`, { headers: { origin: base } });
+    check(`${label}: no se puede borrar la receta de otra persona (404)`, delForeign.status() === 404 && rx.some((r) => r.id.endsWith("0000000000ff")), `(${delForeign.status()})`);
+
+    // ---- Caída del servicio de acceso: no se confunde con "sin sesión" ----
+    control.authDown = true;
+    await page.goto(`${base}/mi-cuenta`, { waitUntil: "networkidle" });
+    check(`${label}: servicio de acceso caído -> aviso, no formulario de ingreso`, (await page.textContent("main")).includes("No pudimos verificar tu sesión") && (await page.locator('input[name="password"]').count()) === 0);
+    const post503 = await page.request.post(`${base}/api/recetas`, { headers: { origin: base }, multipart: { consent: "true" } });
+    check(`${label}: API recetas con acceso caído -> 503 (no 401)`, post503.status() === 503, `(${post503.status()})`);
+    control.authDown = false;
+
+    await page.goto(`${base}/mi-cuenta`, { waitUntil: "networkidle" });
     await page.getByRole("button", { name: "Cerrar sesión" }).click();
     await page.waitForSelector("text=No necesitas cuenta para explorar");
     check(`${label}: cerrar sesión vuelve al ingreso`, true);
     const priv = await page.goto(`${base}/privacidad`, { waitUntil: "networkidle" });
     check(`${label}: privacidad se declara borrador y lista pendientes`, priv.status() === 200 && (await page.textContent("main")).includes("borrador pendiente de revisión"));
     check(`${label}: privacidad sin desborde`, await noOverflow());
+
+    // ---- Teclado: el primer Tab llega al enlace "Saltar al contenido" y lleva al contenido ----
+    await page.goto(`${base}/`, { waitUntil: "networkidle" });
+    await page.keyboard.press("Tab");
+    check(`${label}: primer Tab -> "Saltar al contenido" visible`, (await page.evaluate(() => document.activeElement?.textContent)) === "Saltar al contenido" && (await page.locator("a", { hasText: "Saltar al contenido" }).boundingBox())?.y >= 0);
+    await page.keyboard.press("Enter");
+    check(`${label}: el enlace de salto navega a #contenido`, page.url().endsWith("#contenido"));
+
+    // ---- Accesibilidad (axe-core: solo se exigen violaciones serious/critical) ----
+    for (const path of ["/", "/marcos", "/marcos/ambar", "/marcos/basalto", "/cotizar", "/cristales", "/como-funciona", "/ayuda", "/privacidad", "/mi-cuenta", "/admin/login"]) {
+      await page.goto(base + path, { waitUntil: "networkidle" });
+      await page.addScriptTag({ path: axePath });
+      const violations = await page.evaluate(async () => (await window.axe.run(document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"] } })).violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => `${v.id}[${v.nodes.length}]: ${v.nodes[0].target.join(" ")}`));
+      check(`${label}: axe ${path}`, violations.length === 0, violations.join(" | "));
+    }
     await ctx.close();
   }
 } finally {

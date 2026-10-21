@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/lib/session";
+import { DeletePrescriptionButton } from "@/components/delete-prescription-button";
 import { signIn, signOut, signUp } from "./actions";
 import { PrescriptionUpload } from "@/components/prescription-upload";
 import { OpenPrescriptionButton } from "@/components/open-prescription-button";
@@ -53,45 +55,47 @@ async function AuthForms({ searchParams }: { searchParams: SP }) {
   );
 }
 
-async function Account() {
+async function Account({ userId, email }: { userId: string; email: string | undefined }) {
   const supabase = await createClient();
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData.user;
-  if (!user) return null;
-  const [{ data: rx, error: rxErr }, { data: quotes }] = await Promise.all([
-    supabase.from("prescriptions").select("id, created_at, quote_id").order("created_at", { ascending: false }).limit(50),
-    supabase.from("quotes").select("id, created_at").order("created_at", { ascending: false }).limit(20),
+  // Filtro explícito de dueño: un administrador ve todas las filas por RLS, pero aquí solo van las suyas.
+  const [{ data: rx, error: rxErr }, { data: quotes, error: quotesErr }] = await Promise.all([
+    supabase.from("prescriptions").select("id, created_at, quote_id").eq("user_id", userId).order("created_at", { ascending: false }).limit(50),
+    supabase.from("quotes").select("id, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
   ]);
   const quoteOpts = (quotes ?? []).map((q) => ({ id: q.id, label: `Cotización del ${new Date(q.created_at).toLocaleDateString("es-CL")}` }));
   return (
     <div className="grid gap-10 lg:grid-cols-2">
       <section aria-labelledby="enviar">
-        <p className="mb-4 text-sm text-muted">Sesión iniciada como <strong>{user.email}</strong>.</p>
+        <p className="mb-4 text-sm text-muted">Sesión iniciada como <strong>{email}</strong>.</p>
         <h2 id="enviar" className="mb-3 text-2xl">Enviar mi receta</h2>
+        {quotesErr && <p role="alert" className="mb-3 text-sm text-red-700">No pudimos cargar tus cotizaciones; puedes enviar la receta sin asociarla.</p>}
         <PrescriptionUpload quotes={quoteOpts} />
         <form action={signOut} className="mt-6"><button className="btn btn-ghost">Cerrar sesión</button></form>
       </section>
       <section aria-labelledby="mis">
         <h2 id="mis" className="mb-3 text-2xl">Mis recetas</h2>
         {rxErr ? (
-          <p role="alert" className="text-sm text-red-700">La recepción privada de recetas aún no está disponible.</p>
+          <p role="alert" className="text-sm text-red-700">No pudimos cargar tus recetas en este momento. Intenta recargar la página.</p>
         ) : !rx?.length ? (
           <p className="text-muted">Aún no has enviado ninguna receta.</p>
         ) : (
           <ul className="divide-y divide-line border-y border-line">
             {rx.map((r) => (
-              <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
+              <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
                 <span className="text-sm">
                   Enviada el {new Date(r.created_at).toLocaleString("es-CL")}
                   <span className="block text-xs text-muted">Pendiente de revisión por una persona</span>
                 </span>
-                <OpenPrescriptionButton id={r.id} />
+                <span className="flex flex-wrap items-start gap-2">
+                  <OpenPrescriptionButton id={r.id} />
+                  <DeletePrescriptionButton id={r.id} />
+                </span>
               </li>
             ))}
           </ul>
         )}
         <p className="mt-4 text-xs text-muted">
-          Los enlaces para abrir una receta duran 60 segundos. Solo tú y el equipo autorizado pueden verla.
+          Los enlaces para abrir una receta duran 60 segundos. Solo tú y el equipo autorizado pueden verla. Puedes eliminarla cuando quieras.
         </p>
       </section>
     </div>
@@ -100,8 +104,19 @@ async function Account() {
 
 async function Content({ searchParams }: { searchParams: SP }) {
   const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  return data.user ? <Account /> : <AuthForms searchParams={searchParams} />;
+  const session = await getSession(supabase);
+  if (session.status === "unavailable") {
+    return (
+      <div role="alert" className="max-w-md border border-line bg-white/60 p-6">
+        <h2 className="text-2xl">No pudimos verificar tu sesión</h2>
+        <p className="mt-2 text-muted">El servicio de acceso no respondió. No es un problema de tu cuenta: inténtalo de nuevo en un momento.</p>
+        {/* Recarga completa a propósito: reintenta la consulta al servidor. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+        <a href="/mi-cuenta" className="btn mt-4">Reintentar</a>
+      </div>
+    );
+  }
+  return session.status === "user" ? <Account userId={session.user.id} email={session.user.email} /> : <AuthForms searchParams={searchParams} />;
 }
 
 export default function MiCuentaPage({ searchParams }: PageProps<"/mi-cuenta">) {

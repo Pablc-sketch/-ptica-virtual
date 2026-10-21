@@ -16,14 +16,16 @@ export default function PrivacidadPage() {
         <section>
           <h2 className="mb-2 text-2xl">Navegar sin cuenta</h2>
           <p className="text-muted">
-            Puedes ver el catálogo sin registrarte. Tus <strong>favoritos y tu selección</strong> se guardan solo en tu navegador
-            (almacenamiento local) y no se envían a ningún servidor hasta que pidas una cotización.
+            Puedes ver el catálogo sin registrarte. Tus <strong>favoritos y tu selección</strong> se guardan en tu navegador
+            (almacenamiento local) y no se asocian a ti ni se guardan en nuestro servidor. Al abrir “Tu selección”, tu navegador
+            consulta al servidor los datos y precios vigentes de los marcos elegidos (envía solo sus identificadores, sin tus datos
+            personales). Tu selección solo se guarda en el servidor cuando envías una cotización.
           </p>
         </section>
         <section>
           <h2 className="mb-2 text-2xl">Cuenta</h2>
           <p className="text-muted">
-            Si creas una cuenta guardamos tu correo y tu contraseña (cifrada) en el servicio de acceso. Usamos cookies de sesión
+            Si creas una cuenta guardamos tu correo en el servicio de acceso; tu contraseña queda protegida por ese servicio (no la vemos ni la guardamos en texto legible). Usamos cookies de sesión
             necesarias para mantenerte conectado. Registrarte no otorga permisos de administración.
           </p>
         </section>
@@ -40,7 +42,7 @@ export default function PrivacidadPage() {
             Tu receta es un dato sensible. Solo la pedimos si has iniciado sesión y aceptas expresamente su revisión. Se guarda en
             un almacenamiento <strong>privado</strong>: solo tú y el equipo autorizado pueden abrirla, mediante un enlace temporal de
             60 segundos. Aceptamos JPG, PNG, WebP o PDF de hasta 4 MB, y verificamos el contenido del archivo. Cada envío registra la
-            fecha y la versión del aviso que aceptaste.
+            fecha y la versión del aviso que aceptaste. Puedes eliminar una receta desde “Mi cuenta”: se borra el archivo y su registro.
           </p>
         </section>
         <section>
@@ -54,7 +56,7 @@ export default function PrivacidadPage() {
           <ul className="list-disc pl-5 text-muted">
             <li>Responsable del tratamiento y canal de contacto.</li>
             <li>Plazo de conservación de recetas y cotizaciones.</li>
-            <li>Procedimiento para acceder, corregir o eliminar tus datos (hoy no hay un botón de eliminación en el sitio).</li>
+            <li>Procedimiento para acceder, corregir o eliminar el resto de tus datos. Hoy solo puedes eliminar tus recetas desde “Mi cuenta”; no hay botón para borrar la cuenta ni las cotizaciones.</li>
             <li>Condiciones de venta y de pago.</li>
           </ul>
         </section>

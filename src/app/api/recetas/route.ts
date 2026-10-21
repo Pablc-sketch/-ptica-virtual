@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/lib/session";
 import { PRESCRIPTION_MAX_BYTES, PRESCRIPTION_CONSENT_VERSION, prescriptionFileType, readLimitedFormData, sameOrigin, validQuoteId } from "@/lib/prescriptions";
 
 const privateHeaders = { "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" };
@@ -10,8 +11,10 @@ export async function POST(request: Request) {
   const declaredLength = request.headers.get("content-length");
   if (declaredLength && Number(declaredLength) > PRESCRIPTION_MAX_BYTES + 128 * 1024) return failure("El archivo no puede superar 4 MB.", 413);
   const supabase = await createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) return failure("Inicia sesión para enviar tu receta de forma privada.", 401);
+  const session = await getSession(supabase);
+  if (session.status === "unavailable") return failure("El servicio de acceso no está disponible. Intenta nuevamente.", 503);
+  if (session.status !== "user") return failure("Inicia sesión para enviar tu receta de forma privada.", 401);
+  const user = session.user;
 
   // Bound daily uploads before buffering the multipart body. RLS filters to this user.
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();

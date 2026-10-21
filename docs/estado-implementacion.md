@@ -9,9 +9,19 @@
 - Menú móvil accesible: se cierra al navegar, con Escape (devuelve el foco al botón) y al hacer clic fuera.
 - `proxy.ts`: una cookie de sesión corrupta se trata como anónimo (antes producía 500 en todo el sitio).
 
+## Cambios del bloque 2 (borrado propio, auditoría y accesibilidad)
+- `/mi-cuenta` filtra por dueño de forma explícita (`user_id`) en recetas y cotizaciones; la lista global queda solo en `/admin`.
+- `DELETE /api/recetas/[id]`: solo la persona dueña (no admin), origen válido, primero elimina el objeto (idempotente) y luego el
+  registro; si algo falla el registro se conserva y se puede reintentar. UI con confirmación en línea y manejo de foco.
+- Un fallo del servicio de acceso ya no se confunde con "sin sesión" (`src/lib/session.ts`): `/mi-cuenta` avisa, las APIs de recetas
+  responden 503 y `requireAdmin` falla en vez de reenviar al login. Un error de `is_admin` tampoco se trata como "no admin".
+- `/privacidad` corregida: la selección se consulta al servidor solo con identificadores; contraseña protegida por el servicio de acceso.
+- Accesibilidad: axe-core (WCAG 2.0/2.1 A y AA) sobre 11 páginas en móvil y escritorio sin violaciones serious/critical; se corrigió un
+  `label-content-name-mismatch` real en los botones de favoritos de la ficha. Teclado: enlace "Saltar al contenido" verificado.
+
 ## Pruebas
 - `npm test` (14 unitarias), `npx tsc --noEmit`, `npm run lint`.
-- `npm run test:e2e` (64 comprobaciones, 390×844 y 1440×900) contra un Supabase **simulado en memoria**
+- `npm run test:e2e` (110 comprobaciones, 390×844 y 1440×900) contra un Supabase **simulado en memoria**
   (`scripts/mock-supabase.mjs`): filtros combinados, favoritos persistentes, selección, ficha, 3D con GLB sintético
   de prueba (solo en el simulador, nunca en la base), 404, cotización sin precios del cliente, menú móvil, cuenta/recetas,
   APIs anónimas 401 y origen ajeno 403.
