@@ -32,9 +32,11 @@ describe("motivo y textos", () => {
     expect(validateReason("needs_new_file", "x".repeat(301))).toMatch(/300/);
     expect(validateReason("needs_new_file", "Falta el eje del ojo derecho")).toBeNull();
   });
-  it("el texto de 'revisada' aclara que no es evaluación médica ni compra", () => {
-    expect(CLIENT_LABEL.reviewed.detail).toMatch(/no es una evaluación médica/);
-    expect(Object.values(CLIENT_LABEL).map((l) => l.title + l.detail).join(" ")).not.toMatch(/aprobad|pago|compra confirmada/i);
+  it("el texto de 'revisada' aclara que no es evaluación médica ni valida la graduación ni es compra", () => {
+    expect(CLIENT_LABEL.reviewed.detail).toMatch(/no es una evaluación médica/i);
+    expect(CLIENT_LABEL.reviewed.detail).toMatch(/no valida ni corrige tu graduación/);
+    expect(CLIENT_LABEL.reviewed.detail).toMatch(/no confirma una compra/);
+    expect(Object.values(CLIENT_LABEL).map((l) => l.title + l.detail).join(" ")).not.toMatch(/aprobad|aprueba|apta|válida|correcta|pago|compra confirmada/i);
   });
   it("traduce errores de la función a HTTP", () => {
     expect(reviewErrorToResponse("version_conflict").status).toBe(409);
