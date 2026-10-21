@@ -73,3 +73,6 @@ for delete to authenticated
 using (user_id = (select auth.uid()) or public.is_admin());
 
 commit;
+
+
+
