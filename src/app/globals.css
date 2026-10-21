@@ -42,7 +42,7 @@ input[type=checkbox] { accent-color:var(--olive); }
 .hero-shell { padding-top:28px; }
 .home-hero { display:grid; grid-template-columns:1fr 1fr; min-height:640px; background:#f1e8dc; overflow:hidden; border-radius:4px; }
 .hero-copy { position:relative; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; padding:60px 30px 60px 54px; }
-.hero-copy .eyebrow { color:#716a5f; margin-bottom:30px; }
+.hero-copy .eyebrow { color:#56534c; margin-bottom:30px; }
 .hero-title { font-size:clamp(70px,7.7vw,112px); font-weight:600; line-height:.94; letter-spacing:-.085em; margin-left:-5px; }
 .hero-title em { font-style:normal; color:var(--olive); }
 .hero-description { margin:28px 0; max-width:32ch; font-size:14px; line-height:1.8; color:#6c665b; }
@@ -105,7 +105,7 @@ input[type=checkbox] { accent-color:var(--olive); }
 .empty-selection { background:#f1e8dc; min-height:354px; padding:42px; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; border-radius:4px; }
 .empty-selection .empty-icon { color:var(--olive); margin-bottom:25px; }
 .empty-selection h2 { font-size:34px; max-width:13ch; }
-.empty-selection p { max-width:39ch; margin:15px 0 25px; font-size:13px; color:#706a60; line-height:1.8; }
+.empty-selection p { max-width:39ch; margin:15px 0 25px; font-size:13px; color:#56534c; line-height:1.8; }
 .catalog-empty { padding:54px; background:#f1e8dc; border-radius:4px; display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:45px; }
 .catalog-empty h2 { font-size:36px; max-width:14ch; margin:15px 0; }
 .catalog-empty p { font-size:13px; color:var(--muted); line-height:1.85; max-width:42ch; }
@@ -206,6 +206,41 @@ input[type=checkbox] { accent-color:var(--olive); }
 .measure-sample span { border-bottom:2px solid #d97756; padding-bottom:8px; }
 .measure-legend { display:grid; grid-template-columns:repeat(3,1fr); text-align:center; gap:8px; font-size:11px; margin-top:14px; color:#756452; }
 .measure-visual .illustration-note { text-align:center; margin-top:24px; font-size:10px; color:#756452; }
+.price-section { padding-top:65px; padding-bottom:24px; }
+.home-price-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border:1px solid var(--line); }
+.home-price-option { display:flex; flex-direction:column; padding:28px; min-width:0; background:#f7f1e7; transition:background .2s; }
+.home-price-option+ .home-price-option { border-left:1px solid var(--line); }
+.home-price-option:hover { background:#f2e3d3; }
+.home-price-option>strong { font-size:clamp(28px,3.4vw,46px); letter-spacing:-.05em; margin:18px 0 25px; }
+.home-price-option>span:last-child { display:flex; justify-content:space-between; gap:15px; font-size:13px; }
+.lens-price-card { display:flex; flex-direction:column; border:1px solid var(--line); padding:28px; background:#f7f1e7; min-width:0; }
+.lens-price-card>.btn { margin-top:auto; }
+.lens-guide-grid { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(290px,.8fr); gap:60px; align-items:start; }
+.lens-step { font:11px var(--sans); display:inline-grid; place-items:center; width:30px; height:30px; border:1px solid var(--line); border-radius:50%; margin-right:9px; vertical-align:middle; }
+.lens-choice { cursor:pointer; display:flex; align-items:flex-start; gap:14px; padding:22px; border:1px solid var(--line); background:#fff8; }
+.lens-choice.is-selected { border-color:var(--olive); box-shadow:inset 0 0 0 1px var(--olive); background:#f9ede2; }
+.lens-choice>input { width:19px; height:19px; flex:none; margin-top:2px; accent-color:var(--olive); }
+.lens-choice>span { min-width:0; }
+.lens-choice strong { display:block; font-size:15px; font-weight:600; }
+.lens-choice small { display:block; font-size:12px; line-height:1.7; color:var(--muted); margin-top:4px; }
+.lens-choice .lens-choice-price { margin-left:auto; text-align:right; white-space:nowrap; font-size:19px; font-weight:600; }
+.lens-choice-price small { margin-top:0; font-size:10px; font-weight:400; }
+.lens-summary { position:sticky; top:100px; border:1px solid var(--line); background:#f1e8dc; padding:30px; min-width:0; }
+.tryon-grid { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(290px,.8fr); align-items:start; gap:45px; }
+.tryon-stage { position:relative; aspect-ratio:4/5; width:100%; background:#eae6dd; overflow:hidden; border:1px solid var(--line); }
+.tryon-face { display:block; width:100%; height:100%; object-fit:contain; }
+.tryon-frame { position:absolute; color:#583724; cursor:grab; touch-action:none; user-select:none; }
+.tryon-frame:active { cursor:grabbing; }
+.tryon-frame>svg { display:block; width:100%; filter:drop-shadow(0 2px 2px #0002); }
+.tryon-frame img { display:block; pointer-events:none; }
+.tryon-empty { display:flex; height:100%; flex-direction:column; gap:24px; align-items:center; justify-content:center; color:#66685c; text-align:center; padding:25px; }
+.tryon-empty p { font-size:18px; line-height:1.6; }
+.tryon-stage-note { position:absolute; bottom:0; left:0; right:0; padding:12px; font-size:10px; color:#30332c; background:#fbf8f3ed; border-top:1px solid var(--line); text-align:center; }
+.tryon-shape { min-width:0; min-height:80px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px solid var(--line); padding:10px; font-size:10px; gap:6px; background:#fff8; }
+.tryon-shape.is-selected { border-color:var(--olive); background:#f9e9dd; }
+.tryon-shape svg { width:100%; max-width:75px; }
+@media(max-width:900px) { .lens-guide-grid,.tryon-grid { grid-template-columns:1fr; gap:32px; } .lens-summary { position:static; } .tryon-stage { max-height:70vh; aspect-ratio:4/5; } }
+@media(max-width:600px) { .home-price-grid { grid-template-columns:1fr; } .home-price-option { padding:24px; } .home-price-option+ .home-price-option { border-left:0; border-top:1px solid var(--line); } .home-price-option>strong { margin:14px 0; } .price-section { padding-top:40px; } .lens-choice { padding:17px 14px; gap:10px; flex-wrap:wrap; } .lens-choice>span:nth-child(2) { flex:1; min-width:130px; } .lens-choice .lens-choice-price { margin-left:29px; font-size:18px; text-align:left; } .lens-summary { padding:24px; } .lens-price-card { padding:25px; } }
 @media(max-width:767px) {
  .comparison-bar { gap:10px; padding:13px; bottom:8px; }
  .comparison-bar>div>span { display:none; }

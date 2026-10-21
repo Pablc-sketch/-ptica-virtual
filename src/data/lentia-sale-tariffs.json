@@ -1,0 +1,737 @@
+[
+  {
+    "family": "Bifocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Bifocal Antirreflejo",
+    "laboratorySaleClp": 120000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Bifocal Filtro Azul",
+    "laboratorySaleClp": 150000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Fotocromático Café Antirreflejo",
+    "laboratorySaleClp": 180000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Fotocromático Gris Filtro Azul",
+    "laboratorySaleClp": 180000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Orgánico Antirreflejo",
+    "laboratorySaleClp": 120000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Orgánico Filtro Azul",
+    "laboratorySaleClp": 150000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Bifocal Antirreflejo",
+    "laboratorySaleClp": 120000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Bifocal Filtro Azul",
+    "laboratorySaleClp": 150000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Fotocromático Café Antirreflejo",
+    "laboratorySaleClp": 180000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Fotocromático Gris Filtro Azul",
+    "laboratorySaleClp": 180000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Orgánico Antirreflejo",
+    "laboratorySaleClp": 120000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Orgánico Filtro Azul",
+    "laboratorySaleClp": 150000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Bifocal Antirreflejo",
+    "laboratorySaleClp": 120000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Bifocal Filtro Azul",
+    "laboratorySaleClp": 150000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Fotocromático Café Antirreflejo",
+    "laboratorySaleClp": 180000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Fotocromático Gris Filtro Azul",
+    "laboratorySaleClp": 180000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Orgánico Antirreflejo",
+    "laboratorySaleClp": 120000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Orgánico Filtro Azul",
+    "laboratorySaleClp": 150000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Bifocal Antirreflejo",
+    "laboratorySaleClp": 120000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Bifocal Filtro Azul",
+    "laboratorySaleClp": 150000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Fotocromático Café Antirreflejo",
+    "laboratorySaleClp": 180000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Fotocromático Gris Filtro Azul",
+    "laboratorySaleClp": 180000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Orgánico Antirreflejo",
+    "laboratorySaleClp": 120000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Orgánico Filtro Azul",
+    "laboratorySaleClp": 150000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Bifocal Antirreflejo",
+    "laboratorySaleClp": 125000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Bifocal Filtro Azul",
+    "laboratorySaleClp": 155000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Fotocromático Café Antirreflejo",
+    "laboratorySaleClp": 185000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Fotocromático Gris Filtro Azul",
+    "laboratorySaleClp": 185000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Orgánico Antirreflejo",
+    "laboratorySaleClp": 125000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Bifocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Orgánico Filtro Azul",
+    "laboratorySaleClp": 155000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Adelgazado 1.67 Filtro Azul",
+    "laboratorySaleClp": 135000,
+    "stockSaleClp": 95000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Fotocromático Café Antirreflejo",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Fotocromático Gris Filtro Azul",
+    "laboratorySaleClp": 115000,
+    "stockSaleClp": 70000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Orgánico Antirreflejo",
+    "laboratorySaleClp": 55000,
+    "stockSaleClp": 38000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Orgánico Filtro Azul",
+    "laboratorySaleClp": 68000,
+    "stockSaleClp": 48000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Polarizado Café",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Polarizado Gris Oscuro",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Polarizado Verde Oscuro",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Policarbonato Filtro Azul",
+    "laboratorySaleClp": 115000,
+    "stockSaleClp": 75000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Adelgazado 1.67 Filtro Azul",
+    "laboratorySaleClp": 135000,
+    "stockSaleClp": 95000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Fotocromático Café Antirreflejo",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Fotocromático Gris Filtro Azul",
+    "laboratorySaleClp": 115000,
+    "stockSaleClp": 70000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Orgánico Antirreflejo",
+    "laboratorySaleClp": 55000,
+    "stockSaleClp": 38000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Orgánico Filtro Azul",
+    "laboratorySaleClp": 68000,
+    "stockSaleClp": 48000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Polarizado Café",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Polarizado Gris Oscuro",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Polarizado Verde Oscuro",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Policarbonato Filtro Azul",
+    "laboratorySaleClp": 115000,
+    "stockSaleClp": 75000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Adelgazado 1.67 Filtro Azul",
+    "laboratorySaleClp": 135000,
+    "stockSaleClp": 100000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Fotocromático Café Antirreflejo",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Fotocromático Gris Filtro Azul",
+    "laboratorySaleClp": 115000,
+    "stockSaleClp": 90000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Orgánico Antirreflejo",
+    "laboratorySaleClp": 55000,
+    "stockSaleClp": 42000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Orgánico Filtro Azul",
+    "laboratorySaleClp": 68000,
+    "stockSaleClp": 55000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Polarizado Café",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Polarizado Gris Oscuro",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Polarizado Verde Oscuro",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Policarbonato Filtro Azul",
+    "laboratorySaleClp": 115000,
+    "stockSaleClp": 85000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Adelgazado 1.67 Filtro Azul",
+    "laboratorySaleClp": 135000,
+    "stockSaleClp": 100000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Fotocromático Café Antirreflejo",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Fotocromático Gris Filtro Azul",
+    "laboratorySaleClp": 100000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Orgánico Antirreflejo",
+    "laboratorySaleClp": 55000,
+    "stockSaleClp": 45000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Orgánico Filtro Azul",
+    "laboratorySaleClp": 68000,
+    "stockSaleClp": 58000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Polarizado Café",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Polarizado Gris Oscuro",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Polarizado Verde Oscuro",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Policarbonato Filtro Azul",
+    "laboratorySaleClp": 115000,
+    "stockSaleClp": 90000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Adelgazado 1.67 Filtro Azul",
+    "laboratorySaleClp": 150000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Fotocromático Café Antirreflejo",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Fotocromático Gris Filtro Azul",
+    "laboratorySaleClp": 110000,
+    "stockSaleClp": 95000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Orgánico Antirreflejo",
+    "laboratorySaleClp": 58000,
+    "stockSaleClp": 48000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Orgánico Filtro Azul",
+    "laboratorySaleClp": 72000,
+    "stockSaleClp": 65000
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Polarizado Café",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Polarizado Gris Oscuro",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Polarizado Verde Oscuro",
+    "laboratorySaleClp": 70000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Monofocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Policarbonato Filtro Azul",
+    "laboratorySaleClp": 120000,
+    "stockSaleClp": 105000
+  },
+  {
+    "family": "Multifocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Fotocromático Café Antirreflejo",
+    "laboratorySaleClp": 220000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Fotocromático Gris Filtro Azul",
+    "laboratorySaleClp": 220000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Multifocal Antirreflejo",
+    "laboratorySaleClp": 180000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Multifocal Filtro Azul",
+    "laboratorySaleClp": 200000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Orgánico Antirreflejo",
+    "laboratorySaleClp": 180000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±2.00 / ±2.00",
+    "treatment": "Orgánico Filtro Azul",
+    "laboratorySaleClp": 200000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Fotocromático Café Antirreflejo",
+    "laboratorySaleClp": 220000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Fotocromático Gris Filtro Azul",
+    "laboratorySaleClp": 220000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Multifocal Antirreflejo",
+    "laboratorySaleClp": 180000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Multifocal Filtro Azul",
+    "laboratorySaleClp": 200000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Orgánico Antirreflejo",
+    "laboratorySaleClp": 180000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±4.00 / ±2.00",
+    "treatment": "Orgánico Filtro Azul",
+    "laboratorySaleClp": 200000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Fotocromático Café Antirreflejo",
+    "laboratorySaleClp": 220000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Fotocromático Gris Filtro Azul",
+    "laboratorySaleClp": 220000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Multifocal Antirreflejo",
+    "laboratorySaleClp": 180000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Multifocal Filtro Azul",
+    "laboratorySaleClp": 200000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Orgánico Antirreflejo",
+    "laboratorySaleClp": 180000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±4.00 / ±4.00",
+    "treatment": "Orgánico Filtro Azul",
+    "laboratorySaleClp": 200000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Fotocromático Café Antirreflejo",
+    "laboratorySaleClp": 220000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Fotocromático Gris Filtro Azul",
+    "laboratorySaleClp": 220000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Multifocal Antirreflejo",
+    "laboratorySaleClp": 180000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Multifocal Filtro Azul",
+    "laboratorySaleClp": 200000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Orgánico Antirreflejo",
+    "laboratorySaleClp": 180000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±6.00 / ±4.00",
+    "treatment": "Orgánico Filtro Azul",
+    "laboratorySaleClp": 200000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Fotocromático Café Antirreflejo",
+    "laboratorySaleClp": 225000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Fotocromático Gris Filtro Azul",
+    "laboratorySaleClp": 225000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Multifocal Antirreflejo",
+    "laboratorySaleClp": 185000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Multifocal Filtro Azul",
+    "laboratorySaleClp": 200000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Orgánico Antirreflejo",
+    "laboratorySaleClp": 185000,
+    "stockSaleClp": null
+  },
+  {
+    "family": "Multifocal",
+    "range": "±6.00 / ±6.00",
+    "treatment": "Orgánico Filtro Azul",
+    "laboratorySaleClp": 200000,
+    "stockSaleClp": null
+  }
+]

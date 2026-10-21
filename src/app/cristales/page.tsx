@@ -1,31 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { LENS_OPTIONS } from "@/lib/lens-options";
+import { clp } from "@/lib/format";
 
-export const metadata: Metadata = { title: "Cristales", description: "Cómo se definen y cotizan los cristales a partir de tu receta." };
-
+export const metadata: Metadata = { title: "Cristales y precios", description: "Marco y cristal blanco desde $28.000. Compara antirreflejo y filtro azul antes de enviar tu receta." };
 export default function CristalesPage() {
-  return (
-    <main className="reading-page container-page max-w-3xl py-10 md:py-14">
-      <p className="eyebrow">Cristales</p>
-      <h1 className="mb-6 text-[clamp(40px,6vw,72px)]">Los cristales se definen con tu receta</h1>
-      <div className="space-y-5 text-lg">
-        <p>
-          El precio que ves en cada ficha es solo el del <strong>marco</strong>. Los cristales dependen de tu receta
-          (esfera, cilindro, eje, adición y distancia pupilar), de tu uso y del marco elegido.
-        </p>
-        <p>
-          Por eso no vendemos cristales sin revisar tu receta antes: la revisamos contigo, te proponemos
-          opciones y confirmamos el total antes de cualquier pago.
-        </p>
-        <p className="text-muted">
-          Aún no publicamos una lista de tipos de cristal ni precios. Cuando estén confirmados aparecerán aquí;
-          hasta entonces se cotizan caso a caso.
-        </p>
-      </div>
-      <div className="mt-8 flex flex-wrap gap-3">
-        <Link href="/marcos" className="btn">Elegir marco</Link>
-        <Link href="/como-funciona" className="btn btn-ghost">Cómo funciona</Link>
-      </div>
-    </main>
-  );
+  return <main className="container-page py-10 md:py-16">
+    <div className="max-w-3xl"><p className="eyebrow">Lo que eliges. Lo que cuesta.</p><h1 className="mt-4 text-[clamp(40px,6vw,72px)]">Todo empieza con una buena elección.</h1><p className="mt-5 max-w-xl text-lg text-muted">Marco y cristales, con precios de partida claros. Tú eliges qué te interesa; el equipo revisa tu receta y confirma el total.</p></div>
+    <div className="my-10 grid gap-4 md:grid-cols-3">{LENS_OPTIONS.map((o,i) => <article key={o.id} className="lens-price-card"><p className="eyebrow">0{i+1} / {o.extraClp === 0 ? "El punto de partida" : "Otra opción para tu par"}</p><h2 className="mt-7 text-3xl">{o.name}</h2><p className="mt-3 min-h-12 text-sm text-muted">{o.note}</p><p className="mt-8 text-xs text-muted">Marco y cristales desde</p><p className="mt-2 text-4xl font-semibold">{clp(o.fromClp)}</p><p className="mb-7 mt-3 text-sm">{o.extraClp === 0 ? "Sin recargo de tratamiento" : `+ ${clp(o.extraClp)} sobre la opción blanca`}</p><Link href="/configurar" className="btn btn-ghost w-full">Armar mi par <span aria-hidden="true">↗</span></Link></article>)}</div>
+    <section className="grid gap-8 border-y border-line py-8 md:grid-cols-2"><h2 className="text-3xl">El precio final,<br />antes del pago.</h2><div className="space-y-4 text-sm leading-relaxed text-muted"><p>Estos son precios iniciales de un par completo. La combinación final depende del marco, la graduación y las características de los cristales. La ficha del catálogo muestra por separado el precio informado del marco; no lo confundas con el total del par.</p><p>Antirreflejo y filtro azul son opciones alternativas en esta lista. El recargo de filtro azul es de $20.000 respecto del blanco; no se suma además el recargo de antirreflejo.</p><p>Si buscas fotocromáticos u otra combinación, la cotizamos después de revisar tu receta. No mostramos un precio hasta confirmarlo.</p><p>¿Ya compraste tu par de lejos y ahora necesitas uno de cerca? Puedes enviar tu receta e indicar qué par deseas cotizar. El equipo revisará la indicación antes de preparar tus lentes.</p></div></section>
+    <div className="mt-8 flex flex-wrap gap-3"><Link href="/cotizar-receta" className="btn">Cotizar según mi graduación</Link><Link href="/configurar" className="btn btn-ghost">Empezar paso a paso</Link><Link href="/mi-cuenta" className="btn btn-ghost">Enviar mi receta</Link></div>
+  </main>;
 }

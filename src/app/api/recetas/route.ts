@@ -32,18 +32,39 @@ export async function POST(request: Request) {
   const detected = prescriptionFileType(bytes);
   if (!detected || (file.type && file.type !== detected.mime)) return failure("El contenido del archivo no coincide con un formato permitido.", 400);
 
-  const quoteId = form.get("quote_id");
+  let quoteId = form.get("quote_id");
   if (quoteId) {
     if (!validQuoteId(quoteId)) return failure("La cotización no es válida.", 400);
     const { data: quote } = await supabase.from("quotes").select("id").eq("id", quoteId).eq("user_id", user.id).maybeSingle();
     if (!quote) return failure("La cotización no pertenece a tu cuenta.", 403);
   }
+  // Reemplazo de una receta marcada "requiere nuevo archivo". El trigger de la base también lo exige (propia,
+  // en needs_new_file, una sola vez); esta comprobación previa solo da un mensaje claro antes de subir el archivo.
+  const replacesId = form.get("replaces_id");
+  if (replacesId) {
+    if (!validQuoteId(replacesId)) return failure("La receta a reemplazar no es válida.", 400);
+    const { data: old, error: oldError } = await supabase.from("prescriptions").select("id, status, quote_id").eq("id", replacesId).eq("user_id", user.id).maybeSingle();
+    if (oldError) return failure("No pudimos comprobar la receta a reemplazar. Intenta nuevamente.", 503);
+    if (!old || old.status !== "needs_new_file") return failure("Esa receta no está esperando un nuevo archivo.", 409);
+    const { data: already, error: alreadyError } = await supabase.from("prescriptions").select("id").eq("replaces_id", replacesId).eq("user_id", user.id).maybeSingle();
+    if (alreadyError) return failure("No pudimos comprobar la receta a reemplazar. Intenta nuevamente.", 503);
+    if (already) return failure("Ya enviaste un archivo de reemplazo para esa receta.", 409);
+    // El reemplazo continúa la misma solicitud: hereda la cotización si no se eligió otra.
+    if (!quoteId && old.quote_id) quoteId = old.quote_id;
+  }
   const path = `${user.id}/${crypto.randomUUID()}.${detected.extension}`;
   const { error: uploadError } = await supabase.storage.from("prescriptions").upload(path, bytes, { contentType: detected.mime, cacheControl: "0", upsert: false });
   if (uploadError) return failure("No pudimos guardar el archivo. Intenta nuevamente.", 502);
-  const { data: record, error: insertError } = await supabase.from("prescriptions").insert({ user_id: user.id, quote_id: quoteId || null, path, consent_version: PRESCRIPTION_CONSENT_VERSION }).select("id").single();
+  const { data: record, error: insertError } = await supabase.from("prescriptions").insert({ user_id: user.id, quote_id: quoteId || null, replaces_id: replacesId || null, path, consent_version: PRESCRIPTION_CONSENT_VERSION }).select("id").single();
   if (insertError || !record) {
-    await supabase.storage.from("prescriptions").remove([path]);
+    // El archivo subido no quedó registrado: se retira. Si la limpieza falla queda un objeto privado sin fila
+    // (solo visible para su dueño/admin); se registra para conciliarlo, nunca se oculta.
+    const { error: cleanupError } = await supabase.storage.from("prescriptions").remove([path]);
+    if (cleanupError) console.error("recetas: archivo huérfano tras fallo de registro", { path, code: insertError?.code });
+    // Carrera entre dos reemplazos simultáneos (índice único) o reemplazo ya no permitido (trigger): conflicto, no fallo.
+    if (replacesId && (insertError?.code === "23505" || insertError?.code === "42501")) {
+      return failure("Esa receta ya tiene un archivo de reemplazo o ya no espera uno.", 409);
+    }
     return failure("No pudimos registrar la receta. El archivo no quedó asociado a una solicitud.", 502);
   }
   return NextResponse.json({ id: record.id, status: "pending_review" }, { status: 201, headers: privateHeaders });

@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/session";
 import { DeletePrescriptionButton } from "@/components/delete-prescription-button";
+import { CLIENT_LABEL, isReviewStatus } from "@/lib/prescription-review";
 import { signIn, signOut, signUp } from "./actions";
 import { PrescriptionUpload } from "@/components/prescription-upload";
 import { OpenPrescriptionButton } from "@/components/open-prescription-button";
@@ -17,7 +18,7 @@ const ERRORS: Record<string, string> = {
   registro: "No pudimos crear la cuenta. Revisa los datos o intenta con otro correo.",
 };
 
-type SP = Promise<{ error?: string; aviso?: string; modo?: string }>;
+type SP = Promise<{ error?: string; aviso?: string; modo?: string; reemplazar?: string }>;
 
 async function AuthForms({ searchParams }: { searchParams: SP }) {
   const { error, aviso, modo } = await searchParams;
@@ -55,21 +56,24 @@ async function AuthForms({ searchParams }: { searchParams: SP }) {
   );
 }
 
-async function Account({ userId, email }: { userId: string; email: string | undefined }) {
+async function Account({ userId, email, replacement }: { userId: string; email: string | undefined; replacement?: string }) {
   const supabase = await createClient();
   // Filtro explícito de dueño: un administrador ve todas las filas por RLS, pero aquí solo van las suyas.
   const [{ data: rx, error: rxErr }, { data: quotes, error: quotesErr }] = await Promise.all([
-    supabase.from("prescriptions").select("id, created_at, quote_id").eq("user_id", userId).order("created_at", { ascending: false }).limit(50),
+    supabase.from("prescriptions").select("id, created_at, quote_id, status, status_changed_at, client_message, replaces_id").eq("user_id", userId).order("created_at", { ascending: false }).limit(50),
     supabase.from("quotes").select("id, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
   ]);
   const quoteOpts = (quotes ?? []).map((q) => ({ id: q.id, label: `Cotización del ${new Date(q.created_at).toLocaleDateString("es-CL")}` }));
+  const replacementRow = rx?.find((r) => r.id === replacement && r.status === "needs_new_file" && !rx.some((o) => o.replaces_id === r.id));
   return (
     <div className="grid gap-10 lg:grid-cols-2">
       <section aria-labelledby="enviar">
         <p className="mb-4 text-sm text-muted">Sesión iniciada como <strong>{email}</strong>.</p>
         <h2 id="enviar" className="mb-3 text-2xl">Enviar mi receta</h2>
         {quotesErr && <p role="alert" className="mb-3 text-sm text-red-700">No pudimos cargar tus cotizaciones; puedes enviar la receta sin asociarla.</p>}
-        <PrescriptionUpload quotes={quoteOpts} />
+        {replacement && !replacementRow && <p role="alert" className="mb-3 text-sm">Ese archivo ya no está esperando un reemplazo. Puedes enviar una receta nueva.</p>}
+        {replacementRow && <Link href="/mi-cuenta#enviar" className="mb-3 inline-flex min-h-11 items-center underline">Cancelar reemplazo</Link>}
+        <PrescriptionUpload key={replacementRow?.id ?? "new"} quotes={quoteOpts} replacesId={replacementRow?.id} />
         <form action={signOut} className="mt-6"><button className="btn btn-ghost">Cerrar sesión</button></form>
       </section>
       <section aria-labelledby="mis">
@@ -82,13 +86,34 @@ async function Account({ userId, email }: { userId: string; email: string | unde
           <ul className="divide-y divide-line border-y border-line">
             {rx.map((r) => (
               <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-                <span className="text-sm">
+                <span className="max-w-prose text-sm">
                   Enviada el {new Date(r.created_at).toLocaleString("es-CL")}
-                  <span className="block text-xs text-muted">Pendiente de revisión por una persona</span>
+                  {isReviewStatus(r.status) ? (
+                    <>
+                      <span className="block font-medium">{CLIENT_LABEL[r.status].title}</span>
+                      <span className="block text-xs text-muted">{CLIENT_LABEL[r.status].detail}</span>
+                      {r.status === "needs_new_file" && r.client_message && (
+                        <span className="mt-1 block border-l-2 border-olive pl-2 text-sm">Motivo: {r.client_message}</span>
+                      )}
+                      {r.status === "needs_new_file" && (rx.some((o) => o.replaces_id === r.id)
+                        ? <span className="block text-xs text-muted">Ya enviaste el archivo nuevo.</span>
+                        : <Link href={`/mi-cuenta?reemplazar=${r.id}#enviar`} className="mt-1 inline-flex min-h-11 items-center text-sm underline">Subir un archivo nuevo</Link>)}
+                    </>
+                  ) : (
+                    <span className="block text-xs text-muted">Pendiente de revisión por una persona</span>
+                  )}
                 </span>
                 <span className="flex flex-wrap items-start gap-2">
                   <OpenPrescriptionButton id={r.id} />
-                  <DeletePrescriptionButton id={r.id} />
+                  <DeletePrescriptionButton
+                    id={r.id}
+                    warning={rx.some((o) => o.replaces_id === r.id)
+                      // Borrar sigue permitido (privacidad); solo se avisa del contexto que se pierde. No se guardan copias del motivo.
+                      ? "Esta receta ya tiene un archivo de reemplazo. Si la eliminas, también se borran su motivo y su historial, y el equipo dejará de ver qué archivo reemplazó el nuevo."
+                      : r.replaces_id
+                        ? "Este archivo reemplaza a uno anterior. Si lo eliminas, la receta anterior volverá a esperar un archivo nuevo."
+                        : undefined}
+                  />
                 </span>
               </li>
             ))}
@@ -116,7 +141,7 @@ async function Content({ searchParams }: { searchParams: SP }) {
       </div>
     );
   }
-  return session.status === "user" ? <Account userId={session.user.id} email={session.user.email} /> : <AuthForms searchParams={searchParams} />;
+  return session.status === "user" ? <Account userId={session.user.id} email={session.user.email} replacement={(await searchParams).reemplazar} /> : <AuthForms searchParams={searchParams} />;
 }
 
 export default function MiCuentaPage({ searchParams }: PageProps<"/mi-cuenta">) {

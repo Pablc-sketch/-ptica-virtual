@@ -8,7 +8,7 @@ const MAX = 4 * 1024 * 1024;
 const TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
 const STEPS = ["Tu archivo", "Comprueba", "Autoriza y envía"];
 
-export function PrescriptionUpload({ quotes }: { quotes: { id: string; label: string }[] }) {
+export function PrescriptionUpload({ quotes, replacesId }: { quotes: { id: string; label: string }[]; replacesId?: string }) {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [file, setFile] = useState<File | null>(null);
@@ -61,6 +61,7 @@ export function PrescriptionUpload({ quotes }: { quotes: { id: string; label: st
     const data = new FormData();
     data.set("file", file);
     data.set("consent", "true");
+    if (replacesId) data.set("replaces_id", replacesId);
     if (quote) data.set("quote_id", quote);
     sending.current = true;
     setBusy(true);
@@ -111,6 +112,7 @@ export function PrescriptionUpload({ quotes }: { quotes: { id: string; label: st
         </li>)}
       </ol>
       <div className="p-5 sm:p-7">
+        {replacesId && <p className="mb-5 border-l-2 border-olive bg-paper p-3 text-sm">Envías un nuevo archivo para una receta que necesita corrección. El archivo anterior conserva su registro; no se sobrescribe.</p>}
         <p className="eyebrow mb-3">Paso {step + 1} de 3</p>
         <h3 ref={heading} tabIndex={-1} className="text-2xl focus:outline-none">{["Empecemos con una foto clara.", "Mira el archivo antes de enviarlo.", "Tu receta, con acceso privado."][step]}</h3>
 

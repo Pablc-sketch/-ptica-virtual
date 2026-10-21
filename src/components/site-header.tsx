@@ -7,9 +7,9 @@ import { useFavorites, useSelection } from "@/lib/local-store";
 
 const NAV = [
   { href: "/marcos", label: "Marcos" },
-  { href: "/cristales", label: "Cristales" },
+  { href: "/configurar", label: "Arma tus lentes" },
+  { href: "/probador", label: "Probador" },
   { href: "/comparar", label: "Comparar" },
-  { href: "/como-funciona", label: "Cómo funciona" },
   { href: "/ayuda", label: "Ayuda" },
 ];
 
@@ -46,7 +46,7 @@ export function SiteHeader() {
   return (
     <header className="site-header">
       <div className="container-page flex min-h-[72px] items-center justify-between gap-2 sm:gap-4">
-        <Link href="/" aria-label="Óptica Global, inicio" className="shrink-0">
+        <Link href="/" aria-label="Óptica Global, Visión sin fronteras, inicio" className="shrink-0">
           <Brand />
         </Link>
         <nav aria-label="Principal" className="site-nav hidden gap-7 lg:flex">
@@ -63,7 +63,7 @@ export function SiteHeader() {
           <Link href="/mi-cuenta" className="hidden min-h-11 items-center px-2 text-muted hover:text-olive lg:flex">
             Mi cuenta
           </Link>
-          <Link href="/cotizar" aria-label={`Selección${sel>0 ? `, ${sel} marcos` : ""}`} className="btn header-selection !min-h-11 !px-3 sm:!px-4">
+          <Link href="/cotizar" aria-label={`Selección${sel>0 ? `, ${sel} ${sel === 1 ? "marco" : "marcos"}` : ""}`} className="btn header-selection !min-h-11 !px-3 sm:!px-4">
             <svg className="selection-icon" width="18" height="20" viewBox="0 0 20 22" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="M3 7h14l1 13H2L3 7Z"/><path d="M6 8V5a4 4 0 0 1 8 0v3"/></svg><span className="selection-label">Selección</span>{sel > 0 && <span className="header-count">{sel}</span>}
           </Link>
           <div ref={wrap} className="relative lg:hidden">

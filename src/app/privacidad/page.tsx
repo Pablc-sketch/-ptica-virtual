@@ -23,6 +23,10 @@ export default function PrivacidadPage() {
           </p>
         </section>
         <section>
+          <h2 className="mb-2 text-2xl">Probador y guía de cristales</h2>
+          <p className="text-muted">Las fotos que eliges en el probador se abren en la memoria de este navegador mediante direcciones temporales locales. No se suben a la tienda, no se guardan en tu cuenta y no se envían a un servicio de reconocimiento o generación de imágenes. Puedes quitarlas con “Quitar mis imágenes”; también se liberan al cerrar o salir de la página. La guía de cristales no guarda ni envía tus elecciones de uso o tratamiento.</p>
+        </section>
+        <section>
           <h2 className="mb-2 text-2xl">Cuenta</h2>
           <p className="text-muted">
             Si creas una cuenta guardamos tu correo en el servicio de acceso; tu contraseña queda protegida por ese servicio (no la vemos ni la guardamos en texto legible). Usamos cookies de sesión

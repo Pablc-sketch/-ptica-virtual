@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { FrameOutline } from "@/components/frame-outline";
 import { FrameExplorer } from "@/components/frame-explorer";
+import { LENS_OPTIONS } from "@/lib/lens-options";
+import { clp } from "@/lib/format";
 
 const STEPS = [
  ["Encuentra tu forma", "Explora los marcos, compara sus medidas y guarda tus favoritos."],
@@ -21,9 +23,10 @@ export default function Home() {
     <div className="hero-copy">
      <p className="eyebrow">Óptica Global / Santiago</p>
      <h1 id="home-title" className="hero-title">Visión sin<br /><em>fronteras.</em></h1>
-     <p className="hero-description">Tu próximo marco merece una buena elección. Explora las formas, compara medidas y guarda los que van contigo.</p>
-     <Link href="/marcos" className="btn">Explorar los marcos <span aria-hidden="true">↗</span></Link>
-     <p className="hero-bottom">Marcos, cristales y atención personal.</p>
+     <p className="hero-description">Tu próximo par empieza aquí. Marco y cristal blanco desde $28.000, con tu receta revisada por una persona.</p>
+     <Link href="/configurar" className="btn">Arma tus lentes <span aria-hidden="true">↗</span></Link>
+     <Link href="/marcos" className="mt-3 inline-flex min-h-11 items-center text-sm underline underline-offset-4">Explorar los marcos</Link>
+     <p className="hero-bottom">Cerca o lejos. Una elección personal.</p>
     </div>
     <FrameExplorer />
    </section>
@@ -33,6 +36,7 @@ export default function Home() {
     <p><span className="strip-number">03</span>Atención de persona a persona</p>
    </div>
   </div>
+  <section className="container-page price-section" aria-labelledby="precios-title"><div className="section-intro"><div><p className="eyebrow">Sin adivinar el precio</p><h2 id="precios-title">Tu marco. Tus cristales.<br />Todo más claro.</h2></div><Link href="/cristales" className="arrow-link">Qué incluye cada opción ↗</Link></div><div className="home-price-grid">{LENS_OPTIONS.map(o=><Link href="/configurar" key={o.id} className="home-price-option"><span className="eyebrow">Marco y cristales desde</span><strong>{clp(o.fromClp)}</strong><span>{o.name}<span aria-hidden="true">↗</span></span></Link>)}</div><p className="mt-4 text-xs text-muted">Precios iniciales. El marco, la receta y las características de los cristales se confirman antes del pago.</p></section>
   <section className="container-page shape-section" aria-labelledby="formas-title">
    <div className="section-intro"><div><p className="eyebrow">Una forma de empezar</p><h2 id="formas-title">Elige por forma.<br />Quédate por cómo te ves.</h2></div><Link href="/marcos" className="arrow-link">Ver catálogo <span aria-hidden="true">↗</span></Link></div>
    <div className="shape-grid">{SHAPES.map(s=><Link href={`/marcos?forma=${s.shape}`} key={s.shape} className="shape-card"><div className="shape-visual"><FrameOutline shape={s.shape} /></div><div className="shape-meta"><div><h3>{s.name}</h3><p>{s.sub}</p></div><span aria-hidden="true">↗</span></div></Link>)}</div>
