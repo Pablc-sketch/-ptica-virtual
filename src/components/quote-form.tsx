@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { clearSelection, setQuantity, toggleSelection, useSelection } from "@/lib/local-store";
 import { clp } from "@/lib/format";
+import { FrameOutline } from "@/components/frame-outline";
 
 type Line = { id: string; name: string; price_clp: number };
 
@@ -81,16 +82,17 @@ export function QuoteForm({ open }: { open: boolean }) {
 
   if (selection.length === 0) {
     return (
-      <div className="border border-line bg-white/60 p-8 text-center">
-        <h2 className="text-3xl">Tu selección está vacía</h2>
-        <p className="mt-3 text-muted">Agrega marcos desde el catálogo para pedir una cotización.</p>
-        <Link href="/marcos" className="btn mt-6">Ver marcos</Link>
+      <div className="empty-selection">
+        <div className="empty-icon w-32"><FrameOutline /></div>
+        <h2>Tu próxima mirada empieza aquí.</h2>
+        <p>Tu selección está vacía. Explora el catálogo y agrega los marcos que quieras conocer mejor.</p>
+        <Link href="/marcos" className="btn">Explorar marcos <span aria-hidden="true">↗</span></Link>
       </div>
     );
   }
 
   return (
-    <div className="grid gap-10 md:grid-cols-[1.2fr_1fr]">
+    <div className="quote-filled grid gap-10 md:grid-cols-[1.2fr_1fr]">
       <section aria-labelledby="sel">
         <h2 id="sel" className="mb-4 text-2xl">Tu selección</h2>
         {loadError && <p role="alert" className="mb-3 text-sm text-red-700">No pudimos cargar los precios. Recarga la página.</p>}
@@ -129,7 +131,7 @@ export function QuoteForm({ open }: { open: boolean }) {
             <p className="-mt-1 text-xs text-muted">Indica al menos email o teléfono.</p>
             <label>Comentarios<textarea name="notes" maxLength={2000} className="field mt-1" /></label>
             <label className="flex items-start gap-2 text-sm">
-              <input type="checkbox" name="consent" required className="mt-1 h-5 w-5 accent-[#424d3b]" />
+              <input type="checkbox" name="consent" required className="mt-1 h-5 w-5 accent-olive" />
               <span>Acepto que usen mis datos para responder esta cotización. Leí el <Link href="/privacidad" className="underline">aviso de privacidad (borrador)</Link>.</span>
             </label>
             {state === "error" && <p role="alert" className="text-sm text-red-700">{message}</p>}

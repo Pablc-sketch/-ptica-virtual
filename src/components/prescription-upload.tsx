@@ -57,7 +57,7 @@ export function PrescriptionUpload({ quotes }: { quotes: { id: string; label: st
         </label>
       )}
       <label className="flex items-start gap-2 text-sm">
-        <input type="checkbox" name="consent" value="true" required className="mt-1 h-5 w-5 accent-[#424d3b]" />
+        <input type="checkbox" name="consent" value="true" required className="mt-1 h-5 w-5 accent-olive" />
         <span>
           Autorizo que el equipo de la óptica revise mi receta para cotizar. Leí el{" "}
           <Link href="/privacidad" className="underline">aviso de privacidad (borrador)</Link>.

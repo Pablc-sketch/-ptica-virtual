@@ -11,8 +11,8 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
   const inSel = useSelection().some((x) => x.id === p.id);
   const img = p.images[0];
   return (
-    <article className="group flex flex-col">
-      <div className="relative aspect-square overflow-hidden bg-sage/50">
+    <article className="product-card group flex flex-col">
+      <div className="product-image relative aspect-square overflow-hidden">
         <Link href={`/marcos/${p.slug}`} aria-label={`Ver ${p.name}`}>
           <Image
             src={img.url}
@@ -35,7 +35,7 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
           </svg>
         </button>
       </div>
-      <div className="mt-3 flex items-start justify-between gap-2">
+      <div className="product-meta mt-3 flex items-start justify-between gap-2">
         <div className="min-w-0">
           {p.brand && <p className="eyebrow">{p.brand}</p>}
           <h3 className="truncate text-lg">

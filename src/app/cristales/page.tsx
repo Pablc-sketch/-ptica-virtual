@@ -5,7 +5,7 @@ export const metadata: Metadata = { title: "Cristales", description: "Cómo se d
 
 export default function CristalesPage() {
   return (
-    <main className="container-page max-w-3xl py-10 md:py-14">
+    <main className="reading-page container-page max-w-3xl py-10 md:py-14">
       <p className="eyebrow">Cristales</p>
       <h1 className="mb-6 text-[clamp(40px,6vw,72px)]">Los cristales se definen con tu receta</h1>
       <div className="space-y-5 text-lg">

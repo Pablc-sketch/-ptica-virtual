@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { Manrope } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+
+const manrope = Manrope({ subsets: ["latin"], variable: "--font-global", display: "swap" });
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -12,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es-CL" className="h-full antialiased">
+    <html lang="es-CL" className={`${manrope.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <a
           href="#contenido"

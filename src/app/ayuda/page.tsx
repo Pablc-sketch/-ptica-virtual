@@ -13,7 +13,7 @@ const FAQ = [
 
 export default function AyudaPage() {
   return (
-    <main className="container-page max-w-3xl py-10 md:py-14">
+    <main className="reading-page container-page max-w-3xl py-10 md:py-14">
       <p className="eyebrow">Ayuda</p>
       <h1 className="mb-8 text-[clamp(40px,6vw,72px)]">Preguntas frecuentes</h1>
       <div className="divide-y divide-line border-y border-line">

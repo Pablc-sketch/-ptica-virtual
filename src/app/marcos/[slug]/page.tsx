@@ -41,9 +41,9 @@ async function Detail({ params }: { params: PageProps<"/marcos/[slug]">["params"
     ["Varilla", p.templeMm != null ? `${p.templeMm} mm` : null],
   ];
   return (
-    <div className="grid gap-10 md:grid-cols-2">
+    <div className="product-detail grid gap-7 md:grid-cols-2">
       <div className="min-w-0"><ProductGallery images={p.images} modelUrl={p.modelUrl} name={p.name} /></div>
-      <div className="min-w-0">
+      <div className="product-info min-w-0">
         {p.brand && <p className="eyebrow">{p.brand}</p>}
         <h1 className="text-[clamp(36px,5vw,60px)]">{p.name}</h1>
         <p className="mt-4 text-2xl">{clp(p.priceClp)} <span className="text-sm text-muted">solo el marco</span></p>

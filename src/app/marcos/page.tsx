@@ -28,12 +28,8 @@ async function CatalogLoader() {
 
 export default function MarcosPage() {
   return (
-    <main className="container-page py-10 md:py-14">
-      <p className="eyebrow">Catálogo</p>
-      <h1 className="mb-2 text-[clamp(40px,6vw,72px)]">Marcos</h1>
-      <p className="mb-8 max-w-[60ch] text-muted">
-        El precio corresponde solo al marco. Los cristales se cotizan aparte con tu receta.
-      </p>
+    <main className="container-page">
+      <div className="page-heading"><div><p className="eyebrow">Encuentra tu próxima mirada</p><h1>Los marcos.</h1></div><p className="heading-note">Elige por forma, material o por ese algo que te hace mirarlo dos veces. El precio es solo del marco; los cristales se cotizan aparte.</p></div>
       <Suspense fallback={<p className="text-muted" role="status">Cargando marcos…</p>}>
         <CatalogLoader />
       </Suspense>

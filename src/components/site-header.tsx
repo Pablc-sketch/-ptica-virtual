@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Brand } from "@/components/brand";
 import { useEffect, useRef, useState } from "react";
 import { useFavorites, useSelection } from "@/lib/local-store";
 
@@ -42,26 +43,26 @@ export function SiteHeader() {
   const close = () => setOpen(false);
 
   return (
-    <header className="sticky top-0 z-20 border-b border-line bg-paper/95 backdrop-blur">
+    <header className="site-header">
       <div className="container-page flex min-h-[72px] items-center justify-between gap-2 sm:gap-4">
-        <Link href="/" className="whitespace-nowrap font-serif text-sm tracking-[0.06em] min-[360px]:text-base min-[360px]:tracking-[0.1em] sm:text-2xl sm:tracking-[0.12em]">
-          ÓPTICA GLOBAL
+        <Link href="/" aria-label="Óptica Global, inicio" className="shrink-0">
+          <Brand />
         </Link>
-        <nav aria-label="Principal" className="hidden gap-8 text-[13px] lg:flex">
+        <nav aria-label="Principal" className="site-nav hidden gap-7 lg:flex">
           {NAV.map((n) => (
             <Link key={n.href} href={n.href} className="hover:text-olive">
               {n.label}
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-1 text-[13px]">
+        <div className="header-actions flex items-center">
           <Link href="/marcos?favoritos=1" className="hidden min-h-11 items-center px-2 hover:text-olive sm:flex">
             Favoritos{favs > 0 && <span className="ml-1 text-muted">({favs})</span>}
           </Link>
           <Link href="/mi-cuenta" className="hidden min-h-11 items-center px-2 text-muted hover:text-olive lg:flex">
             Mi cuenta
           </Link>
-          <Link href="/cotizar" className="btn !min-h-11 !px-3 sm:!px-4">
+          <Link href="/cotizar" className="btn header-selection !min-h-11 !px-3 sm:!px-4">
             Selección{sel > 0 && <span className="ml-1">({sel})</span>}
           </Link>
           <div ref={wrap} className="relative lg:hidden">

@@ -18,7 +18,7 @@ export function ProductGallery({ images, modelUrl, name }: { images: CatalogImag
   const img = images[i];
   return (
     <div>
-      <div className="relative aspect-square overflow-hidden bg-sage/50">
+      <div className="product-gallery relative aspect-square overflow-hidden">
         {show3d && !failed && modelUrl ? (
           <Viewer3D url={modelUrl} onError={() => setFailed(true)} />
         ) : (
