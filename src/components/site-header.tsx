@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { useFavorites, useSelection } from "@/lib/local-store";
 
 const NAV = [
@@ -13,6 +14,33 @@ const NAV = [
 export function SiteHeader() {
   const favs = useFavorites().length;
   const sel = useSelection().length;
+  const [open, setOpen] = useState(false);
+  const wrap = useRef<HTMLDivElement>(null);
+  const toggle = useRef<HTMLButtonElement>(null);
+
+  // Menú móvil: se cierra con Escape (devolviendo el foco al botón) y al hacer clic fuera.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        toggle.current?.focus();
+      }
+    };
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("touchstart", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("touchstart", onDown);
+    };
+  }, [open]);
+  const close = () => setOpen(false);
+
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-paper/95 backdrop-blur">
       <div className="container-page flex min-h-[72px] items-center justify-between gap-4">
@@ -36,28 +64,34 @@ export function SiteHeader() {
           <Link href="/cotizar" className="btn !min-h-11 !px-4">
             Selección{sel > 0 && <span className="ml-1">({sel})</span>}
           </Link>
-          <details className="relative md:hidden">
-            <summary className="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center border border-line">
-              <span className="sr-only">Menú</span>
-              <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
-                <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" strokeWidth="1.5" />
-              </svg>
-            </summary>
-            <nav
-              aria-label="Menú móvil"
-              className="absolute right-0 top-12 flex w-56 flex-col border border-line bg-paper p-2 shadow-lg"
+          <div ref={wrap} className="relative md:hidden">
+            <button
+              ref={toggle}
+              type="button"
+              aria-expanded={open}
+              aria-controls="menu-movil"
+              onClick={() => setOpen((v) => !v)}
+              className="flex min-h-11 min-w-11 items-center justify-center border border-line"
             >
-              {NAV.map((n) => (
-                <Link key={n.href} href={n.href} className="flex min-h-11 items-center px-3 hover:bg-sage">
-                  {n.label}
+              <span className="sr-only">{open ? "Cerrar menú" : "Abrir menú"}</span>
+              <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+                <path d={open ? "M4 4l12 12M16 4L4 16" : "M3 6h14M3 10h14M3 14h14"} stroke="currentColor" strokeWidth="1.5" />
+              </svg>
+            </button>
+            {open && (
+              <nav id="menu-movil" aria-label="Menú móvil" className="absolute right-0 top-12 flex w-56 flex-col border border-line bg-paper p-2 shadow-lg">
+                {NAV.map((n) => (
+                  <Link key={n.href} href={n.href} onClick={close} className="flex min-h-11 items-center px-3 hover:bg-sage">
+                    {n.label}
+                  </Link>
+                ))}
+                <Link href="/mi-cuenta" onClick={close} className="flex min-h-11 items-center px-3 hover:bg-sage">Mi cuenta</Link>
+                <Link href="/marcos?favoritos=1" onClick={close} className="flex min-h-11 items-center px-3 hover:bg-sage sm:hidden">
+                  Favoritos{favs > 0 && <span className="ml-1 text-muted">({favs})</span>}
                 </Link>
-              ))}
-              <Link href="/mi-cuenta" className="flex min-h-11 items-center px-3 hover:bg-sage">Mi cuenta</Link>
-              <Link href="/marcos?favoritos=1" className="flex min-h-11 items-center px-3 hover:bg-sage sm:hidden">
-                Favoritos{favs > 0 && <span className="ml-1 text-muted">({favs})</span>}
-              </Link>
-            </nav>
-          </details>
+              </nav>
+            )}
+          </div>
         </div>
       </div>
     </header>

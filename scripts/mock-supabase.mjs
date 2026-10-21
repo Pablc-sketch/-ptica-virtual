@@ -31,6 +31,12 @@ const PRODUCTS = [
 ];
 
 export const quoteCalls = [];
+export const rx = []; // recetas simuladas
+const USER = { id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", email: "cliente@test.cl", aud: "authenticated", role: "authenticated", app_metadata: {}, user_metadata: {}, created_at: "2026-01-01T00:00:00Z" };
+export const GOOD_PASSWORD = "clave-segura-123";
+const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
+const TOKEN = `${b64({ alg: "HS256", typ: "JWT" })}.${b64({ sub: USER.id, aud: "authenticated", role: "authenticated", email: USER.email, iat: 1700000000, exp: 4102444800 })}.${Buffer.from("firma-simulada").toString("base64url")}`;
+const session = () => ({ access_token: TOKEN, token_type: "bearer", expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: "r", user: USER });
 
 export function startMock(port) {
   const server = createServer((req, res) => {
@@ -38,7 +44,7 @@ export function startMock(port) {
     res.setHeader("Access-Control-Allow-Origin", req.headers.origin ?? "*");
     res.setHeader("Access-Control-Allow-Credentials", "true");
     res.setHeader("Access-Control-Allow-Headers", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,HEAD,DELETE,OPTIONS");
     if (req.method === "OPTIONS") return res.writeHead(204).end();
     const json = (o, s = 200) => res.writeHead(s, { "Content-Type": "application/json" }).end(JSON.stringify(o));
 
@@ -62,6 +68,23 @@ export function startMock(port) {
       req.on("end", () => { quoteCalls.push(JSON.parse(body)); json("99999999-9999-4999-8999-999999999999"); });
       return;
     }
+    const readBody = (cb) => { let b = ""; req.on("data", (c) => (b += c)); req.on("end", () => cb(b)); };
+    if (url.pathname === "/auth/v1/user") return (req.headers.authorization ?? "").includes(TOKEN) ? json(USER) : json({ message: "no session" }, 401);
+    if (url.pathname === "/auth/v1/token") return readBody((b) => { const d = JSON.parse(b || "{}"); d.password === GOOD_PASSWORD ? json(session()) : json({ error: "invalid_grant", error_description: "Invalid login credentials" }, 400); });
+    if (url.pathname === "/auth/v1/signup") return readBody(() => json({ ...USER, identities: [] }));
+    if (url.pathname === "/auth/v1/logout") return res.writeHead(204).end();
+    if (url.pathname === "/rest/v1/quotes") return json([]);
+    if (url.pathname === "/rest/v1/prescriptions" && req.method === "GET") {
+      res.setHeader("Content-Range", `0-${Math.max(rx.length - 1, 0)}/${rx.length}`);
+      const idq = url.searchParams.get("id");
+      const rows = rx.filter((r) => !idq?.startsWith("eq.") || r.id === idq.slice(3));
+      if ((req.headers.accept ?? "").includes("vnd.pgrst.object")) return rows[0] ? json(rows[0]) : json({ message: "no rows" }, 406);
+      return json(rows);
+    }
+    if (url.pathname === "/rest/v1/prescriptions" && req.method === "HEAD") { res.setHeader("Content-Range", `*/${rx.length}`); return res.writeHead(200).end(); }
+    if (url.pathname === "/rest/v1/prescriptions" && req.method === "POST") return readBody((b) => { const r = { id: `bbbbbbbb-bbbb-4bbb-8bbb-${String(rx.length + 1).padStart(12, "0")}`, created_at: new Date().toISOString(), quote_id: null, path: JSON.parse(b).path }; rx.push(r); json({ id: r.id }, 201); });
+    if (url.pathname.startsWith("/storage/v1/object/prescriptions/") && req.method === "POST") return readBody(() => json({ Key: url.pathname }));
+    if (url.pathname.startsWith("/storage/v1/object/sign/prescriptions/")) return readBody(() => json({ signedURL: `/object/sign/prescriptions/x?token=t${Date.now()}` }));
     if (url.pathname.startsWith("/auth/v1/")) return json({}, 401);
     json({ message: "no mock" }, 404);
   });

@@ -2,7 +2,8 @@
 // Uso: npm run test:e2e   (construye, levanta mock + next start y ejecuta Playwright)
 import { spawn, execSync } from "node:child_process";
 import { chromium } from "playwright-core";
-import { startMock, quoteCalls } from "./mock-supabase.mjs";
+import { startMock, quoteCalls, rx, GOOD_PASSWORD } from "./mock-supabase.mjs";
+import { writeFileSync } from "node:fs";
 
 const MOCK = 54399, APP = 3101;
 const env = {
@@ -89,6 +90,73 @@ try {
     check(`${label}: cotización enviada muestra confirmación real`, (await page.textContent("main")).includes("Recibimos tu cotización"));
     const sent = quoteCalls.at(-1);
     check(`${label}: payload sin precios del cliente`, quoteCalls.length === before + 1 && JSON.stringify(sent.p_items) === JSON.stringify([{ product_id: "22222222-2222-4222-8222-222222222222", quantity: 2 }]));
+
+    // ---- Menú móvil ----
+    if (label === "móvil") {
+      await page.goto(`${base}/`, { waitUntil: "networkidle" });
+      await hydrated(page, 'button[aria-controls="menu-movil"]');
+      const burger = page.locator('button[aria-controls="menu-movil"]');
+      await burger.click();
+      check(`${label}: menú se abre (aria-expanded)`, (await burger.getAttribute("aria-expanded")) === "true");
+      await page.getByRole("link", { name: "Cristales" }).first().click();
+      await page.waitForURL("**/cristales");
+      check(`${label}: menú se cierra al navegar`, (await page.locator("#menu-movil").count()) === 0);
+      await burger.click();
+      await page.keyboard.press("Escape");
+      check(`${label}: Escape cierra el menú y devuelve el foco al botón`, (await page.locator("#menu-movil").count()) === 0 && (await page.evaluate(() => document.activeElement?.getAttribute("aria-controls"))) === "menu-movil");
+      await burger.click();
+      await page.mouse.click(200, 600);
+      check(`${label}: clic fuera cierra el menú`, (await page.locator("#menu-movil").count()) === 0);
+    }
+
+    // ---- Cuenta y recetas ----
+    await page.context().clearCookies();
+    await page.goto(`${base}/mi-cuenta`, { waitUntil: "networkidle" });
+    await hydrated(page, 'input[name="email"]');
+    check(`${label}: /mi-cuenta sin sesión muestra ingreso y no exige cuenta para explorar`, (await page.textContent("main")).includes("No necesitas cuenta para explorar"));
+    check(`${label}: /mi-cuenta sin desborde`, await noOverflow());
+    const anonPost = await page.request.post(`${base}/api/recetas`, { headers: { origin: base }, multipart: { consent: "true" } });
+    const anonGet = await page.request.get(`${base}/api/recetas/bbbbbbbb-bbbb-4bbb-8bbb-000000000001`);
+    const xorigin = await page.request.post(`${base}/api/recetas`, { headers: { origin: "https://evil.example" }, multipart: { consent: "true" } });
+    check(`${label}: API recetas anónima -> 401 (POST y GET) y origen ajeno -> 403`, anonPost.status() === 401 && anonGet.status() === 401 && xorigin.status() === 403, `(${anonPost.status()}/${anonGet.status()}/${xorigin.status()})`);
+    await page.fill('input[name="email"]', "cliente@test.cl");
+    await page.fill('input[name="password"]', "incorrecta");
+    await page.getByRole("button", { name: "Ingresar" }).click();
+    await page.waitForSelector("text=Correo o contraseña incorrectos");
+    check(`${label}: credenciales malas -> mensaje único`, true);
+    await page.fill('input[name="email"]', "cliente@test.cl");
+    await page.fill('input[name="password"]', GOOD_PASSWORD);
+    await page.getByRole("button", { name: "Ingresar" }).click();
+    await page.waitForSelector("text=Enviar mi receta");
+    check(`${label}: ingreso correcto muestra la cuenta`, (await page.textContent("main")).includes("cliente@test.cl"));
+    await hydrated(page, 'input[name="file"]');
+    const png = "/tmp/e2e-receta.png";
+    writeFileSync(png, Buffer.from("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4", "hex"));
+    const txt = "/tmp/e2e-receta.txt";
+    writeFileSync(txt, "no soy una receta");
+    const rxBefore = rx.length;
+    await page.setInputFiles('input[name="file"]', txt);
+    await page.check('input[name="consent"]');
+    await page.getByRole("button", { name: "Enviar receta" }).click();
+    await page.waitForSelector('[role="alert"]');
+    check(`${label}: archivo no permitido se rechaza`, (await page.textContent("main")).includes("Usa JPG, PNG, WebP o PDF") && rx.length === rxBefore);
+    await page.setInputFiles('input[name="file"]', png);
+    await page.getByRole("button", { name: "Enviar receta" }).click();
+    await page.waitForSelector("text=Recibimos tu receta");
+    check(`${label}: receta válida enviada (pendiente de revisión, no confirmada)`, rx.length === rxBefore + 1 && (await page.textContent("main")).includes("no está confirmada"));
+    await page.waitForSelector("text=Pendiente de revisión por una persona");
+    await hydrated(page, "main li button");
+    await page.waitForTimeout(1000); // router.refresh() reemplaza el nodo: esperar a que se estabilice
+    const [popup] = await Promise.all([page.waitForEvent("popup"), page.getByRole("button", { name: /Abrir \(enlace/ }).first().click()]);
+    await popup.waitForURL(/object\/sign\/prescriptions/, { timeout: 8000 }).catch(() => {});
+    check(`${label}: abrir receta usa URL firmada temporal`, /object\/sign\/prescriptions/.test(popup.url()), popup.url().slice(0, 90));
+    await popup.close();
+    await page.getByRole("button", { name: "Cerrar sesión" }).click();
+    await page.waitForSelector("text=No necesitas cuenta para explorar");
+    check(`${label}: cerrar sesión vuelve al ingreso`, true);
+    const priv = await page.goto(`${base}/privacidad`, { waitUntil: "networkidle" });
+    check(`${label}: privacidad se declara borrador y lista pendientes`, priv.status() === 200 && (await page.textContent("main")).includes("borrador pendiente de revisión"));
+    check(`${label}: privacidad sin desborde`, await noOverflow());
     await ctx.close();
   }
 } finally {

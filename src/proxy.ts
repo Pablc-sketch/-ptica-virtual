@@ -19,9 +19,13 @@ export async function proxy(request: NextRequest) {
       },
     },
   );
-  const { data } = await supabase.auth.getClaims();
+  // Una cookie de sesión corrupta no debe tumbar el sitio: se trata como visitante anónimo.
+  const claims = await supabase.auth
+    .getClaims()
+    .then((r) => r.data?.claims ?? null)
+    .catch(() => null);
   const { pathname } = request.nextUrl;
-  if (!data?.claims && pathname.startsWith("/admin") && pathname !== "/admin/login") {
+  if (!claims && pathname.startsWith("/admin") && pathname !== "/admin/login") {
     return NextResponse.redirect(new URL("/admin/login", request.url));
   }
   return response;
