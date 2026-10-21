@@ -1,5 +1,8 @@
 -- Fully synthetic fixtures; every statement is rolled back.
 begin;
+-- Test the intended future open-store RPC inside this rollback only.
+-- Production preview remains closed; this temporary grant cannot persist.
+grant execute on function public.create_quote(text,text,text,text,jsonb) to anon, authenticated;
 insert into auth.users(id,email) values
  ('75000000-0000-4000-8000-000000000001','catalog-owner@example.invalid'),
  ('75000000-0000-4000-8000-000000000002','catalog-other@example.invalid'),

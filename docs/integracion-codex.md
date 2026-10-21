@@ -31,4 +31,8 @@ Se detectó que los archivos iniciales incluían partes canceladas que duplicaba
 
 Alta del administrador de Pablo (falta email inequívoco), fotos/GLB comerciales, precios online validados, importación de catálogo con identificación autorizada, interfaz de cliente y receta, canal de contacto, validación de privacidad/condiciones, pago y servicios IA/OCR. No se presentan como integrados. QUOTES_OPEN permanece falso. Antes de abrir cotizaciones, revisar también acceso directo a create_quote: la flag del servidor no desactiva por sí sola el RPC público.
 
+Actualización 01:29 Santiago: la migración remota 20261021042756_cotizaciones_cerradas_preview_codex revoca EXECUTE de create_quote a PUBLIC/anon/authenticated. Verificación real: has_function_privilege=false para anon y authenticated. Así QUOTES_OPEN=false coincide con la base. Para abrir la tienda se requiere una nueva migración explícita que conceda EXECUTE a anon/authenticated y activar QUOTES_OPEN en Vercel después de validar datos/contacto/privacidad. Nunca concederlo desde una petición del cliente. El test de catálogo otorga temporalmente ese permiso dentro de su transacción con ROLLBACK para probar el futuro flujo abierto sin abrir la vista previa.
+
+Vista previa actual: https://optica-global-virtual-fccmqjhtp-prxva.vercel.app/ (bcc713e, READY). Navegador real: portada, catálogo vacío y menú móvil expandible verificados; ancho del documento 375 y scrollWidth 375 con viewport 390 (sin desborde en esa página). La revisión sigue en curso.
+
 Para Claude: fusionar codex/tienda-integrada y continuar desde esa base. No reaplicar migraciones ya aplicadas. Las pruebas de recetas y catálogo se pueden repetir con rollback; no usar datos reales para probar.
