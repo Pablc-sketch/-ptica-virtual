@@ -362,6 +362,12 @@ try {
     check("reemplazo UI: tras enviar se mantiene la confirmación y no aparece un aviso de error",
       afterUi.includes("Tu receta ya está en tu cuenta") && !afterUi.includes("ya no está esperando un reemplazo"),
       `(confirmación=${afterUi.includes("Tu receta ya está en tu cuenta")}, aviso=${afterUi.includes("ya no está esperando un reemplazo")}, url=${client.url().replace(base, "")})`);
+    await client.getByRole("button", { name: "Enviar otra receta" }).click();
+    await hydrated(client, "#prescription-file");
+    check("reemplazo UI: 'Enviar otra receta' reinicia como receta normal (sin aviso de reemplazo)", !(await client.textContent("main")).includes("Envías un nuevo archivo para una receta que necesita corrección"));
+    await client.reload({ waitUntil: "networkidle" });
+    const reloaded = await client.textContent("main");
+    check("reemplazo UI: tras recargar queda el recibo persistente y no el aviso de error", reloaded.includes("El archivo de reemplazo ya fue recibido") && !reloaded.includes("ya no está esperando un reemplazo"));
     const repl = { status: () => (rx.some((r) => r.replaces_id === mine) ? 201 : 0), json: async () => ({ id: rx.find((r) => r.replaces_id === mine)?.id }) };
     const repl2 = await client.request.post(`${base}/api/recetas`, { headers: { origin: base }, multipart: { consent: "true", replaces_id: mine, file: { name: "r.png", mimeType: "image/png", buffer: png } } });
     const newId = (await repl.json()).id;
