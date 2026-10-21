@@ -2,7 +2,7 @@
 // Uso: npm run test:e2e   (construye, levanta mock + next start y ejecuta Playwright)
 import { spawn, execSync } from "node:child_process";
 import { chromium } from "playwright-core";
-import { startMock, quoteCalls, rx, control, events, GOOD_PASSWORD } from "./mock-supabase.mjs";
+import { startMock, quoteCalls, rx, control, events, removed, GOOD_PASSWORD } from "./mock-supabase.mjs";
 import { writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 const axePath = createRequire(import.meta.url).resolve("axe-core/axe.min.js");
@@ -330,10 +330,22 @@ try {
     const ctext = await client.textContent("main");
     check("revisión: la persona ve el estado, el motivo y cómo subir un archivo nuevo", ctext.includes("Necesitamos un nuevo archivo") && ctext.includes("no se lee el eje") && (await client.getByRole("link", { name: "Subir un archivo nuevo" }).count()) === 1);
     check("revisión: la persona no ve el historial interno", events.length >= 2 && !ctext.includes("Historial"));
+    control.rxReadDown = true;
+    const down = await client.request.post(`${base}/api/recetas`, { headers: { origin: base }, multipart: { consent: "true", replaces_id: mine, file: { name: "r.png", mimeType: "image/png", buffer: png } } });
+    control.rxReadDown = false;
+    check("reemplazo: si la base falla en la comprobación previa -> 503 (no un falso 409) y no sube nada", down.status() === 503 && !rx.some((r) => r.replaces_id === mine), `(${down.status()})`);
+    rx.find((r) => r.id === mine).quote_id = "dddddddd-dddd-4ddd-8ddd-000000000001";
     const repl = await client.request.post(`${base}/api/recetas`, { headers: { origin: base }, multipart: { consent: "true", replaces_id: mine, file: { name: "r.png", mimeType: "image/png", buffer: png } } });
     const repl2 = await client.request.post(`${base}/api/recetas`, { headers: { origin: base }, multipart: { consent: "true", replaces_id: mine, file: { name: "r.png", mimeType: "image/png", buffer: png } } });
     const newId = (await repl.json()).id;
     check("revisión: reemplazo aceptado una sola vez", repl.status() === 201 && rx.find((r) => r.id === newId)?.replaces_id === mine && repl2.status() === 409, `(${repl.status()}/${repl2.status()})`);
+    check("reemplazo: hereda la cotización de la receta original", rx.find((r) => r.id === newId)?.quote_id === "dddddddd-dddd-4ddd-8ddd-000000000001");
+    // Carrera: la comprobación previa no ve el reemplazo ya insertado; el índice único lo rechaza.
+    control.hidePrecheck = true;
+    const removedBefore = removed.length;
+    const race = await client.request.post(`${base}/api/recetas`, { headers: { origin: base }, multipart: { consent: "true", replaces_id: mine, file: { name: "r.png", mimeType: "image/png", buffer: png } } });
+    control.hidePrecheck = false;
+    check("reemplazo: carrera simultánea -> 409 claro y el archivo subido se retira", race.status() === 409 && removed.length === removedBefore + 1 && rx.filter((r) => r.replaces_id === mine).length === 1, `(${race.status()}, retirados ${removed.length - removedBefore})`);
     await client.reload({ waitUntil: "networkidle" });
     check("revisión: tras reemplazar, la cuenta indica que ya envió el archivo", (await client.textContent("main")).includes("Ya enviaste el archivo nuevo"));
 

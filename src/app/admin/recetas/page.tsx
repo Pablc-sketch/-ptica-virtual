@@ -93,7 +93,8 @@ export default function RecetasAdminPage({ searchParams }: PageProps<"/admin/rec
       <h1 className="mb-6 text-4xl">Recetas</h1>
       <AdminNav />
       <p className="mb-4 text-sm text-muted">
-        Revisión <strong>documental</strong>: confirma que el archivo es legible y completo para cotizar. No es una evaluación médica ni activa pagos.
+        Revisión <strong>documental</strong>: confirma que el archivo se puede leer y trae los datos necesarios para cotizar. No valida ni corrige
+        la graduación (no es un acto clínico) y no activa pagos.
         Cada apertura genera un enlace firmado de 60 segundos.
       </p>
       <Suspense fallback={<p role="status">Cargando…</p>}><List searchParams={searchParams} /></Suspense>

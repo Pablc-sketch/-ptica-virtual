@@ -31,7 +31,8 @@ const PRODUCTS = [
 ];
 
 export const quoteCalls = [];
-export const control = { authDown: false, productsDown: false, failStorageDelete: 0, objectMissing: false };
+export const control = { authDown: false, productsDown: false, failStorageDelete: 0, objectMissing: false, hidePrecheck: false, rxReadDown: false };
+export const removed = [];
 const FOREIGN = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 // Receta y cotización de OTRA persona: la UI de cuenta nunca debe mostrarlas (RLS de admin las dejaría pasar).
 export const rx = [{ id: "bbbbbbbb-bbbb-4bbb-8bbb-0000000000ff", user_id: FOREIGN, created_at: "2026-03-03T10:00:00Z", quote_id: null, path: `${FOREIGN}/x.png`, status: "pending", version: 0, status_changed_at: "2026-03-03T10:00:00Z", client_message: null, replaces_id: null }];
@@ -115,6 +116,9 @@ export function startMock(port) {
       const idq = url.searchParams.get("id");
       const uq = url.searchParams.get("user_id");
       const rq = url.searchParams.get("replaces_id");
+      if (control.rxReadDown) return json({ message: "db down" }, 500);
+      // Simula una carrera: otra petición aún no ha insertado su reemplazo cuando esta hace la comprobación previa.
+      if (control.hidePrecheck && rq?.startsWith("eq.")) return (req.headers.accept ?? "").includes("vnd.pgrst.object") ? json({ message: "no rows" }, 406) : json([]);
       const sq = url.searchParams.get("status");
       const sset = sq?.startsWith("in.(") ? sq.slice(4, -1).split(",") : null;
       const rows = rx.filter((r) => (!idq?.startsWith("eq.") || r.id === idq.slice(3)) && (!uq?.startsWith("eq.") || r.user_id === uq.slice(3))
@@ -127,9 +131,10 @@ export function startMock(port) {
       const d = JSON.parse(b);
       if (d.replaces_id) {
         const old = rx.find((o) => o.id === d.replaces_id && o.user_id === USER.id && o.status === "needs_new_file");
-        if (!old || rx.some((o) => o.replaces_id === d.replaces_id)) return json({ code: "42501", message: "replacement_not_allowed" }, 403);
+        if (!old) return json({ code: "42501", message: "replacement_not_allowed" }, 403);
+        if (rx.some((o) => o.replaces_id === d.replaces_id)) return json({ code: "23505", message: "duplicate key value violates unique constraint \"prescriptions_replaces_once\"" }, 409);
       }
-      const r = { id: `bbbbbbbb-bbbb-4bbb-8bbb-${String(rx.length + 1).padStart(12, "0")}`, created_at: new Date().toISOString(), quote_id: null, path: d.path, user_id: USER.id,
+      const r = { id: `bbbbbbbb-bbbb-4bbb-8bbb-${String(rx.length + 1).padStart(12, "0")}`, created_at: new Date().toISOString(), quote_id: d.quote_id ?? null, path: d.path, user_id: USER.id,
         status: "pending", version: 0, status_changed_at: new Date().toISOString(), client_message: null, replaces_id: d.replaces_id ?? null };
       rx.push(r); json({ id: r.id }, 201);
     });
@@ -140,7 +145,8 @@ export function startMock(port) {
       return res.writeHead(204).end();
     }
     if (url.pathname.startsWith("/storage/v1/object/prescriptions/") && req.method === "HEAD") return res.writeHead(control.objectMissing ? 404 : 200).end();
-    if (url.pathname === "/storage/v1/object/prescriptions" && req.method === "DELETE") return readBody(() => { if (control.failStorageDelete > 0) { control.failStorageDelete--; return json({ message: "storage down" }, 500); } json([{ name: "x" }]); });
+    if (url.pathname === "/storage/v1/object/prescriptions" && req.method === "DELETE") return readBody((b) => {
+      try { removed.push(...(JSON.parse(b || "{}").prefixes ?? [])); } catch { /* cuerpo no JSON */ } if (control.failStorageDelete > 0) { control.failStorageDelete--; return json({ message: "storage down" }, 500); } json([{ name: "x" }]); });
     if (url.pathname.startsWith("/storage/v1/object/prescriptions/") && req.method === "POST") return readBody(() => json({ Key: url.pathname }));
     if (url.pathname.startsWith("/storage/v1/object/sign/prescriptions/")) return readBody(() => json({ signedURL: `/object/sign/prescriptions/x?token=t${Date.now()}` }));
     if (url.pathname.startsWith("/auth/v1/")) return json({}, 401);
