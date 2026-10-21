@@ -32,6 +32,7 @@ async function Detail({ params }: { params: PageProps<"/marcos/[slug]">["params"
   }
   if (!p) notFound();
   const specs: [string, string | null][] = [
+    ["Código", p.sku],
     ["Forma", p.frameShape],
     ["Material", p.material],
     ["Color", p.color],

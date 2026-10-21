@@ -109,7 +109,7 @@ export function QuoteForm({ open }: { open: boolean }) {
           })}
         </ul>
         <p className="mt-4 flex justify-between text-lg"><span>Total referencial de marcos</span><span>{clp(total)}</span></p>
-        <p className="mt-1 text-sm text-muted">Sin cristales. El total final se confirma después de revisar tu receta; el servidor recalcula los precios.</p>
+        <p className="mt-1 text-sm text-muted">El precio de los cristales y la entrega se confirma contigo después de revisar tu receta.</p>
       </section>
 
       <section aria-labelledby="datos">

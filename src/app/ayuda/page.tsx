@@ -3,12 +3,12 @@ import type { Metadata } from "next";
 export const metadata: Metadata = { title: "Ayuda", description: "Preguntas frecuentes sobre marcos, recetas y cotizaciones." };
 
 const FAQ = [
-  ["¿Puedo comprar directamente?", "No. Primero cotizas; revisamos tu receta contigo y confirmamos el total antes de cualquier pago."],
+  ["¿Cómo compro mis lentes?", "Elige tu marco y solicita una cotización. Revisamos tu receta contigo y confirmamos el valor completo antes de pagar."],
   ["¿El precio incluye cristales?", "No. El precio publicado es solo el del marco. Los cristales se cotizan con tu receta."],
   ["¿Qué son los favoritos y la selección?", "Los favoritos son un guardado personal. La selección es la lista de marcos que enviarás a cotizar. Ambos se guardan solo en tu navegador."],
   ["¿Cómo se tratan mis datos y mi receta?", "La receta es un dato sensible: solo tú y el equipo autorizado pueden verla y los enlaces de acceso son temporales. Solo la pedimos cuando estás en una cotización."],
   ["¿La vista 3D me dice cómo me queda?", "No. Es una referencia del modelo del marco. No es un probador facial ni garantiza el ajuste: usa las medidas de la ficha."],
-  ["¿Por qué no veo ciertos marcos?", "Solo publicamos marcos con fotografía real verificada, precio confirmado y medidas."],
+  ["¿Por qué no veo ciertos marcos?", "Cada modelo se incorpora cuando hemos revisado su fotografía y precio. La disponibilidad se confirma en tu cotización."],
 ];
 
 export default function AyudaPage() {

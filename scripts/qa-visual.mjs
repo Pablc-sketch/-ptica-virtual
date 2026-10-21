@@ -16,7 +16,7 @@ for (const [label, vp] of [["movil", { width: 390, height: 844 }], ["escritorio"
   results.push(`${label} marcos vacío honesto: ${(await page.textContent("main")).includes("Estamos preparando el catálogo")}`);
   await page.goto(base + "/cotizar", { waitUntil: "networkidle" });
   results.push(`${label} cotizar vacío: ${(await page.textContent("main")).includes("Tu selección está vacía")}`);
-  const r = await page.goto(base + "/admin", { waitUntil: "networkidle" });
+  await page.goto(base + "/admin", { waitUntil: "networkidle" });
   results.push(`${label} /admin sin sesión -> ${page.url()}`);
   const api = await page.request.post(base + "/api/cotizaciones", { data: { name: "Ana", email: "a@b.cl", items: [] } });
   results.push(`${label} POST cotizaciones (cerradas) -> ${api.status()}`);

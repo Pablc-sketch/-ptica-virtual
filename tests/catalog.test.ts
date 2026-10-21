@@ -5,7 +5,7 @@ import type { CatalogProduct } from "../src/lib/catalog-types";
 process.env.NEXT_PUBLIC_SUPABASE_URL = "https://ejemplo.supabase.co";
 
 const mk = (o: Partial<CatalogProduct>): CatalogProduct => ({
-  id: "i", slug: "s", name: "N", brand: null, description: null, priceClp: 1000, frameShape: null,
+  id: "i", slug: "s", name: "N", sku: null, brand: null, description: null, priceClp: 1000, frameShape: null,
   material: null, color: null, gender: null, lensWidthMm: null, bridgeMm: null, templeMm: null,
   images: [{ url: "u", alt: "a" }], modelUrl: null, ...o,
 });
@@ -42,7 +42,7 @@ describe("adapt (DB -> UI)", () => {
   it("solo expone fotos verificadas y 3D verificado, nunca drafts de media", async () => {
     const { adapt } = await import("../src/lib/catalog-adapt");
     const p = adapt({
-      id: "1", slug: "a", name: "A", description: null, price_clp: 1000, frame_shape: null, material: null,
+      id: "1", slug: "a", name: "A", sku: null, description: null, price_clp: 1000, frame_shape: null, material: null,
       color: null, gender: null, lens_width_mm: null, bridge_mm: null, temple_mm: null,
       brands: { name: "Marca" },
       product_images: [
@@ -55,7 +55,7 @@ describe("adapt (DB -> UI)", () => {
     expect(p.images.map((i) => i.url.split("/").pop())).toEqual(["b.jpg", "c%20con%20espacio.jpg"]);
     expect(p.modelUrl).toBeNull();
     expect(p.brand).toBe("Marca");
-    const q = adapt({ id: "2", slug: "b", name: "B", description: null, price_clp: 1, frame_shape: null,
+    const q = adapt({ id: "2", slug: "b", name: "B", sku: null, description: null, price_clp: 1, frame_shape: null,
       material: null, color: null, gender: null, lens_width_mm: null, bridge_mm: null, temple_mm: null, brands: null,
       product_images: [], product_models: [{ glb_path: "2/m.glb", verified: true }] });
     expect(q.modelUrl).toMatch(/product-models\/2\/m\.glb$/);

@@ -3,6 +3,7 @@ export type CatalogProduct = {
   id: string;
   slug: string;
   name: string;
+  sku: string | null;
   brand: string | null;
   description: string | null;
   priceClp: number;

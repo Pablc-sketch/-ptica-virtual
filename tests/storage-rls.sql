@@ -70,4 +70,3 @@ end $$;
 reset role;
 select 'PASS: customer isolation, own upload, quote ownership, missing-file rejection, anon denial and admin review; all fixtures rolled back' as test_result;
 rollback;
-

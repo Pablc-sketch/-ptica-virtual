@@ -25,7 +25,7 @@ async function Editor({ params, searchParams }: { params: Promise<{ id: string }
   const model = Array.isArray(p.product_models) ? p.product_models[0] : p.product_models;
   const images = [...(p.product_images ?? [])].sort((a, b) => a.position - b.position);
   const hasVerified = images.some((i) => i.verified);
-  const canPublish = hasVerified && p.price_clp > 0 && p.name.trim().length > 0;
+  const canPublish = hasVerified && p.price_clp > 0 && p.name.trim().length > 0 && Boolean(p.sku?.trim());
 
   return (
     <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
@@ -35,6 +35,7 @@ async function Editor({ params, searchParams }: { params: Promise<{ id: string }
         {ok && <p role="status" className="mb-3 border border-line bg-sage/50 p-3">{ok}</p>}
         <form action={updateProduct.bind(null, id)} className="flex flex-col gap-3">
           <label>Nombre<input name="name" defaultValue={p.name} required maxLength={120} className="field mt-1" /></label>
+          <label>Código real / SKU<input name="sku" defaultValue={p.sku ?? ""} required maxLength={80} className="field mt-1" /></label>
           <label>Marca<input name="brand" defaultValue={brand?.name ?? ""} maxLength={80} className="field mt-1" /></label>
           <label>Precio del marco (CLP)<input name="price_clp" type="number" min={0} step={1} defaultValue={p.price_clp} required className="field mt-1" /></label>
           <label>Descripción<textarea name="description" defaultValue={p.description ?? ""} maxLength={2000} className="field mt-1" /></label>
@@ -53,7 +54,7 @@ async function Editor({ params, searchParams }: { params: Promise<{ id: string }
         <h2 className="mb-2 mt-10 text-2xl">Publicación</h2>
         <p className="mb-3 text-sm text-muted">
           Estado actual: <strong>{p.status === "published" ? "Publicado" : p.status === "archived" ? "Archivado" : "Borrador"}</strong>.
-          Para publicar se exige precio mayor a 0 y al menos una foto real verificada
+          Para publicar se exige código real, precio mayor a 0 y al menos una foto verificada
           {canPublish ? " (cumplido)." : " (aún no se cumple)."}
         </p>
         <div className="flex flex-wrap gap-2">

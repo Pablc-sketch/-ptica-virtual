@@ -11,6 +11,7 @@ export type Row = {
   id: string;
   slug: string;
   name: string;
+  sku: string | null;
   description: string | null;
   price_clp: number;
   frame_shape: string | null;
@@ -43,6 +44,7 @@ export function adapt(r: Row): CatalogProduct {
     id: r.id,
     slug: r.slug,
     name: r.name,
+    sku: r.sku,
     brand: brand?.name ?? null,
     description: r.description,
     priceClp: r.price_clp,
