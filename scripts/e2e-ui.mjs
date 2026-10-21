@@ -2,7 +2,7 @@
 // Uso: npm run test:e2e   (construye, levanta mock + next start y ejecuta Playwright)
 import { spawn, execSync } from "node:child_process";
 import { chromium } from "playwright-core";
-import { startMock, quoteCalls, rx, control, GOOD_PASSWORD } from "./mock-supabase.mjs";
+import { startMock, quoteCalls, rx, control, events, removed, GOOD_PASSWORD } from "./mock-supabase.mjs";
 import { writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 const axePath = createRequire(import.meta.url).resolve("axe-core/axe.min.js");
@@ -63,7 +63,7 @@ try {
     await page.getByLabel("Solo favoritos").uncheck();
 
     await page.getByRole("button", { name: "Agregar a selección" }).nth(1).click();
-    check(`${label}: selección actualiza contador del header`, (await page.locator("header").textContent()).includes("Selección(1)"));
+    check(`${label}: selección actualiza contador del header`, (await page.locator('header a[href="/cotizar"]').getAttribute("aria-label")) === "Selección, 1 marco");
 
     await page.goto(`${base}/marcos/ambar`, { waitUntil: "networkidle" });
     await hydrated(page, "main button");
@@ -105,8 +105,10 @@ try {
       const burger = page.locator('button[aria-controls="menu-movil"]');
       await burger.click();
       check(`${label}: menú se abre (aria-expanded)`, (await burger.getAttribute("aria-expanded")) === "true");
-      await page.getByRole("link", { name: "Cristales" }).first().click();
-      await page.waitForURL("**/cristales");
+      const menuLink = page.locator("#menu-movil a").first();
+      const dest = await menuLink.getAttribute("href");
+      await menuLink.click();
+      await page.waitForURL((u) => u.pathname === dest);
       check(`${label}: menú se cierra al navegar`, (await page.locator("#menu-movil").count()) === 0);
       await burger.click();
       await page.keyboard.press("Escape");
@@ -136,23 +138,26 @@ try {
     await page.getByRole("button", { name: "Ingresar" }).click();
     await page.waitForSelector("text=Enviar mi receta");
     check(`${label}: ingreso correcto muestra la cuenta`, (await page.textContent("main")).includes("cliente@test.cl"));
-    check(`${label}: no muestra receta ni cotización ajenas (filtro de dueño)`, (await page.getByRole("button", { name: /Abrir \(enlace/ }).count()) === 0 && (await page.locator('select[name="quote_id"] option').count()) === 2, `(recetas visibles=${await page.getByRole("button", { name: /Abrir \(enlace/ }).count()}, opciones=${await page.locator('select[name="quote_id"] option').count()})`);
-    await hydrated(page, 'input[name="file"]');
+    { await page.reload({ waitUntil: "networkidle" }); const html = await page.content(); check(`${label}: no muestra receta ni cotización ajenas (filtro de dueño)`, (await page.getByRole("button", { name: /Abrir \(enlace/ }).count()) === 0 && !html.includes("dddddddd-dddd-4ddd-8ddd-000000000002") && html.includes("dddddddd-dddd-4ddd-8ddd-000000000001") && !html.includes("0000000000ff"), `(recetas visibles=${await page.getByRole("button", { name: /Abrir \(enlace/ }).count()}, ajena=${html.includes("dddddddd-dddd-4ddd-8ddd-000000000002")}, propia=${html.includes("dddddddd-dddd-4ddd-8ddd-000000000001")}, rxAjena=${html.includes("0000000000ff")})`); }
+    await hydrated(page, "#prescription-file");
     const png = "/tmp/e2e-receta.png";
     writeFileSync(png, Buffer.from("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4", "hex"));
     const txt = "/tmp/e2e-receta.txt";
     writeFileSync(txt, "no soy una receta");
     const rxBefore = rx.length;
-    await page.setInputFiles('input[name="file"]', txt);
-    await page.check('input[name="consent"]');
-    await page.getByRole("button", { name: "Enviar receta" }).click();
-    await page.waitForSelector('[role="alert"]');
-    check(`${label}: archivo no permitido se rechaza`, (await page.textContent("main")).includes("Usa JPG, PNG, WebP o PDF") && rx.length === rxBefore);
-    await page.setInputFiles('input[name="file"]', png);
-    await page.getByRole("button", { name: "Enviar receta" }).click();
-    await page.waitForSelector("text=Recibimos tu receta");
-    check(`${label}: receta válida enviada (pendiente de revisión, no confirmada)`, rx.length === rxBefore + 1 && (await page.textContent("main")).includes("no está confirmada"));
-    await page.waitForSelector("text=Pendiente de revisión por una persona");
+    // Formulario de 3 pasos de Codex (0dbb82e): elegir archivo -> comprobarlo -> autorizar y enviar.
+    await page.setInputFiles("#prescription-file", txt);
+    await page.waitForSelector("text=Ese formato no es compatible");
+    check(`${label}: archivo no permitido se rechaza`, rx.length === rxBefore && (await page.getByRole("button", { name: /Continuar/ }).isDisabled()));
+    await page.setInputFiles("#prescription-file", png);
+    await page.getByRole("button", { name: /Continuar/ }).click();
+    await page.getByLabel("Revisé el archivo que elegí y corresponde a mi receta.").check();
+    await page.getByRole("button", { name: /Continuar/ }).click();
+    await page.getByLabel(/Autorizo al equipo de la óptica a revisar mi receta/).check();
+    await page.getByRole("button", { name: "Enviar mi receta" }).click();
+    await page.waitForSelector("text=Tu receta ya está en tu cuenta.");
+    check(`${label}: receta válida enviada (pendiente de revisión, no confirmada)`, rx.length === rxBefore + 1 && (await page.textContent("main")).includes("no confirma la receta"));
+    await page.waitForSelector("main li >> text=Recibida");
     await hydrated(page, "main li button");
     await page.waitForTimeout(1000); // router.refresh() reemplaza el nodo: esperar a que se estabilice
     const [popup] = await Promise.all([page.waitForEvent("popup"), page.getByRole("button", { name: /Abrir \(enlace/ }).first().click()]);
@@ -276,6 +281,125 @@ try {
     await page.waitForTimeout(3000);
     check("rendimiento: three.js se descarga solo tras pulsar Vista 3D", hasThree(), `(JS tras 3D ${kb()} KB)`);
     await ctx.close();
+  }
+
+  // ---- Revisión documental de recetas (cliente + admin) ----
+  {
+    const base = `http://localhost:${APP}`;
+    const client = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
+    await client.goto(`${base}/mi-cuenta`, { waitUntil: "networkidle" });
+    await hydrated(client, 'input[name="email"]');
+    await client.fill('input[name="email"]', "cliente@test.cl");
+    await client.fill('input[name="password"]', GOOD_PASSWORD);
+    await client.getByRole("button", { name: "Ingresar" }).click();
+    await client.waitForSelector("text=Mis recetas");
+    const png = Buffer.from("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4", "hex");
+    const up = await client.request.post(`${base}/api/recetas`, { headers: { origin: base }, multipart: { consent: "true", file: { name: "r.png", mimeType: "image/png", buffer: png } } });
+    const mine = (await up.json()).id;
+    check("revisión: receta nueva nace 'pending'", up.status() === 201 && rx.find((r) => r.id === mine)?.status === "pending");
+    await client.reload({ waitUntil: "networkidle" });
+    check("revisión: la persona ve 'Recibida'", (await client.textContent("main")).includes("Recibida"));
+    const selfReview = await client.request.post(`${base}/api/admin/recetas/${mine}/estado`, { headers: { origin: base }, data: { to: "in_review", expected_version: 0 } });
+    check("revisión: el cliente no puede cambiar el estado (403)", selfReview.status() === 403 && rx.find((r) => r.id === mine).status === "pending", `(${selfReview.status()})`);
+    const replacePending = await client.request.post(`${base}/api/recetas`, { headers: { origin: base }, multipart: { consent: "true", replaces_id: mine, file: { name: "r.png", mimeType: "image/png", buffer: png } } });
+    check("revisión: no se puede reemplazar una receta que no pidió archivo nuevo (409)", replacePending.status() === 409);
+
+    const admin = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+    await admin.goto(`${base}/admin/login`, { waitUntil: "networkidle" });
+    await hydrated(admin, 'input[name="email"]');
+    await admin.fill('input[name="email"]', "admin@test.cl");
+    await admin.fill('input[name="password"]', GOOD_PASSWORD);
+    await admin.getByRole("button", { name: "Entrar" }).click();
+    await admin.waitForURL(/\/admin(\?|$)/);
+    await admin.goto(`${base}/admin/recetas`, { waitUntil: "networkidle" });
+    check("revisión: admin ve la fila en 'Por revisar'", (await admin.locator("main li").count()) >= 2 && (await admin.textContent("main")).includes("Pendiente"));
+    const row = admin.locator("main li").filter({ hasText: "Cliente aaaaaaaa" });
+    await hydrated(admin, "main li button");
+    await row.getByRole("button", { name: "Tomar para revisar" }).click();
+    await admin.waitForFunction(() => document.querySelector("main")?.textContent?.includes("En revisión"));
+    check("revisión: 'Tomar para revisar' pasa a 'En revisión' (versión 1)", rx.find((r) => r.id === mine).status === "in_review" && rx.find((r) => r.id === mine).version === 1);
+    const stale = await admin.request.post(`${base}/api/admin/recetas/${mine}/estado`, { headers: { origin: base }, data: { to: "reviewed", expected_version: 0 } });
+    check("revisión: versión obsoleta -> 409 sin cambios", stale.status() === 409 && rx.find((r) => r.id === mine).status === "in_review", `(${stale.status()})`);
+    await hydrated(admin, "main li button");
+    await row.getByRole("button", { name: "Pedir nuevo archivo" }).click();
+    await row.getByRole("button", { name: "Enviar solicitud" }).click();
+    check("revisión: pedir archivo sin motivo se rechaza en la UI", (await row.getByRole("alert").textContent()).includes("motivo") && rx.find((r) => r.id === mine).status === "in_review");
+    await row.getByLabel("Motivo visible para la persona").fill("La foto está borrosa: no se lee el eje del ojo derecho.");
+    await row.getByRole("button", { name: "Enviar solicitud" }).click();
+    await admin.waitForFunction(() => !document.querySelector("main")?.textContent?.includes("Enviar solicitud"), null, { timeout: 8000 }).catch(() => {});
+    check("revisión: queda 'needs_new_file' con motivo", rx.find((r) => r.id === mine).status === "needs_new_file" && rx.find((r) => r.id === mine).client_message?.includes("borrosa"));
+    await admin.goto(`${base}/admin/recetas?estado=nuevo-archivo`, { waitUntil: "networkidle" });
+    check("revisión: aparece en 'Esperando nuevo archivo' con su historial", (await admin.textContent("main")).includes("Motivo enviado") && (await admin.textContent("main")).includes("Historial (2)"));
+
+    await client.goto(`${base}/mi-cuenta`, { waitUntil: "networkidle" });
+    const ctext = await client.textContent("main");
+    check("revisión: la persona ve el estado, el motivo y cómo subir un archivo nuevo", ctext.includes("Necesitamos un nuevo archivo") && ctext.includes("no se lee el eje") && (await client.getByRole("link", { name: "Subir un archivo nuevo" }).count()) === 1);
+    check("revisión: la persona no ve el historial interno", events.length >= 2 && !ctext.includes("Historial"));
+    control.rxReadDown = true;
+    const down = await client.request.post(`${base}/api/recetas`, { headers: { origin: base }, multipart: { consent: "true", replaces_id: mine, file: { name: "r.png", mimeType: "image/png", buffer: png } } });
+    control.rxReadDown = false;
+    check("reemplazo: si la base falla en la comprobación previa -> 503 (no un falso 409) y no sube nada", down.status() === 503 && !rx.some((r) => r.replaces_id === mine), `(${down.status()})`);
+    rx.find((r) => r.id === mine).quote_id = "dddddddd-dddd-4ddd-8ddd-000000000001";
+    // Reemplazo por la INTERFAZ (cableado de Codex: ?reemplazar=<id> -> replacesId en el formulario de 3 pasos)
+    await client.goto(`${base}/mi-cuenta`, { waitUntil: "networkidle" });
+    await hydrated(client, "main li a");
+    await client.getByRole("link", { name: "Subir un archivo nuevo" }).click();
+    await client.waitForURL(/reemplazar=/);
+    await hydrated(client, "#prescription-file");
+    check("reemplazo UI: el formulario indica que es un reemplazo", (await client.textContent("main")).includes("Envías un nuevo archivo para una receta que necesita corrección"));
+    const pngPath = "/tmp/e2e-reemplazo.png";
+    writeFileSync(pngPath, png);
+    await client.setInputFiles("#prescription-file", pngPath);
+    await client.getByRole("button", { name: /Continuar/ }).click();
+    await client.getByLabel("Revisé el archivo que elegí y corresponde a mi receta.").check();
+    await client.getByRole("button", { name: /Continuar/ }).click();
+    await client.getByLabel(/Autorizo al equipo de la óptica a revisar mi receta/).check();
+    await client.getByRole("button", { name: "Enviar mi receta" }).click();
+    await client.waitForFunction(() => document.querySelector("main")?.textContent?.match(/Tu receta ya está en tu cuenta|ya no está esperando/), null, { timeout: 10000 }).catch(() => {});
+    await client.waitForTimeout(1500);
+    const afterUi = await client.textContent("main");
+    check("reemplazo UI: crea la fila vinculada a la receta anterior", rx.some((r) => r.replaces_id === mine));
+    check("reemplazo UI: tras enviar se mantiene la confirmación y no aparece un aviso de error",
+      afterUi.includes("Tu receta ya está en tu cuenta") && !afterUi.includes("ya no está esperando un reemplazo"),
+      `(confirmación=${afterUi.includes("Tu receta ya está en tu cuenta")}, aviso=${afterUi.includes("ya no está esperando un reemplazo")}, url=${client.url().replace(base, "")})`);
+    const repl = { status: () => (rx.some((r) => r.replaces_id === mine) ? 201 : 0), json: async () => ({ id: rx.find((r) => r.replaces_id === mine)?.id }) };
+    const repl2 = await client.request.post(`${base}/api/recetas`, { headers: { origin: base }, multipart: { consent: "true", replaces_id: mine, file: { name: "r.png", mimeType: "image/png", buffer: png } } });
+    const newId = (await repl.json()).id;
+    check("revisión: reemplazo aceptado una sola vez", repl.status() === 201 && rx.find((r) => r.id === newId)?.replaces_id === mine && repl2.status() === 409, `(${repl.status()}/${repl2.status()})`);
+    check("reemplazo: hereda la cotización de la receta original", rx.find((r) => r.id === newId)?.quote_id === "dddddddd-dddd-4ddd-8ddd-000000000001");
+    // Carrera: la comprobación previa no ve el reemplazo ya insertado; el índice único lo rechaza.
+    control.hidePrecheck = true;
+    const removedBefore = removed.length;
+    const race = await client.request.post(`${base}/api/recetas`, { headers: { origin: base }, multipart: { consent: "true", replaces_id: mine, file: { name: "r.png", mimeType: "image/png", buffer: png } } });
+    control.hidePrecheck = false;
+    check("reemplazo: carrera simultánea -> 409 claro y el archivo subido se retira", race.status() === 409 && removed.length === removedBefore + 1 && rx.filter((r) => r.replaces_id === mine).length === 1, `(${race.status()}, retirados ${removed.length - removedBefore})`);
+    await client.reload({ waitUntil: "networkidle" });
+    check("revisión: tras reemplazar, la cuenta indica que ya envió el archivo", (await client.textContent("main")).includes("Ya enviaste el archivo nuevo"));
+    // Borrar la receta anterior sigue permitido, pero se advierte el contexto que se pierde (sin copias ocultas).
+    await hydrated(client, "main li button");
+    const oldRow = client.locator("main li").filter({ hasText: "Necesitamos un nuevo archivo" });
+    await oldRow.getByRole("button", { name: "Eliminar" }).click();
+    check("reemplazo: al borrar la receta anterior se advierte que se pierden motivo e historial", (await oldRow.textContent()).includes("también se borran su motivo y su historial"));
+    await oldRow.getByRole("button", { name: "Cancelar" }).click();
+    check("reemplazo: cancelar no borra la receta anterior", rx.some((r) => r.id === mine));
+
+    for (const [to, v] of [["in_review", 0], ["reviewed", 1]]) {
+      await admin.request.post(`${base}/api/admin/recetas/${newId}/estado`, { headers: { origin: base }, data: { to, expected_version: v } });
+    }
+    await client.reload({ waitUntil: "networkidle" });
+    const done = await client.textContent("main");
+    check("revisión: 'completada' aclara que no es evaluación médica ni compra", done.includes("Revisión documental completada") && /no es una evaluación médica/i.test(done) && done.includes("no valida ni corrige tu graduación"));
+    const bad = await admin.request.post(`${base}/api/admin/recetas/${newId}/estado`, { headers: { origin: base }, data: { to: "pending", expected_version: 2 } });
+    check("revisión: 'completada' es terminal (409)", bad.status() === 409);
+    const xorigin = await admin.request.post(`${base}/api/admin/recetas/${newId}/estado`, { headers: { origin: "https://evil.example" }, data: { to: "pending", expected_version: 2 } });
+    check("revisión: origen ajeno -> 403", xorigin.status() === 403);
+
+    await admin.goto(`${base}/admin/recetas`, { waitUntil: "networkidle" });
+    await admin.addScriptTag({ path: axePath });
+    const v = await admin.evaluate(async () => (await window.axe.run(document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"] } })).violations.filter((x) => x.impact === "serious" || x.impact === "critical").map((x) => x.id));
+    check("revisión: axe /admin/recetas sin violaciones serias", v.length === 0, v.join(","));
+    await client.context().close();
+    await admin.context().close();
   }
 } finally {
   await browser.close();
