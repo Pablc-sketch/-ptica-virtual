@@ -68,5 +68,18 @@ do $$ begin
  if (select count(*) from storage.objects where bucket_id='prescriptions' and name in ('71000000-0000-4000-8000-000000000001/qa-owner.pdf','71000000-0000-4000-8000-000000000002/qa-other.pdf','71000000-0000-4000-8000-000000000001/qa-new.pdf')) <> 3 then raise exception 'Admin cannot access files'; end if;
 end $$;
 reset role;
-select 'PASS: customer isolation, own upload, quote ownership, missing-file rejection, anon denial and admin review; all fixtures rolled back' as test_result;
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"71000000-0000-4000-8000-000000000001","role":"authenticated"}',true);
+select set_config('request.jwt.claim.sub','71000000-0000-4000-8000-000000000001',true);
+do $$ declare affected integer; begin
+ delete from public.prescriptions where path='71000000-0000-4000-8000-000000000002/qa-other.pdf';
+ get diagnostics affected = row_count;
+ if affected <> 0 then raise exception 'Cross-owner delete allowed'; end if;
+ delete from public.prescriptions where path='71000000-0000-4000-8000-000000000001/qa-new.pdf';
+ get diagnostics affected = row_count;
+ if affected <> 1 then raise exception 'Own prescription delete unavailable'; end if;
+end $$;
+reset role;
+select 'PASS: own deletion, cross-owner deletion denial, customer isolation, own upload, quote ownership, missing-file rejection, anon denial and admin review; all fixtures rolled back' as test_result;
 rollback;
+
