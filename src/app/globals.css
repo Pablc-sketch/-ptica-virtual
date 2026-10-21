@@ -117,6 +117,8 @@ input[type=checkbox] { accent-color:var(--olive); }
 .product-card .product-meta { padding:3px 6px; }
 .product-card h3 { font-weight:600; letter-spacing:-.035em; }
 .product-card>.btn { border-color:#dfded5; border-radius:2px; }
+.catalog-filter-toggle { display:inline-flex; }
+@media (min-width:640px) { .catalog-filter-toggle { display:none; } }
 .site-footer { margin-top:90px; background:#30332c; color:#fff; padding:55px 0 22px; }
 .footer-top { display:flex; align-items:center; justify-content:space-between; padding-bottom:40px; margin-bottom:32px; border-bottom:1px solid #ffffff26; }
 .footer-motto { font-size:clamp(27px,3.5vw,48px); line-height:1.1; letter-spacing:-.065em; font-weight:500; }
@@ -262,4 +264,3 @@ input[type=checkbox] { accent-color:var(--olive); }
  .explorer-options button { font-size:10px; }
  .measure-visual { padding:30px 24px; }
 }
-

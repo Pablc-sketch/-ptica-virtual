@@ -59,7 +59,7 @@ function CatalogControls({ products }: { products: CatalogProduct[] }) {
 
   return (
     <>
-      <button type="button" onClick={()=>setFiltersOpen(v=>!v)} aria-expanded={filtersOpen} aria-controls="catalog-filters" className="btn btn-ghost mt-4 w-full sm:hidden">{filtersOpen ? "Cerrar filtros" : filtered ? "Filtrar y ordenar · filtros activos" : "Filtrar y ordenar"}</button>
+      <button type="button" onClick={()=>setFiltersOpen(v=>!v)} aria-expanded={filtersOpen} aria-controls="catalog-filters" className="btn btn-ghost catalog-filter-toggle mt-4 w-full">{filtersOpen ? "Cerrar filtros" : filtered ? "Filtrar y ordenar · filtros activos" : "Filtrar y ordenar"}</button>
       <form
         id="catalog-filters"
         role="search"
