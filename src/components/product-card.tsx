@@ -21,7 +21,7 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
             alt={img.alt}
             fill
             priority={priority}
-            sizes="(min-width: 1024px) 25vw, 50vw"
+            sizes="(min-width: 1280px) 400px, (min-width: 1024px) 33vw, (min-width: 480px) 50vw, 100vw"
             className="object-contain transition-transform duration-500 group-hover:scale-[1.03]"
           />
         </Link>
@@ -63,3 +63,4 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
     </article>
   );
 }
+
