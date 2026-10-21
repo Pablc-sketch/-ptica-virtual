@@ -37,6 +37,8 @@ input[type=checkbox] { accent-color:var(--olive); }
 .header-actions { gap:3px; font-size:11px; }
 .header-selection { background:var(--ink); border-color:var(--ink); }
 .header-selection:hover { background:#4c5144; }
+.selection-icon { display:none; flex:none; }
+.header-count { display:inline-grid; place-items:center; flex:none; width:17px; height:17px; border-radius:50%; background:#ffffff25; color:#fff; font-size:9px; }
 .hero-shell { padding-top:28px; }
 .home-hero { display:grid; grid-template-columns:1fr 1fr; min-height:640px; background:#f1e8dc; overflow:hidden; border-radius:4px; }
 .hero-copy { position:relative; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; padding:60px 30px 60px 54px; }
@@ -143,6 +145,7 @@ input[type=checkbox] { accent-color:var(--olive); }
  .footer-top { flex-direction:column; align-items:flex-start; gap:25px; padding-bottom:30px; } .footer-grid { grid-template-columns:1fr; gap:32px; } .site-footer { margin-top:60px; padding-top:38px; } .footer-grid nav { max-width:320px; } .footer-bottom { flex-direction:column; gap:6px; }
 }
 @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } *,*::before,*::after { animation:none!important; transition:none!important; } }
+@media(max-width:359px) { .selection-icon { display:block; } .selection-label { display:none; } .header-selection { gap:6px; } }
 
 
 /* Original optical identity — orange sampled from the supplied logo: #d97756. */

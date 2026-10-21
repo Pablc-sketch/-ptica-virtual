@@ -63,8 +63,8 @@ export function SiteHeader() {
           <Link href="/mi-cuenta" className="hidden min-h-11 items-center px-2 text-muted hover:text-olive lg:flex">
             Mi cuenta
           </Link>
-          <Link href="/cotizar" className="btn header-selection !min-h-11 !px-3 sm:!px-4">
-            Selección{sel > 0 && <span className="ml-1">({sel})</span>}
+          <Link href="/cotizar" aria-label={`Selección${sel>0 ? `, ${sel} marcos` : ""}`} className="btn header-selection !min-h-11 !px-3 sm:!px-4">
+            <svg className="selection-icon" width="18" height="20" viewBox="0 0 20 22" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="M3 7h14l1 13H2L3 7Z"/><path d="M6 8V5a4 4 0 0 1 8 0v3"/></svg><span className="selection-label">Selección</span>{sel > 0 && <span className="header-count">{sel}</span>}
           </Link>
           <div ref={wrap} className="relative lg:hidden">
             <button
