@@ -65,15 +65,17 @@ async function Account({ userId, email, replacement }: { userId: string; email: 
   ]);
   const quoteOpts = (quotes ?? []).map((q) => ({ id: q.id, label: `Cotización del ${new Date(q.created_at).toLocaleDateString("es-CL")}` }));
   const replacementRow = rx?.find((r) => r.id === replacement && r.status === "needs_new_file" && !rx.some((o) => o.replaces_id === r.id));
+  const replacementReceived = !!replacement && rx?.some((r) => r.replaces_id === replacement);
   return (
     <div className="grid gap-10 lg:grid-cols-2">
       <section aria-labelledby="enviar">
         <p className="mb-4 text-sm text-muted">Sesión iniciada como <strong>{email}</strong>.</p>
         <h2 id="enviar" className="mb-3 text-2xl">Enviar mi receta</h2>
         {quotesErr && <p role="alert" className="mb-3 text-sm text-red-700">No pudimos cargar tus cotizaciones; puedes enviar la receta sin asociarla.</p>}
-        {replacement && !replacementRow && <p role="alert" className="mb-3 text-sm">Ese archivo ya no está esperando un reemplazo. Puedes enviar una receta nueva.</p>}
+        {replacement && !replacementRow && !replacementReceived && <p role="alert" className="mb-3 text-sm">Ese archivo ya no está esperando un reemplazo. Puedes enviar una receta nueva.</p>}
+        {replacementReceived && <p role="status" className="mb-3 text-sm">El archivo de reemplazo ya fue recibido. Puedes verlo en Mis recetas.</p>}
         {replacementRow && <Link href="/mi-cuenta#enviar" className="mb-3 inline-flex min-h-11 items-center underline">Cancelar reemplazo</Link>}
-        <PrescriptionUpload key={replacementRow?.id ?? "new"} quotes={quoteOpts} replacesId={replacementRow?.id} />
+        <PrescriptionUpload key={replacement ?? "new"} quotes={quoteOpts} replacesId={replacementRow?.id} />
         <form action={signOut} className="mt-6"><button className="btn btn-ghost">Cerrar sesión</button></form>
       </section>
       <section aria-labelledby="mis">
@@ -155,3 +157,4 @@ export default function MiCuentaPage({ searchParams }: PageProps<"/mi-cuenta">) 
     </main>
   );
 }
+
