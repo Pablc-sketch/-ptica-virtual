@@ -241,8 +241,8 @@ try {
         nav: document.querySelector('nav[aria-label="Principal"]').getClientRects().length > 0,
       };
     });
-    check(`${w}px: --paper #f5f6fa y fondo del body calculado`, st.paper === "#f5f6fa" && st.bodyBg === "rgb(245, 246, 250)", JSON.stringify([st.paper, st.bodyBg]));
-    check(`${w}px: botón azul #2945ed`, st.btnBg === "rgb(41, 69, 237)", st.btnBg);
+    check(`${w}px: --paper #fbf8f3 y fondo del body calculado`, st.paper === "#fbf8f3" && st.bodyBg === "rgb(251, 248, 243)", JSON.stringify([st.paper, st.bodyBg]));
+    check(`${w}px: botón naranjo oscuro #b65432`, st.btnBg === "rgb(182, 84, 50)", st.btnBg);
     check(`${w}px: contenedor = min(1240, viewport-40)`, st.container === Math.min(1240, w - 40), `(${st.container})`);
     check(`${w}px: CSS servido contiene .container-page, .btn y :root`, st.inCSSOM);
     check(`${w}px: encabezado dentro del contenedor y sin solapes (holgura ≥ 4px)`, st.hdrRight <= w - 20 + 1 && st.gaps.every((g) => g >= 4), `(derecha=${Math.round(st.hdrRight)} máx=${w - 20}, huecos=${st.gaps.map(Math.round)})`);

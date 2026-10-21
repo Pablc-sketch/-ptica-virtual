@@ -8,7 +8,8 @@ const manrope = Manrope({ subsets: ["latin"], variable: "--font-global", display
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
-  title: { default: "Óptica Global — Tu forma de ver", template: "%s · Óptica Global" },
+  icons: { icon: "/brand/logo-original.png" },
+  title: { default: "Óptica Global — Visión sin fronteras", template: "%s · Óptica Global" },
   description:
     "Catálogo de marcos ópticos con fotografías reales y, cuando existe, vista 3D verificada. Cotiza el marco y revisa tu receta con nosotros.",
 };

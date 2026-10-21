@@ -16,10 +16,10 @@ export default function PrivacidadPage() {
         <section>
           <h2 className="mb-2 text-2xl">Navegar sin cuenta</h2>
           <p className="text-muted">
-            Puedes ver el catálogo sin registrarte. Tus <strong>favoritos y tu selección</strong> se guardan en tu navegador
+            Puedes ver el catálogo sin registrarte. Tus <strong>favoritos, tu selección y la lista del comparador</strong> se guardan en tu navegador
             (almacenamiento local) y no se asocian a ti ni se guardan en nuestro servidor. Al abrir “Tu selección”, tu navegador
             consulta al servidor los datos y precios vigentes de los marcos elegidos (envía solo sus identificadores, sin tus datos
-            personales). Tu selección solo se guarda en el servidor cuando envías una cotización.
+            personales). La comparación usa datos del catálogo público y guarda solo identificadores de marcos en este dispositivo. Puedes vaciarla desde el comparador. Tu selección solo se guarda en el servidor cuando envías una cotización.
           </p>
         </section>
         <section>

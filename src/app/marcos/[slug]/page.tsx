@@ -6,6 +6,7 @@ import { getPublishedProduct } from "@/lib/catalog";
 import { clp } from "@/lib/format";
 import { ProductGallery } from "@/components/product-gallery";
 import { SelectionButtons } from "@/components/selection-button";
+import { CompareButton } from "@/components/compare-button";
 
 export async function generateMetadata({ params }: PageProps<"/marcos/[slug]">): Promise<Metadata> {
   const { slug } = await params;
@@ -55,6 +56,7 @@ async function Detail({ params }: { params: PageProps<"/marcos/[slug]">["params"
           ))}
         </dl>
         <SelectionButtons id={p.id} />
+        <CompareButton id={p.id}/>
         <p className="mt-6 text-sm text-muted">
           La selección no es una compra: revisamos tu receta contigo y confirmamos el total antes de cualquier pago.{" "}
           <Link href="/como-funciona" className="underline">Cómo funciona</Link>

@@ -1,3 +1,7 @@
+// Both views display the unmodified original logo; only its transparent margins are framed.
 export function Brand() {
-  return <span className="brand-mark"><svg className="brand-orbit" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="16" r="13" stroke="currentColor" strokeWidth="1.7"/><ellipse cx="16" cy="16" rx="6" ry="13" stroke="currentColor" strokeWidth="1.5" transform="rotate(32 16 16)"/><path d="M3 16h26" stroke="currentColor" strokeWidth="1.5"/></svg><span className="brand-word">ÓPTICA<br />GLOBAL</span></span>;
+  return <span className="brand-mark">
+    <svg className="brand-symbol" viewBox="136 174 350 160" aria-hidden="true"><image href="/brand/logo-original.png" width="640" height="640" /></svg>
+    <span className="brand-lockup"><svg className="brand-wordmark" viewBox="55 434 525 60" role="img" aria-label="Óptica Global"><image href="/brand/logo-original.png" width="640" height="640" /></svg><span className="brand-tagline">Visión sin fronteras</span></span>
+  </span>;
 }

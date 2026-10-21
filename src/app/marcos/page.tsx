@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getPublishedProducts } from "@/lib/catalog";
 import { CatalogClient } from "@/components/catalog-client";
+import { ComparisonBar } from "@/components/comparison-bar";
 
 export const metadata: Metadata = {
   title: "Marcos",
@@ -33,6 +34,7 @@ export default function MarcosPage() {
       <Suspense fallback={<p className="text-muted" role="status">Cargando marcos…</p>}>
         <CatalogLoader />
       </Suspense>
+      <ComparisonBar/>
     </main>
   );
 }

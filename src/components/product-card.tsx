@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { CatalogProduct } from "@/lib/catalog-types";
 import { clp } from "@/lib/format";
+import { CompareButton } from "@/components/compare-button";
 import { toggleFavorite, toggleSelection, useFavorites, useSelection } from "@/lib/local-store";
 
 export function ProductCard({ p, priority = false }: { p: CatalogProduct; priority?: boolean }) {
@@ -56,6 +57,7 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
       >
         {inSel ? "En tu selección ✓" : "Agregar a selección"}
       </button>
+      <CompareButton id={p.id}/>
     </article>
   );
 }

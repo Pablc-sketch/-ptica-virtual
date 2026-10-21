@@ -8,6 +8,7 @@ import { useFavorites, useSelection } from "@/lib/local-store";
 const NAV = [
   { href: "/marcos", label: "Marcos" },
   { href: "/cristales", label: "Cristales" },
+  { href: "/comparar", label: "Comparar" },
   { href: "/como-funciona", label: "Cómo funciona" },
   { href: "/ayuda", label: "Ayuda" },
 ];
