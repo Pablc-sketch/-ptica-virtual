@@ -30,6 +30,9 @@ export function SiteHeader() {
           <Link href="/marcos?favoritos=1" className="hidden min-h-11 items-center px-2 hover:text-olive sm:flex">
             Favoritos{favs > 0 && <span className="ml-1 text-muted">({favs})</span>}
           </Link>
+          <Link href="/mi-cuenta" className="hidden min-h-11 items-center px-2 text-muted hover:text-olive lg:flex">
+            Mi cuenta
+          </Link>
           <Link href="/cotizar" className="btn !min-h-11 !px-4">
             Selección{sel > 0 && <span className="ml-1">({sel})</span>}
           </Link>
@@ -49,6 +52,7 @@ export function SiteHeader() {
                   {n.label}
                 </Link>
               ))}
+              <Link href="/mi-cuenta" className="flex min-h-11 items-center px-3 hover:bg-sage">Mi cuenta</Link>
               <Link href="/marcos?favoritos=1" className="flex min-h-11 items-center px-3 hover:bg-sage sm:hidden">
                 Favoritos{favs > 0 && <span className="ml-1 text-muted">({favs})</span>}
               </Link>

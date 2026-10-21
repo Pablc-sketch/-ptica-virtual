@@ -16,6 +16,8 @@ export function SiteFooter() {
           <Link href="/cristales">Cristales</Link>
           <Link href="/como-funciona">Cómo funciona</Link>
           <Link href="/ayuda">Ayuda</Link>
+          <Link href="/privacidad">Privacidad (borrador)</Link>
+          <Link href="/mi-cuenta">Mi cuenta</Link>
         </nav>
         <p className="text-muted">
           Las imágenes marcadas como “conceptual” son ilustrativas y no representan un producto a la

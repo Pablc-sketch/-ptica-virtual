@@ -14,11 +14,14 @@ const env = {
   NEXT_DIST_DIR: ".next-e2e",
 };
 const results = [];
+// Espera a que React hidrate un elemento antes de interactuar (evita actuar sobre HTML aún inerte).
+const hydrated = (page, sel) =>
+  page.waitForFunction((q) => { const el = document.querySelector(q); return el && Object.keys(el).some((k) => k.startsWith("__reactProps")); }, sel, { timeout: 15000 });
 const check = (name, ok, extra = "") => { results.push({ name, ok }); console.log(`${ok ? "OK  " : "FAIL"} ${name} ${extra}`); };
 
 execSync("npx next build", { env, stdio: "ignore" });
 const mock = await startMock(MOCK);
-const app = spawn("npx", ["next", "start", "-p", String(APP)], { env, stdio: "ignore" });
+const app = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "-p", String(APP)], { env, stdio: "ignore" });
 await new Promise((r) => setTimeout(r, 6000));
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH ?? "/opt/pw-browsers/chromium", args: ["--no-sandbox", "--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
@@ -30,6 +33,7 @@ try {
     const noOverflow = async (p) => !(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1));
 
     await page.goto(`${base}/marcos`, { waitUntil: "networkidle" });
+    await hydrated(page, "#q");
     check(`${label}: catálogo muestra 3 marcos`, (await page.locator("article").count()) === 3);
     check(`${label}: catálogo sin desborde`, await noOverflow());
     check(`${label}: precio rotulado "solo marco"`, (await page.locator("article").first().textContent()).includes("solo marco"));
@@ -44,6 +48,7 @@ try {
 
     await page.getByRole("button", { name: /Guardar Ámbar en favoritos/ }).click();
     await page.reload({ waitUntil: "networkidle" });
+    await hydrated(page, "#q");
     check(`${label}: favorito persiste tras recargar`, await page.getByRole("button", { name: /Quitar Ámbar de favoritos/ }).count() === 1);
     await page.getByLabel("Solo favoritos").check();
     check(`${label}: solo favoritos -> 1`, (await page.locator("article").count()) === 1);
@@ -53,6 +58,7 @@ try {
     check(`${label}: selección actualiza contador del header`, (await page.locator("header").textContent()).includes("Selección(1)"));
 
     await page.goto(`${base}/marcos/ambar`, { waitUntil: "networkidle" });
+    await hydrated(page, "main button");
     const main = await page.textContent("main");
     check(`${label}: ficha con medidas y "solo el marco"`, main.includes("48 mm") && main.includes("solo el marco"));
     check(`${label}: ficha sin desborde`, await noOverflow());
@@ -70,6 +76,7 @@ try {
     check(`${label}: slug inexistente -> página 404 propia con noindex`, nf.status() >= 200 && (await page.textContent("main")).includes("No encontramos esa página") && robots.includes("noindex"));
 
     await page.goto(`${base}/cotizar`, { waitUntil: "networkidle" });
+    await hydrated(page, 'input[type="number"]');
     check(`${label}: cotizar lista la selección con total`, (await page.textContent("main")).includes("Basalto"));
     await page.fill('input[type="number"]', "2");
     check(`${label}: total refleja cantidad (2 × $50.000)`, (await page.textContent("main")).replace(/\s/g, " ").includes("100.000"));

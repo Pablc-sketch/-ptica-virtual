@@ -128,7 +128,7 @@ export function QuoteForm({ open }: { open: boolean }) {
             <label>Comentarios<textarea name="notes" maxLength={2000} className="field mt-1" /></label>
             <label className="flex items-start gap-2 text-sm">
               <input type="checkbox" name="consent" required className="mt-1 h-5 w-5 accent-[#424d3b]" />
-              Acepto que usen mis datos para responder esta cotización.
+              <span>Acepto que usen mis datos para responder esta cotización. Leí el <Link href="/privacidad" className="underline">aviso de privacidad (borrador)</Link>.</span>
             </label>
             {state === "error" && <p role="alert" className="text-sm text-red-700">{message}</p>}
             <button className="btn" disabled={state === "sending" || lines === null}>{state === "sending" ? "Enviando…" : "Enviar cotización"}</button>
