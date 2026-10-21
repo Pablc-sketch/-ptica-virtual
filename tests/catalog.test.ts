@@ -39,6 +39,16 @@ describe("filterProducts", () => {
 });
 
 describe("adapt (DB -> UI)", () => {
+  it("las muestras muestran el retoque identificado, sin exponer SKU ni metadatos privados",async()=>{
+    const {adapt}=await import('../src/lib/catalog-adapt');
+    const row={id:'trial',slug:'trial',name:'Muestra',sku:'PRIVATE-PURCHASE-CODE',description:null,price_clp:null,pair_base_price_clp:28000,is_sample:true,frame_shape:null,material:null,color:null,gender:null,lens_width_mm:null,bridge_mm:null,temple_mm:null,brands:null,product_models:null,product_images:[{path:'site/products/ambar.webp',alt:'Imagen retocada',position:0,verified:false,kind:'retouched'}],supplier_code:'PRIVATE-PURCHASE-CODE'};
+    const p=adapt(row);
+    expect(p.images[0].url).toBe('/products/ambar.webp');
+    expect(p.priceClp).toBeNull();
+    expect(p.pairBasePriceClp).toBe(28000);
+    expect(JSON.stringify(p)).not.toContain('PRIVATE-PURCHASE-CODE');
+    expect(adapt({...row,is_sample:false}).images).toEqual([]);
+  });
   it("solo expone fotos verificadas y 3D verificado, nunca drafts de media", async () => {
     const { adapt } = await import("../src/lib/catalog-adapt");
     const p = adapt({

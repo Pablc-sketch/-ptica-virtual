@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { clearSelection, setQuantity, toggleSelection, useSelection } from "@/lib/local-store";
 import { clp } from "@/lib/format";
+import { productPrice } from "@/lib/product-price";
 import { FrameOutline } from "@/components/frame-outline";
 
-type Line = { id: string; name: string; price_clp: number };
+type Line = { id: string; name: string; price_clp: number | null; pair_base_price_clp?: number | null; is_sample?: boolean };
 
 export function QuoteForm({ open }: { open: boolean }) {
   const selection = useSelection();
@@ -23,7 +24,7 @@ export function QuoteForm({ open }: { open: boolean }) {
     (async () => {
       try {
         const { createClient } = await import("@/lib/supabase/client");
-        const { data, error } = await createClient().from("products").select("id, name, price_clp").in("id", ids.split(","));
+        const { data, error } = await createClient().from("products").select("id, name, price_clp, pair_base_price_clp, is_sample").in("id", ids.split(","));
         if (cancelled) return;
         if (error) setLoadError(true);
         else setLines(data ?? []);
@@ -37,10 +38,14 @@ export function QuoteForm({ open }: { open: boolean }) {
   }, [ids]);
 
   const byId = new Map((lines ?? []).map((l) => [l.id, l]));
-  const total = selection.reduce((acc, s) => acc + (byId.get(s.id)?.price_clp ?? 0) * s.quantity, 0);
+  const pricing = (l: Line) => productPrice({priceClp:l.price_clp,pairBasePriceClp:l.pair_base_price_clp});
+  const complete = !loadError && selection.every(s=>{const l=byId.get(s.id);return l && pricing(l).amount !== null;});
+  const total = complete ? selection.reduce((acc,s)=>acc+pricing(byId.get(s.id)!).amount!*s.quantity,0) : null;
+  const canSubmit = complete && selection.every(s=>{const l=byId.get(s.id);return l && !l.is_sample && l.price_clp !== null && l.price_clp>0;});
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!open || !canSubmit || state === "sending") return;
     const f = new FormData(e.currentTarget);
     setState("sending");
     setMessage("");
@@ -106,14 +111,14 @@ export function QuoteForm({ open }: { open: boolean }) {
                   Cant.
                   <input type="number" min={1} max={10} value={s.quantity} onChange={(e) => setQuantity(s.id, Number(e.target.value))} className="field !w-16" />
                 </label>
-                <span className="w-28 text-right">{l ? clp(l.price_clp * s.quantity) : "—"}</span>
+                <span className="w-32 text-right text-sm">{l && pricing(l).amount !== null ? <>{clp(pricing(l).amount! * s.quantity)}<small className="block text-muted">{pricing(l).label}</small></> : "Por confirmar"}</span>
                 <button type="button" onClick={() => toggleSelection(s.id)} className="min-h-11 px-2 text-sm underline">Quitar</button>
               </li>
             );
           })}
         </ul>
-        <p className="mt-4 flex justify-between text-lg"><span>Total referencial de marcos</span><span>{clp(total)}</span></p>
-        <p className="mt-1 text-sm text-muted">El precio de los cristales y la entrega se confirma contigo después de revisar tu receta.</p>
+        <p className="mt-4 flex justify-between text-lg"><span>Total inicial de selección</span><span>{total === null ? "Por confirmar" : clp(total)}</span></p>
+        <p className="mt-1 text-sm text-muted">La graduación, los tratamientos y la entrega se confirman después de revisar tu receta. Las muestras necesitan comprobar disponibilidad y detalles antes de cotizar.</p>
       </section>
 
       <section aria-labelledby="datos">
@@ -135,7 +140,8 @@ export function QuoteForm({ open }: { open: boolean }) {
               <span>Acepto que usen mis datos para responder esta cotización. Leí el <Link href="/privacidad" className="underline">aviso de privacidad (borrador)</Link>.</span>
             </label>
             {state === "error" && <p role="alert" className="text-sm text-red-700">{message}</p>}
-            <button className="btn" disabled={state === "sending" || lines === null}>{state === "sending" ? "Enviando…" : "Enviar cotización"}</button>
+            {!canSubmit && lines !== null && <p role="status" className="text-sm">Esta selección necesita comprobar precio o disponibilidad antes del envío.</p>}
+            <button className="btn" disabled={state === "sending" || !canSubmit}>{state === "sending" ? "Enviando…" : "Enviar cotización"}</button>
           </form>
         )}
       </section>

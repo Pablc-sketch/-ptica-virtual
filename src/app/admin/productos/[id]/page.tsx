@@ -6,7 +6,7 @@ import { AdminNav } from "@/components/admin-nav";
 import { MediaUploader } from "@/components/media-uploader";
 import { MediaRowActions } from "@/components/media-row-actions";
 import { publicStorageUrl } from "@/lib/catalog";
-import { setProductStatus, updateProduct } from "@/app/admin/actions";
+import { setProductStatus, updateProduct, updateProcurement } from "@/app/admin/actions";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -17,10 +17,11 @@ async function Editor({ params, searchParams }: { params: Promise<{ id: string }
   if (!UUID.test(id)) notFound();
   const { data: p } = await supabase
     .from("products")
-    .select("*, brands(name), product_images(id, path, alt, position, verified), product_models(glb_path, verified, size_bytes)")
+    .select("*, brands(name), product_images(id, path, alt, position, verified, kind), product_models(glb_path, verified, size_bytes)")
     .eq("id", id)
     .maybeSingle();
   if (!p) notFound();
+  const {data:procurement,error:procurementError}=await supabase.from("product_procurement").select("supplier_code,color_code,supplier_name,confirmed,notes").eq("product_id",id).maybeSingle();
   const brand = Array.isArray(p.brands) ? p.brands[0] : p.brands;
   const model = Array.isArray(p.product_models) ? p.product_models[0] : p.product_models;
   const images = [...(p.product_images ?? [])].sort((a, b) => a.position - b.position);
@@ -35,9 +36,11 @@ async function Editor({ params, searchParams }: { params: Promise<{ id: string }
         {ok && <p role="status" className="mb-3 border border-line bg-sage/50 p-3">{ok}</p>}
         <form action={updateProduct.bind(null, id)} className="flex flex-col gap-3">
           <label>Nombre<input name="name" defaultValue={p.name} required maxLength={120} className="field mt-1" /></label>
-          <label>Código real / SKU<input name="sku" defaultValue={p.sku ?? ""} required maxLength={80} className="field mt-1" /></label>
+          <label>Identificador de tienda<input name="sku" defaultValue={p.sku ?? ""} required maxLength={80} className="field mt-1" /></label>
           <label>Marca<input name="brand" defaultValue={brand?.name ?? ""} maxLength={80} className="field mt-1" /></label>
-          <label>Precio del marco (CLP)<input name="price_clp" type="number" min={0} step={1} defaultValue={p.price_clp} required className="field mt-1" /></label>
+          <label>Solo marco (CLP, vacío si falta confirmar)<input name="price_clp" type="number" min={1} step={1} defaultValue={p.price_clp ?? ""} className="field mt-1" /></label>
+          <label>Par con cristal blanco, desde (CLP)<input name="pair_base_price_clp" type="number" min={1} step={1} defaultValue={p.pair_base_price_clp ?? ""} className="field mt-1" /></label>
+          <label className="flex items-start gap-3 text-sm"><input type="checkbox" name="is_sample" defaultChecked={p.is_sample} className="h-5 w-5"/>Mostrar como muestra: imagen retocada y disponibilidad por confirmar. No habilita venta.</label>
           <label>Descripción<textarea name="description" defaultValue={p.description ?? ""} maxLength={2000} className="field mt-1" /></label>
           <div className="grid grid-cols-2 gap-3">
             <label>Forma<input name="frame_shape" defaultValue={p.frame_shape ?? ""} className="field mt-1" /></label>
@@ -51,9 +54,11 @@ async function Editor({ params, searchParams }: { params: Promise<{ id: string }
           <button className="btn self-start">Guardar datos</button>
         </form>
 
+        <section className="mt-10 border-t border-line pt-6" aria-labelledby="abastecimiento"><h2 id="abastecimiento" className="text-2xl">Referencia privada del proveedor</h2><p className="my-3 text-sm text-muted">Solo administración. Este código no aparece en el catálogo ni se envía al cliente.</p>{procurementError ? <p role="alert">No se pudo cargar la referencia privada.</p> : <form action={updateProcurement.bind(null,id)} className="flex flex-col gap-3"><label>Proveedor<input name="supplier_name" defaultValue={procurement?.supplier_name??""} maxLength={120} className="field mt-1"/></label><label>Código de compra<input name="supplier_code" defaultValue={procurement?.supplier_code??""} required maxLength={80} className="field mt-1"/></label><label>Variante / color del proveedor<input name="color_code" defaultValue={procurement?.color_code??""} maxLength={80} className="field mt-1"/></label><label>Notas internas<textarea name="procurement_notes" defaultValue={procurement?.notes??""} maxLength={1000} className="field mt-1"/></label><label className="flex gap-3 text-sm"><input name="procurement_confirmed" type="checkbox" defaultChecked={procurement?.confirmed} className="h-5 w-5"/>Código comprobado</label><button className="btn self-start">Guardar referencia privada</button></form>}</section>
+
         <h2 className="mb-2 mt-10 text-2xl">Publicación</h2>
         <p className="mb-3 text-sm text-muted">
-          Estado actual: <strong>{p.status === "published" ? "Publicado" : p.status === "archived" ? "Archivado" : "Borrador"}</strong>.
+          Estado actual: <strong>{p.is_sample ? "Muestra de catálogo" : p.status === "published" ? "Publicado" : p.status === "archived" ? "Archivado" : "Borrador"}</strong>.
           Para publicar se exige código real, precio mayor a 0 y al menos una foto verificada
           {canPublish ? " (cumplido)." : " (aún no se cumple)."}
         </p>
@@ -80,8 +85,8 @@ async function Editor({ params, searchParams }: { params: Promise<{ id: string }
                   <Image src={publicStorageUrl("product-images", i.path)} alt={i.alt ?? ""} fill sizes="96px" className="object-cover" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm">{i.verified ? "✓ Verificada" : "Sin verificar"}</p>
-                  <MediaRowActions kind="image" productId={id} imageId={i.id} verified={i.verified} />
+                  <p className="text-sm">{i.kind === "retouched" ? "Imagen retocada · muestra" : i.verified ? "✓ Verificada" : "Sin verificar"}</p>
+                  {i.kind !== "retouched" && <MediaRowActions kind="image" productId={id} imageId={i.id} verified={i.verified} />}
                 </div>
               </li>
             ))}

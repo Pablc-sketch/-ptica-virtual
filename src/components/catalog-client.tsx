@@ -18,6 +18,7 @@ function CatalogControls({ products }: { products: CatalogProduct[] }) {
   const params = useSearchParams();
   const favs = useFavorites();
   const [q, setQ] = useState("");
+  const [filtersOpen,setFiltersOpen]=useState(false);
   const requestedShape = params.get("forma");
   const shapeAliases: Record<string, string[]> = { rectangular: ["rectangular", "rectangulares"], round: ["redondo", "redondos", "round"], "cat-eye": ["cat eye", "cat-eye", "cateye"] };
   const initialShape = products.find(p => p.frameShape && (shapeAliases[requestedShape ?? ""] ?? []).includes(p.frameShape.toLowerCase()))?.frameShape ?? "";
@@ -58,11 +59,13 @@ function CatalogControls({ products }: { products: CatalogProduct[] }) {
 
   return (
     <>
+      <button type="button" onClick={()=>setFiltersOpen(v=>!v)} aria-expanded={filtersOpen} aria-controls="catalog-filters" className="btn btn-ghost mt-4 w-full sm:hidden">{filtersOpen ? "Cerrar filtros" : filtered ? "Filtrar y ordenar · filtros activos" : "Filtrar y ordenar"}</button>
       <form
+        id="catalog-filters"
         role="search"
         aria-label="Filtrar marcos"
         onSubmit={(e) => e.preventDefault()}
-        className="catalog-filter grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto]"
+        className={`catalog-filter ${filtersOpen ? "grid" : "hidden"} gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto]`}
       >
         <label className="sr-only" htmlFor="q">Buscar</label>
         <input id="q" className="field" type="search" placeholder="Buscar por nombre, color, material…" value={q} onChange={(e) => setQ(e.target.value)} />
@@ -80,7 +83,7 @@ function CatalogControls({ products }: { products: CatalogProduct[] }) {
         <select id="sort" className="field" value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
           <option value="recomendado">Recomendados</option>
           <option value="nombre">Nombre</option>
-          <option value="precio">Precio del marco</option>
+          <option value="precio">Precio inicial</option>
         </select>
         <label className="flex min-h-11 items-center gap-2 px-1">
           <input type="checkbox" checked={onlyFavs} onChange={(e) => setOnlyFavs(e.target.checked)} className="h-5 w-5 accent-olive" />
@@ -104,7 +107,7 @@ function CatalogControls({ products }: { products: CatalogProduct[] }) {
           <button type="button" onClick={clear} className="btn btn-ghost mt-4">Limpiar filtros</button>
         </div>
       ) : (
-        <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-4">
+        <div className="mt-6 grid grid-cols-1 gap-x-5 gap-y-8 min-[480px]:grid-cols-2 lg:grid-cols-3">
           {result.map((p, i) => <ProductCard key={p.id} p={p} priority={i < 4} />)}
         </div>
       )}

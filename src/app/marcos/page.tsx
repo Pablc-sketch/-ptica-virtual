@@ -6,7 +6,7 @@ import { ComparisonBar } from "@/components/comparison-bar";
 
 export const metadata: Metadata = {
   title: "Marcos",
-  description: "Catálogo de marcos con fotografías reales, medidas y precio del marco.",
+  description: "Marcos de Óptica Global: formas, colores, medidas y opciones de cristales.",
 };
 
 async function CatalogLoader() {
@@ -30,7 +30,7 @@ async function CatalogLoader() {
 export default function MarcosPage() {
   return (
     <main className="container-page">
-      <div className="page-heading"><div><p className="eyebrow">Encuentra tu próxima mirada</p><h1>Los marcos.</h1></div><p className="heading-note">Elige por forma, material o por ese algo que te hace mirarlo dos veces. El precio es solo del marco; los cristales se cotizan aparte.</p></div>
+      <div className="page-heading"><div><p className="eyebrow">Encuentra tu próxima mirada</p><h1>Los marcos.</h1></div><p className="heading-note">Una forma, un color, tu manera de mirar. Elige tu marco y revisa las opciones para tu receta.</p></div>
       <Suspense fallback={<p className="text-muted" role="status">Cargando marcos…</p>}>
         <CatalogLoader />
       </Suspense>

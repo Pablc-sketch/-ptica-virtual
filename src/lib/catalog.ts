@@ -6,8 +6,8 @@ export { publicStorageUrl } from "@/lib/catalog-adapt";
 export type { CatalogImage, CatalogProduct } from "@/lib/catalog-types";
 
 const SELECT =
-  "id, slug, name, sku, description, price_clp, frame_shape, material, color, gender, lens_width_mm, bridge_mm, temple_mm, " +
-  "brands(name), product_images(path, alt, position, verified), product_models(glb_path, verified)";
+  "id, slug, name, description, price_clp, pair_base_price_clp, is_sample, frame_shape, material, color, gender, lens_width_mm, bridge_mm, temple_mm, " +
+  "brands(name), product_images(path, alt, position, verified, kind), product_models(glb_path, verified)";
 
 export async function getPublishedProducts(): Promise<CatalogProduct[]> {
   const supabase = await createClient();

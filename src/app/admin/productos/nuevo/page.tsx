@@ -10,8 +10,8 @@ async function Form({ searchParams }: { searchParams: Promise<{ error?: string }
     <form action={createProduct} className="flex max-w-lg flex-col gap-3">
       {error && <p role="alert" className="text-red-700">{error}</p>}
       <label>Nombre<input name="name" required maxLength={120} className="field mt-1" /></label>
-      <label>Código real / SKU<input name="sku" required maxLength={80} className="field mt-1" /></label>
-      <label>Precio del marco (CLP)<input name="price_clp" type="number" min={0} step={1} required className="field mt-1" /></label>
+      <label>Identificador de tienda<input name="sku" required maxLength={80} className="field mt-1" /></label>
+      <label>Solo marco (CLP, opcional)<input name="price_clp" type="number" min={1} step={1} className="field mt-1" /></label>
       <p className="text-sm text-muted">Se crea como borrador. Para publicar necesita código real, una foto verificada y precio mayor a 0.</p>
       <button className="btn self-start">Crear borrador</button>
     </form>

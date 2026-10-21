@@ -1,4 +1,5 @@
 import type { CatalogProduct } from "@/lib/catalog-types";
+import { productPrice } from "./product-price";
 
 export type Sort = "recomendado" | "nombre" | "precio";
 export type Filters = { q: string; shape: string; material: string; onlyFavs: boolean; sort: Sort };
@@ -15,7 +16,7 @@ export function filterProducts(products: CatalogProduct[], f: Filters, favs: str
       (!f.onlyFavs || favs.includes(p.id)),
   );
   if (f.sort === "nombre") list.sort((a, b) => a.name.localeCompare(b.name, "es"));
-  if (f.sort === "precio") list.sort((a, b) => a.priceClp - b.priceClp);
+  if (f.sort === "precio") list.sort((a, b) => (productPrice(a).amount ?? Infinity) - (productPrice(b).amount ?? Infinity));
   return list;
 }
 

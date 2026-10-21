@@ -6,7 +6,9 @@ export type CatalogProduct = {
   sku: string | null;
   brand: string | null;
   description: string | null;
-  priceClp: number;
+  priceClp: number | null;
+  pairBasePriceClp?: number | null;
+  isSample?: boolean;
   frameShape: string | null;
   material: string | null;
   color: string | null;

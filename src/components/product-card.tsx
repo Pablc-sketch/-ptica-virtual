@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { CatalogProduct } from "@/lib/catalog-types";
-import { clp } from "@/lib/format";
+import { productPrice } from "@/lib/product-price";
 import { CompareButton } from "@/components/compare-button";
 import { toggleFavorite, toggleSelection, useFavorites, useSelection } from "@/lib/local-store";
 
@@ -11,9 +11,10 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
   const isFav = useFavorites().includes(p.id);
   const inSel = useSelection().some((x) => x.id === p.id);
   const img = p.images[0];
+  const price = productPrice(p);
   return (
     <article className="product-card group flex flex-col">
-      <div className="product-image relative aspect-square overflow-hidden">
+      <div className="product-image relative aspect-[4/3] overflow-hidden !bg-white">
         <Link href={`/marcos/${p.slug}`} aria-label={`Ver ${p.name}`}>
           <Image
             src={img.url}
@@ -21,7 +22,7 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
             fill
             priority={priority}
             sizes="(min-width: 1024px) 25vw, 50vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            className="object-contain transition-transform duration-500 group-hover:scale-[1.03]"
           />
         </Link>
         <button
@@ -36,19 +37,20 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
           </svg>
         </button>
       </div>
-      <div className="product-meta mt-3 flex items-start justify-between gap-2">
+      <div className="product-meta mt-3">
         <div className="min-w-0">
           {p.brand && <p className="eyebrow">{p.brand}</p>}
           <h3 className="truncate text-lg">
             <Link href={`/marcos/${p.slug}`}>{p.name}</Link>
           </h3>
-          <p className="text-sm text-muted">{[p.frameShape, p.material, p.color].filter(Boolean).join(" · ")}</p>
+          <p className="text-xs text-muted">{[p.frameShape, p.color].filter(Boolean).join(" · ")}</p>
         </div>
-        <p className="whitespace-nowrap text-sm">
-          {clp(p.priceClp)}
-          <span className="block text-right text-[11px] text-muted">solo marco</span>
+        <p className="mt-3 text-sm">
+          {price.text}
+          <span className="block text-[11px] text-muted">{price.label}</span>
         </p>
       </div>
+      {p.isSample && <p className="mt-2 text-[11px] text-muted">Imagen retocada · disponibilidad por confirmar</p>}
       <button
         type="button"
         onClick={() => toggleSelection(p.id)}

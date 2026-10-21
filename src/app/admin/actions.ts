@@ -20,15 +20,17 @@ const slugify = (s: string) =>
   s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "marco";
 
 export type ActionResult = { error?: string };
+const priceValue = (f: FormData, k: string) => { const v=text(f,k); return v === null ? null : Number(v); };
+const validPrice = (v: number | null) => v === null || (Number.isSafeInteger(v) && v > 0 && v <= 100_000_000);
 
 export async function createProduct(formData: FormData) {
   const { supabase } = await requireAdmin();
   const name = text(formData, "name");
   const sku = text(formData, "sku");
-  const price = Number(text(formData, "price_clp") ?? "");
+  const price = priceValue(formData, "price_clp");
   if (!name || name.length > 120) redirect("/admin/productos/nuevo?error=Nombre%20inv%C3%A1lido");
   if (!sku || sku.length > 80) redirect("/admin/productos/nuevo?error=C%C3%B3digo%20inv%C3%A1lido");
-  if (!Number.isInteger(price) || price < 0 || price > 100_000_000) redirect("/admin/productos/nuevo?error=Precio%20inv%C3%A1lido");
+  if (!validPrice(price)) redirect("/admin/productos/nuevo?error=Precio%20inv%C3%A1lido");
   const { data, error } = await supabase
     .from("products")
     .insert({ name, sku, price_clp: price, slug: `${slugify(name)}-${randomBytes(3).toString("hex")}`, status: "draft" })
@@ -42,12 +44,13 @@ export async function updateProduct(id: string, formData: FormData) {
   const { supabase } = await requireAdmin();
   const name = text(formData, "name");
   const sku = text(formData, "sku");
-  const price = Number(text(formData, "price_clp") ?? "");
+  const price = priceValue(formData, "price_clp");
+  const pairBase = priceValue(formData, "pair_base_price_clp");
   const dims = ["lens_width_mm", "bridge_mm", "temple_mm"].map((k) => num(formData, k));
   const back = (m: string) => redirect(`/admin/productos/${id}?error=${encodeURIComponent(m)}`);
   if (!name || name.length > 120) back("Nombre inválido");
   if (!sku || sku.length > 80) back("Indica el código real del marco (hasta 80 caracteres)");
-  if (!Number.isInteger(price) || price < 0 || price > 100_000_000) back("Precio inválido");
+  if (!validPrice(price) || !validPrice(pairBase)) back("Precio inválido: indica pesos enteros mayores a cero o deja vacío si falta confirmar");
   if (dims.some((d) => Number.isNaN(d))) back("Las medidas deben ser números en mm");
 
   let brandId: string | null = null;
@@ -67,6 +70,8 @@ export async function updateProduct(id: string, formData: FormData) {
       name: name!,
       sku,
       price_clp: price,
+      pair_base_price_clp: pairBase,
+      is_sample: formData.get("is_sample") === "on",
       brand_id: brandId,
       description: text(formData, "description"),
       frame_shape: text(formData, "frame_shape"),
@@ -81,6 +86,17 @@ export async function updateProduct(id: string, formData: FormData) {
   if (error) back("No se pudo guardar");
   revalidatePath("/marcos");
   redirect(`/admin/productos/${id}?ok=Guardado`);
+}
+
+export async function updateProcurement(id: string, formData: FormData) {
+  const {supabase}=await requireAdmin();
+  const code=text(formData,"supplier_code"), color=text(formData,"color_code"), supplier=text(formData,"supplier_name"), notes=text(formData,"procurement_notes");
+  const back=(m:string)=>redirect(`/admin/productos/${id}?error=${encodeURIComponent(m)}`);
+  if (!code || code.length>80 || (color?.length??0)>80 || (supplier?.length??0)>120 || (notes?.length??0)>1000) back("Revisa los datos privados del proveedor");
+  const {error}=await supabase.from("product_procurement").upsert({product_id:id,supplier_code:code,color_code:color,supplier_name:supplier,notes,confirmed:formData.get("procurement_confirmed")==="on"});
+  if(error) back("No se pudo guardar el código privado");
+  revalidatePath(`/admin/productos/${id}`);
+  redirect(`/admin/productos/${id}?ok=Referencia%20privada%20guardada`);
 }
 
 export async function setProductStatus(id: string, status: "draft" | "published" | "archived") {

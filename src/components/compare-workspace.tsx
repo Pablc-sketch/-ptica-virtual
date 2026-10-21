@@ -3,14 +3,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useComparison, toggleComparison, clearComparison } from "@/lib/compare-store";
-import { clp } from "@/lib/format";
+import { productPrice } from "@/lib/product-price";
 import type { CatalogProduct } from "@/lib/catalog-types";
 import { SelectionButtons } from "@/components/selection-button";
 import { FrameOutline } from "@/components/frame-outline";
 
 const mm = (value: number | null) => value == null ? "Sin informar" : `${value} mm`;
 const ROWS: [string,(p:CatalogProduct)=>string][] = [
-  ["Precio del marco",p=>clp(p.priceClp)], ["Código",p=>p.sku ?? "Sin informar"],
+  ["Precio de referencia",p=>`${productPrice(p).text} ${productPrice(p).label}`.trim()],
   ["Forma",p=>p.frameShape ?? "Sin informar"], ["Material",p=>p.material ?? "Sin informar"],
   ["Color",p=>p.color ?? "Sin informar"], ["Ancho del lente",p=>mm(p.lensWidthMm)],
   ["Puente",p=>mm(p.bridgeMm)], ["Varilla",p=>mm(p.templeMm)],
@@ -43,6 +43,6 @@ export function CompareWorkspace() {
     <div className="compare-scroll" role="region" aria-label="Tabla de comparación de marcos; puedes desplazarla horizontalmente" tabIndex={0}>
       <table className="compare-table"><caption className="sr-only">Comparación de precios, materiales y medidas reales de los marcos elegidos</caption><thead><tr><th scope="col"><span className="eyebrow">Lado a lado</span><p className="mt-3 text-xl">Encuentra<br/>la diferencia.</p></th>{selected.map(p=><th key={p.id} scope="col"><Link href={`/marcos/${p.slug}`} className="compare-product"><span className="compare-image"><Image src={p.images[0].url} alt={p.images[0].alt} fill sizes="200px" className="object-contain"/></span><span>{p.name}</span></Link><button type="button" onClick={()=>toggleComparison(p.id)} className="compare-remove" aria-label={`Quitar ${p.name} del comparador`}>Quitar</button></th>)}</tr></thead><tbody>{ROWS.map(([label,get])=><tr key={label}><th scope="row">{label}</th>{selected.map(p=><td key={p.id}>{get(p)}</td>)}</tr>)}<tr><th scope="row">Tu elección</th>{selected.map(p=><td key={p.id}><SelectionButtons id={p.id}/></td>)}</tr></tbody></table>
     </div>
-    <p className="mt-5 max-w-2xl text-sm text-muted">El precio incluye solo el marco. Los cristales y la entrega se cotizan aparte. Compara las medidas con tus lentes actuales; la tabla no garantiza el ajuste ni reemplaza la orientación de la óptica.</p>
+    <p className="mt-5 max-w-2xl text-sm text-muted">Cada precio indica si incluye cristal blanco o solo marco. La graduación, otros tratamientos y el despacho se confirman al cotizar. Las medidas orientan; no garantizan el ajuste.</p>
   </>;
 }

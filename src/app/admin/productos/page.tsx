@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { AdminNav } from "@/components/admin-nav";
-import { clp } from "@/lib/format";
+import {productPrice} from "@/lib/product-price";
 
 const LABEL: Record<string, string> = { draft: "Borrador", published: "Publicado", archived: "Archivado" };
 
@@ -10,7 +10,7 @@ async function List() {
   const { supabase } = await requireAdmin();
   const { data, error } = await supabase
     .from("products")
-    .select("id, name, price_clp, status, product_images(verified)")
+    .select("id, name, price_clp, pair_base_price_clp, is_sample, status, product_images(verified)")
     .order("created_at", { ascending: false })
     .limit(200);
   if (error) return <p role="alert" className="text-red-700">No se pudo cargar la lista.</p>;
@@ -24,7 +24,7 @@ async function List() {
             <Link href={`/admin/productos/${p.id}`} className="flex min-h-14 flex-wrap items-center justify-between gap-2 py-3 hover:bg-sage/30">
               <span>{p.name}</span>
               <span className="text-sm text-muted">
-                {clp(p.price_clp)} · {verified} foto(s) verificada(s) · {LABEL[p.status] ?? p.status}
+                {productPrice({priceClp:p.price_clp,pairBasePriceClp:p.pair_base_price_clp}).text} · {verified} foto(s) verificada(s) · {p.is_sample ? "Muestra" : LABEL[p.status] ?? p.status}
               </span>
             </Link>
           </li>

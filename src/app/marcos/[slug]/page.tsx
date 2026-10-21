@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getPublishedProduct } from "@/lib/catalog";
-import { clp } from "@/lib/format";
+import { productPrice } from "@/lib/product-price";
 import { ProductGallery } from "@/components/product-gallery";
 import { SelectionButtons } from "@/components/selection-button";
 import { CompareButton } from "@/components/compare-button";
@@ -33,7 +33,6 @@ async function Detail({ params }: { params: PageProps<"/marcos/[slug]">["params"
   }
   if (!p) notFound();
   const specs: [string, string | null][] = [
-    ["Código", p.sku],
     ["Forma", p.frameShape],
     ["Material", p.material],
     ["Color", p.color],
@@ -41,20 +40,24 @@ async function Detail({ params }: { params: PageProps<"/marcos/[slug]">["params"
     ["Puente", p.bridgeMm != null ? `${p.bridgeMm} mm` : null],
     ["Varilla", p.templeMm != null ? `${p.templeMm} mm` : null],
   ];
+  const price = productPrice(p);
   return (
     <div className="product-detail grid gap-7 md:grid-cols-2">
       <div className="min-w-0"><ProductGallery images={p.images} modelUrl={p.modelUrl} name={p.name} /></div>
       <div className="product-info min-w-0">
         {p.brand && <p className="eyebrow">{p.brand}</p>}
         <h1 className="text-[clamp(36px,5vw,60px)]">{p.name}</h1>
-        <p className="mt-4 text-2xl">{clp(p.priceClp)} <span className="text-sm text-muted">solo el marco</span></p>
-        <p className="mt-1 text-sm text-muted">Los cristales se cotizan aparte según tu receta.</p>
+        <p className="mt-4 text-2xl">{price.text}</p>
+        <p className="mt-1 text-sm text-muted">{price.label}{p.pairBasePriceClp ? ". Otros tratamientos y graduaciones se confirman al cotizar." : ". Los cristales se cotizan aparte."}</p>
+        {p.isSample && <p className="mt-3 text-xs text-muted">Imagen retocada a partir del marco fotografiado. Color y detalles sujetos a comprobación.</p>}
         {p.description && <p className="mt-6">{p.description}</p>}
-        <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-line pt-6 text-sm">
+        <details className="mt-6 border-y border-line py-4"><summary className="cursor-pointer text-sm">Detalles y medidas</summary><dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
           {specs.filter(([, v]) => v).map(([k, v]) => (
             <div key={k}><dt className="eyebrow">{k}</dt><dd>{v}</dd></div>
           ))}
-        </dl>
+        </dl></details>
+        {p.pairBasePriceClp && <div className="mt-6 grid grid-cols-3 gap-2 text-sm" aria-label="Precios iniciales del par"><div>Blanco<p className="mt-1 font-semibold">${p.pairBasePriceClp.toLocaleString("es-CL")}</p></div><div>Antirreflejo<p className="mt-1 font-semibold">${(p.pairBasePriceClp+10000).toLocaleString("es-CL")}</p></div><div>Filtro azul<p className="mt-1 font-semibold">${(p.pairBasePriceClp+20000).toLocaleString("es-CL")}</p></div></div>}
+        <Link href={`/cotizar-receta?marco=${p.slug}`} className="mt-5 inline-flex min-h-11 items-center text-sm underline">Consultar mi graduación →</Link>
         <SelectionButtons id={p.id} />
         <CompareButton id={p.id}/>
         <p className="mt-6 text-sm text-muted">
