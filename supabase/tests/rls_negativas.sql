@@ -18,9 +18,9 @@ begin
     (u1, 'u1@test.cl'), (u2, 'u2@test.cl'), (adm, 'adm@test.cl');
   update public.profiles set role = 'admin' where id = adm;
 
-  insert into public.products (id, slug, name, price_clp, status) values
-    (pub, 'pub', 'Publicado', 50000, 'draft'),
-    (drf, 'drf', 'Borrador', 40000, 'draft');
+  insert into public.products (id, slug, name, price_clp, status, sku) values
+    (pub, 'pub', 'Publicado', 50000, 'draft', 'SKU-TEST-PUB'),
+    (drf, 'drf', 'Borrador', 40000, 'draft', null);
   insert into public.product_images (product_id, path, is_primary, verified, verified_at)
     values (pub, 'x/pub.jpg', true, true, now());
   update public.products set status = 'published' where id = pub;
@@ -29,6 +29,13 @@ begin
   begin
     update public.products set status = 'published' where id = drf;
     fails := fails || 'se publicó sin foto verificada';
+  exception when others then null; end;
+
+  -- 1b. con foto verificada pero sin SKU tampoco se publica
+  insert into public.product_images (product_id, path, verified, verified_at) values (drf, 'x/drf.jpg', true, now());
+  begin
+    update public.products set status = 'published' where id = drf;
+    fails := fails || 'se publicó sin SKU';
   exception when others then null; end;
 
   -- 2. publicar con precio 0 debe fallar

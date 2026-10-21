@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import type { CatalogProduct } from "@/lib/catalog";
+import type { CatalogProduct } from "@/lib/catalog-types";
 import { clp } from "@/lib/format";
 import { toggleFavorite, toggleSelection, useFavorites, useSelection } from "@/lib/local-store";
 

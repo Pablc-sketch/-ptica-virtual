@@ -1,0 +1,18 @@
+export type CatalogImage = { url: string; alt: string };
+export type CatalogProduct = {
+  id: string;
+  slug: string;
+  name: string;
+  brand: string | null;
+  description: string | null;
+  priceClp: number;
+  frameShape: string | null;
+  material: string | null;
+  color: string | null;
+  gender: string | null;
+  lensWidthMm: number | null;
+  bridgeMm: number | null;
+  templeMm: number | null;
+  images: CatalogImage[];
+  modelUrl: string | null;
+};

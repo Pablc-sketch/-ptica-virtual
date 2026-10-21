@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
-import type { CatalogImage } from "@/lib/catalog";
+import type { CatalogImage } from "@/lib/catalog-types";
 
 // El visor 3D (three/R3F) solo se descarga cuando la persona pulsa "Vista 3D".
 const Viewer3D = dynamic(() => import("@/components/viewer3d"), {

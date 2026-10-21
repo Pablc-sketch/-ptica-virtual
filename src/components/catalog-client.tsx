@@ -3,13 +3,10 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import type { CatalogProduct } from "@/lib/catalog";
+import type { CatalogProduct } from "@/lib/catalog-types";
+import { distinct, filterProducts, type Sort } from "@/lib/catalog-filter";
 import { useFavorites } from "@/lib/local-store";
 import { ProductCard } from "@/components/product-card";
-
-type Sort = "recomendado" | "nombre" | "precio";
-
-const norm = (s: string) => s.toLocaleLowerCase("es").normalize("NFD").replace(/\p{Diacritic}/gu, "");
 
 export function CatalogClient({ products }: { products: CatalogProduct[] }) {
   const params = useSearchParams();
@@ -20,22 +17,12 @@ export function CatalogClient({ products }: { products: CatalogProduct[] }) {
   const [sort, setSort] = useState<Sort>("recomendado");
   const [onlyFavs, setOnlyFavs] = useState(params.get("favoritos") === "1");
 
-  const shapes = useMemo(() => [...new Set(products.map((p) => p.frameShape).filter(Boolean))].sort() as string[], [products]);
-  const materials = useMemo(() => [...new Set(products.map((p) => p.material).filter(Boolean))].sort() as string[], [products]);
-
-  const result = useMemo(() => {
-    const nq = norm(q.trim());
-    const list = products.filter(
-      (p) =>
-        (!nq || [p.name, p.brand, p.color, p.material, p.frameShape].some((v) => v && norm(v).includes(nq))) &&
-        (!shape || p.frameShape === shape) &&
-        (!material || p.material === material) &&
-        (!onlyFavs || favs.includes(p.id)),
-    );
-    if (sort === "nombre") list.sort((a, b) => a.name.localeCompare(b.name, "es"));
-    if (sort === "precio") list.sort((a, b) => a.priceClp - b.priceClp);
-    return list;
-  }, [products, q, shape, material, onlyFavs, favs, sort]);
+  const shapes = useMemo(() => distinct(products, "frameShape"), [products]);
+  const materials = useMemo(() => distinct(products, "material"), [products]);
+  const result = useMemo(
+    () => filterProducts(products, { q, shape, material, onlyFavs, sort }, favs),
+    [products, q, shape, material, onlyFavs, favs, sort],
+  );
 
   const filtered = Boolean(q || shape || material || onlyFavs);
   const clear = () => {
