@@ -136,23 +136,26 @@ try {
     await page.getByRole("button", { name: "Ingresar" }).click();
     await page.waitForSelector("text=Enviar mi receta");
     check(`${label}: ingreso correcto muestra la cuenta`, (await page.textContent("main")).includes("cliente@test.cl"));
-    check(`${label}: no muestra receta ni cotización ajenas (filtro de dueño)`, (await page.getByRole("button", { name: /Abrir \(enlace/ }).count()) === 0 && (await page.locator('select[name="quote_id"] option').count()) === 2, `(recetas visibles=${await page.getByRole("button", { name: /Abrir \(enlace/ }).count()}, opciones=${await page.locator('select[name="quote_id"] option').count()})`);
-    await hydrated(page, 'input[name="file"]');
+    { await page.reload({ waitUntil: "networkidle" }); const html = await page.content(); check(`${label}: no muestra receta ni cotización ajenas (filtro de dueño)`, (await page.getByRole("button", { name: /Abrir \(enlace/ }).count()) === 0 && !html.includes("dddddddd-dddd-4ddd-8ddd-000000000002") && html.includes("dddddddd-dddd-4ddd-8ddd-000000000001") && !html.includes("0000000000ff"), `(recetas visibles=${await page.getByRole("button", { name: /Abrir \(enlace/ }).count()}, ajena=${html.includes("dddddddd-dddd-4ddd-8ddd-000000000002")}, propia=${html.includes("dddddddd-dddd-4ddd-8ddd-000000000001")}, rxAjena=${html.includes("0000000000ff")})`); }
+    await hydrated(page, "#prescription-file");
     const png = "/tmp/e2e-receta.png";
     writeFileSync(png, Buffer.from("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4", "hex"));
     const txt = "/tmp/e2e-receta.txt";
     writeFileSync(txt, "no soy una receta");
     const rxBefore = rx.length;
-    await page.setInputFiles('input[name="file"]', txt);
-    await page.check('input[name="consent"]');
-    await page.getByRole("button", { name: "Enviar receta" }).click();
-    await page.waitForSelector('[role="alert"]');
-    check(`${label}: archivo no permitido se rechaza`, (await page.textContent("main")).includes("Usa JPG, PNG, WebP o PDF") && rx.length === rxBefore);
-    await page.setInputFiles('input[name="file"]', png);
-    await page.getByRole("button", { name: "Enviar receta" }).click();
-    await page.waitForSelector("text=Recibimos tu receta");
-    check(`${label}: receta válida enviada (pendiente de revisión, no confirmada)`, rx.length === rxBefore + 1 && (await page.textContent("main")).includes("no está confirmada"));
-    await page.waitForSelector("text=Pendiente de revisión por una persona");
+    // Formulario de 3 pasos de Codex (0dbb82e): elegir archivo -> comprobarlo -> autorizar y enviar.
+    await page.setInputFiles("#prescription-file", txt);
+    await page.waitForSelector("text=Ese formato no es compatible");
+    check(`${label}: archivo no permitido se rechaza`, rx.length === rxBefore && (await page.getByRole("button", { name: /Continuar/ }).isDisabled()));
+    await page.setInputFiles("#prescription-file", png);
+    await page.getByRole("button", { name: /Continuar/ }).click();
+    await page.getByLabel("Revisé el archivo que elegí y corresponde a mi receta.").check();
+    await page.getByRole("button", { name: /Continuar/ }).click();
+    await page.getByLabel(/Autorizo al equipo de la óptica a revisar mi receta/).check();
+    await page.getByRole("button", { name: "Enviar mi receta" }).click();
+    await page.waitForSelector("text=Tu receta ya está en tu cuenta.");
+    check(`${label}: receta válida enviada (pendiente de revisión, no confirmada)`, rx.length === rxBefore + 1 && (await page.textContent("main")).includes("no confirma la receta"));
+    await page.waitForSelector("main li >> text=Recibida");
     await hydrated(page, "main li button");
     await page.waitForTimeout(1000); // router.refresh() reemplaza el nodo: esperar a que se estabilice
     const [popup] = await Promise.all([page.waitForEvent("popup"), page.getByRole("button", { name: /Abrir \(enlace/ }).first().click()]);
@@ -348,13 +351,20 @@ try {
     check("reemplazo: carrera simultánea -> 409 claro y el archivo subido se retira", race.status() === 409 && removed.length === removedBefore + 1 && rx.filter((r) => r.replaces_id === mine).length === 1, `(${race.status()}, retirados ${removed.length - removedBefore})`);
     await client.reload({ waitUntil: "networkidle" });
     check("revisión: tras reemplazar, la cuenta indica que ya envió el archivo", (await client.textContent("main")).includes("Ya enviaste el archivo nuevo"));
+    // Borrar la receta anterior sigue permitido, pero se advierte el contexto que se pierde (sin copias ocultas).
+    await hydrated(client, "main li button");
+    const oldRow = client.locator("main li").filter({ hasText: "Necesitamos un nuevo archivo" });
+    await oldRow.getByRole("button", { name: "Eliminar" }).click();
+    check("reemplazo: al borrar la receta anterior se advierte que se pierden motivo e historial", (await oldRow.textContent()).includes("también se borran su motivo y su historial"));
+    await oldRow.getByRole("button", { name: "Cancelar" }).click();
+    check("reemplazo: cancelar no borra la receta anterior", rx.some((r) => r.id === mine));
 
     for (const [to, v] of [["in_review", 0], ["reviewed", 1]]) {
       await admin.request.post(`${base}/api/admin/recetas/${newId}/estado`, { headers: { origin: base }, data: { to, expected_version: v } });
     }
     await client.reload({ waitUntil: "networkidle" });
     const done = await client.textContent("main");
-    check("revisión: 'completada' aclara que no es evaluación médica ni compra", done.includes("Revisión documental completada") && done.includes("no es una evaluación médica"));
+    check("revisión: 'completada' aclara que no es evaluación médica ni compra", done.includes("Revisión documental completada") && /no es una evaluación médica/i.test(done) && done.includes("no valida ni corrige tu graduación"));
     const bad = await admin.request.post(`${base}/api/admin/recetas/${newId}/estado`, { headers: { origin: base }, data: { to: "pending", expected_version: 2 } });
     check("revisión: 'completada' es terminal (409)", bad.status() === 409);
     const xorigin = await admin.request.post(`${base}/api/admin/recetas/${newId}/estado`, { headers: { origin: "https://evil.example" }, data: { to: "pending", expected_version: 2 } });

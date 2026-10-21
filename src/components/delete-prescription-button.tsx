@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 // Confirmación en línea (no window.confirm): accesible con teclado y lector de pantalla.
-export function DeletePrescriptionButton({ id }: { id: string }) {
+export function DeletePrescriptionButton({ id, warning }: { id: string; warning?: string }) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -55,6 +55,7 @@ export function DeletePrescriptionButton({ id }: { id: string }) {
   return (
     <span role="group" aria-label="Confirmar eliminación de la receta" className="inline-flex flex-col items-start gap-1">
       <span className="text-sm">¿Eliminar esta receta definitivamente? No se puede deshacer.</span>
+      {warning && <span className="max-w-prose border-l-2 border-olive pl-2 text-sm">{warning}</span>}
       <span className="flex gap-2">
         <button ref={confirmRef} type="button" onClick={remove} disabled={busy} className="btn !min-h-11 !px-3 text-sm">
           {busy ? "Eliminando…" : "Sí, eliminar"}

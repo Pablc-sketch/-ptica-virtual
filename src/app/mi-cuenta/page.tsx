@@ -102,7 +102,15 @@ async function Account({ userId, email }: { userId: string; email: string | unde
                 </span>
                 <span className="flex flex-wrap items-start gap-2">
                   <OpenPrescriptionButton id={r.id} />
-                  <DeletePrescriptionButton id={r.id} />
+                  <DeletePrescriptionButton
+                    id={r.id}
+                    warning={rx.some((o) => o.replaces_id === r.id)
+                      // Borrar sigue permitido (privacidad); solo se avisa del contexto que se pierde. No se guardan copias del motivo.
+                      ? "Esta receta ya tiene un archivo de reemplazo. Si la eliminas, también se borran su motivo y su historial, y el equipo dejará de ver qué archivo reemplazó el nuevo."
+                      : r.replaces_id
+                        ? "Este archivo reemplaza a uno anterior. Si lo eliminas, la receta anterior volverá a esperar un archivo nuevo."
+                        : undefined}
+                  />
                 </span>
               </li>
             ))}
