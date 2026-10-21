@@ -24,12 +24,14 @@ export type ActionResult = { error?: string };
 export async function createProduct(formData: FormData) {
   const { supabase } = await requireAdmin();
   const name = text(formData, "name");
+  const sku = text(formData, "sku");
   const price = Number(text(formData, "price_clp") ?? "");
   if (!name || name.length > 120) redirect("/admin/productos/nuevo?error=Nombre%20inv%C3%A1lido");
+  if (!sku || sku.length > 80) redirect("/admin/productos/nuevo?error=C%C3%B3digo%20inv%C3%A1lido");
   if (!Number.isInteger(price) || price < 0 || price > 100_000_000) redirect("/admin/productos/nuevo?error=Precio%20inv%C3%A1lido");
   const { data, error } = await supabase
     .from("products")
-    .insert({ name, price_clp: price, slug: `${slugify(name)}-${randomBytes(3).toString("hex")}`, status: "draft" })
+    .insert({ name, sku, price_clp: price, slug: `${slugify(name)}-${randomBytes(3).toString("hex")}`, status: "draft" })
     .select("id")
     .single();
   if (error || !data) redirect("/admin/productos/nuevo?error=No%20se%20pudo%20crear");
@@ -39,10 +41,12 @@ export async function createProduct(formData: FormData) {
 export async function updateProduct(id: string, formData: FormData) {
   const { supabase } = await requireAdmin();
   const name = text(formData, "name");
+  const sku = text(formData, "sku");
   const price = Number(text(formData, "price_clp") ?? "");
   const dims = ["lens_width_mm", "bridge_mm", "temple_mm"].map((k) => num(formData, k));
   const back = (m: string) => redirect(`/admin/productos/${id}?error=${encodeURIComponent(m)}`);
   if (!name || name.length > 120) back("Nombre inválido");
+  if (!sku || sku.length > 80) back("Indica el código real del marco (hasta 80 caracteres)");
   if (!Number.isInteger(price) || price < 0 || price > 100_000_000) back("Precio inválido");
   if (dims.some((d) => Number.isNaN(d))) back("Las medidas deben ser números en mm");
 
@@ -61,6 +65,7 @@ export async function updateProduct(id: string, formData: FormData) {
     .from("products")
     .update({
       name: name!,
+      sku,
       price_clp: price,
       brand_id: brandId,
       description: text(formData, "description"),

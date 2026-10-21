@@ -1,0 +1,47 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { PRESCRIPTION_MAX_BYTES, PRESCRIPTION_CONSENT_VERSION, prescriptionFileType, readLimitedFormData, sameOrigin, validQuoteId } from "@/lib/prescriptions";
+
+const privateHeaders = { "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" };
+function failure(error: string, status: number) { return NextResponse.json({ error }, { status, headers: privateHeaders }); }
+
+export async function POST(request: Request) {
+  if (!sameOrigin(request)) return failure("Origen de solicitud inválido.", 403);
+  const declaredLength = request.headers.get("content-length");
+  if (declaredLength && Number(declaredLength) > PRESCRIPTION_MAX_BYTES + 128 * 1024) return failure("El archivo no puede superar 4 MB.", 413);
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) return failure("Inicia sesión para enviar tu receta de forma privada.", 401);
+
+  // Bound daily uploads before buffering the multipart body. RLS filters to this user.
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { count, error: countError } = await supabase.from("prescriptions").select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("created_at", since);
+  if (countError) return failure("La recepción privada de recetas aún no está disponible.", 503);
+  if ((count ?? 0) >= 10) return failure("Alcanzaste el límite diario de archivos. Intenta mañana.", 429);
+
+  let form: FormData;
+  try { form = await readLimitedFormData(request, PRESCRIPTION_MAX_BYTES + 128 * 1024); }
+  catch (error) { return failure(error instanceof RangeError ? "El archivo no puede superar 4 MB." : "La solicitud no es válida.", error instanceof RangeError ? 413 : 400); }
+  if (!form || form.get("consent") !== "true") return failure("Necesitamos tu consentimiento para revisar la receta.", 400);
+  const file = form.get("file");
+  if (!(file instanceof File) || file.size < 12 || file.size > PRESCRIPTION_MAX_BYTES) return failure("Adjunta una receta en JPG, PNG, WebP o PDF de hasta 4 MB.", 400);
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const detected = prescriptionFileType(bytes);
+  if (!detected || (file.type && file.type !== detected.mime)) return failure("El contenido del archivo no coincide con un formato permitido.", 400);
+
+  const quoteId = form.get("quote_id");
+  if (quoteId) {
+    if (!validQuoteId(quoteId)) return failure("La cotización no es válida.", 400);
+    const { data: quote } = await supabase.from("quotes").select("id").eq("id", quoteId).eq("user_id", user.id).maybeSingle();
+    if (!quote) return failure("La cotización no pertenece a tu cuenta.", 403);
+  }
+  const path = `${user.id}/${crypto.randomUUID()}.${detected.extension}`;
+  const { error: uploadError } = await supabase.storage.from("prescriptions").upload(path, bytes, { contentType: detected.mime, cacheControl: "0", upsert: false });
+  if (uploadError) return failure("No pudimos guardar el archivo. Intenta nuevamente.", 502);
+  const { data: record, error: insertError } = await supabase.from("prescriptions").insert({ user_id: user.id, quote_id: quoteId || null, path, consent_version: PRESCRIPTION_CONSENT_VERSION }).select("id").single();
+  if (insertError || !record) {
+    await supabase.storage.from("prescriptions").remove([path]);
+    return failure("No pudimos registrar la receta. El archivo no quedó asociado a una solicitud.", 502);
+  }
+  return NextResponse.json({ id: record.id, status: "pending_review" }, { status: 201, headers: privateHeaders });
+}

@@ -5,6 +5,7 @@ export type CatalogProduct = {
   id: string;
   slug: string;
   name: string;
+  sku: string | null;
   brand: string | null;
   description: string | null;
   priceClp: number;
@@ -20,7 +21,7 @@ export type CatalogProduct = {
 };
 
 const SELECT =
-  "id, slug, name, description, price_clp, frame_shape, material, color, gender, lens_width_mm, bridge_mm, temple_mm, " +
+  "id, slug, name, sku, description, price_clp, frame_shape, material, color, gender, lens_width_mm, bridge_mm, temple_mm, " +
   "brands(name), product_images(path, alt, position, verified), product_models(glb_path, verified)";
 
 export function publicStorageUrl(bucket: "product-images" | "product-models", path: string) {
@@ -34,6 +35,7 @@ type Row = {
   id: string;
   slug: string;
   name: string;
+  sku: string | null;
   description: string | null;
   price_clp: number;
   frame_shape: string | null;
@@ -66,6 +68,7 @@ function adapt(r: Row): CatalogProduct {
     id: r.id,
     slug: r.slug,
     name: r.name,
+    sku: r.sku,
     brand: brand?.name ?? null,
     description: r.description,
     priceClp: r.price_clp,
