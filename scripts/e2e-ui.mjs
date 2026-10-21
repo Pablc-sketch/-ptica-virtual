@@ -210,6 +210,47 @@ try {
     }
     await ctx.close();
   }
+
+  // ---- Estilos calculados, anchos de contenedor y encabezado en 5 anchos (320/390/768/1024/1440) ----
+  const PAGES = ["/", "/marcos", "/marcos/ambar", "/cotizar", "/cristales", "/como-funciona", "/ayuda", "/privacidad", "/mi-cuenta", "/admin/login"];
+  for (const w of [320, 390, 768, 1024, 1440]) {
+    const ctx = await browser.newContext({ viewport: { width: w, height: 800 } });
+    const page = await ctx.newPage();
+    const base = `http://localhost:${APP}`;
+    await page.goto(`${base}/`, { waitUntil: "networkidle" });
+    const st = await page.evaluate(() => {
+      const cs = (e) => getComputedStyle(e);
+      const rects = (e) => { const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, w: r.width }; };
+      const collect = (rules) => rules.flatMap((r) => [r.selectorText ?? "", ...(r.cssRules ? collect([...r.cssRules]) : [])]);
+      const sel = collect([...document.styleSheets].flatMap((s) => [...s.cssRules]));
+      const hdr = document.querySelector("header .container-page");
+      const kids = [...hdr.children].filter((c) => cs(c).display !== "none").map(rects);
+      return {
+        paper: cs(document.documentElement).getPropertyValue("--paper").trim(),
+        bodyBg: cs(document.body).backgroundColor,
+        btnBg: cs(document.querySelector(".btn")).backgroundColor,
+        container: Math.round(hdr.getBoundingClientRect().width),
+        hdrRight: Math.max(...kids.map((k) => k.r)),
+        gaps: kids.slice(1).map((k, i) => k.l - kids[i].r),
+        inCSSOM: [".container-page", ".btn", ":root"].every((s) => sel.some((x) => x.includes(s))),
+        burger: document.querySelector('button[aria-controls="menu-movil"]').getClientRects().length > 0,
+        nav: document.querySelector('nav[aria-label="Principal"]').getClientRects().length > 0,
+      };
+    });
+    check(`${w}px: --paper #f7f6f2 y fondo del body calculado`, st.paper === "#f7f6f2" && st.bodyBg === "rgb(247, 246, 242)", JSON.stringify([st.paper, st.bodyBg]));
+    check(`${w}px: botón verde #424d3b`, st.btnBg === "rgb(66, 77, 59)", st.btnBg);
+    check(`${w}px: contenedor = min(1240, viewport-40)`, st.container === Math.min(1240, w - 40), `(${st.container})`);
+    check(`${w}px: CSS servido contiene .container-page, .btn y :root`, st.inCSSOM);
+    check(`${w}px: encabezado dentro del contenedor y sin solapes (holgura ≥ 4px)`, st.hdrRight <= w - 20 + 1 && st.gaps.every((g) => g >= 4), `(derecha=${Math.round(st.hdrRight)} máx=${w - 20}, huecos=${st.gaps.map(Math.round)})`);
+    check(`${w}px: navegación completa solo desde 1024 y menú móvil debajo`, w >= 1024 ? st.nav && !st.burger : !st.nav && st.burger, JSON.stringify([st.nav, st.burger]));
+    const overflowing = [];
+    for (const path of PAGES) {
+      await page.goto(base + path, { waitUntil: "networkidle" });
+      if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)) overflowing.push(path);
+    }
+    check(`${w}px: sin desborde horizontal en ${PAGES.length} páginas`, overflowing.length === 0, overflowing.join(" "));
+    await ctx.close();
+  }
 } finally {
   await browser.close();
   app.kill();

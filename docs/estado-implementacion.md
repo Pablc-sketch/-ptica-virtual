@@ -19,9 +19,19 @@
 - Accesibilidad: axe-core (WCAG 2.0/2.1 A y AA) sobre 11 páginas en móvil y escritorio sin violaciones serious/critical; se corrigió un
   `label-content-name-mismatch` real en los botones de favoritos de la ficha. Teclado: enlace "Saltar al contenido" verificado.
 
+## Verificación visual de estilos (hallazgo de Codex sobre CSS vacío en el IAB)
+- En el build de producción propio (Chromium/Playwright) el CSS servido es una sola hoja que contiene `--paper`, `.btn`, `.container-page`
+  y `:root`; estilos calculados: `--paper` `#f7f6f2`, fondo del body `rgb(247,246,242)`, botón `rgb(66,77,59)`, contenedor
+  280/350/728/984/1240 px en 320/390/768/1024/1440. **No se reproduce** el CSSOM sin esas reglas: la causa probable es una limitación del
+  navegador integrado o del preview antiguo, no del CSS compilado. No se cambió el pipeline.
+- Defecto real encontrado al medir más anchos: a 320 px el encabezado desbordaba 28 px. Corregido (marca y botones compactos bajo 360 px)
+  y la navegación completa/menú móvil pasa al breakpoint `lg` (1024 px) para dar holgura en 768 px.
+- e2e: aserciones de estilos calculados, ancho del contenedor, CSS servido, encabezado sin solapes y sin desborde en 10 páginas en
+  320/390/768/1024/1440 px.
+
 ## Pruebas
 - `npm test` (14 unitarias), `npx tsc --noEmit`, `npm run lint`.
-- `npm run test:e2e` (110 comprobaciones, 390×844 y 1440×900) contra un Supabase **simulado en memoria**
+- `npm run test:e2e` (145 comprobaciones, 390×844 y 1440×900) contra un Supabase **simulado en memoria**
   (`scripts/mock-supabase.mjs`): filtros combinados, favoritos persistentes, selección, ficha, 3D con GLB sintético
   de prueba (solo en el simulador, nunca en la base), 404, cotización sin precios del cliente, menú móvil, cuenta/recetas,
   APIs anónimas 401 y origen ajeno 403.
