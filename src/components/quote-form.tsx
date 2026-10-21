@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { clearSelection, setQuantity, toggleSelection, useSelection } from "@/lib/local-store";
 import { clp } from "@/lib/format";
 
@@ -19,15 +18,18 @@ export function QuoteForm({ open }: { open: boolean }) {
   useEffect(() => {
     let cancelled = false;
     if (!ids) return;
-    createClient()
-      .from("products")
-      .select("id, name, price_clp")
-      .in("id", ids.split(","))
-      .then(({ data, error }) => {
+    // El cliente de Supabase (≈250 KB) se importa bajo demanda: así no viaja en las demás páginas por la precarga del enlace.
+    (async () => {
+      try {
+        const { createClient } = await import("@/lib/supabase/client");
+        const { data, error } = await createClient().from("products").select("id, name, price_clp").in("id", ids.split(","));
         if (cancelled) return;
         if (error) setLoadError(true);
         else setLines(data ?? []);
-      });
+      } catch {
+        if (!cancelled) setLoadError(true);
+      }
+    })();
     return () => {
       cancelled = true;
     };

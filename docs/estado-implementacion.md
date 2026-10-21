@@ -29,9 +29,23 @@
 - e2e: aserciones de estilos calculados, ancho del contenedor, CSS servido, encabezado sin solapes y sin desborde en 10 páginas en
   320/390/768/1024/1440 px.
 
+## Cambios del bloque 3 (sesión robusta, borrado verificado, rendimiento)
+- `src/lib/session.ts` clasifica errores de autenticación (`classifyAuthError`): sesión ausente/401/403/código de sesión inválida/cookie corrupta
+  conocida -> anónimo; **429**, 5xx, red y timeouts -> servicio no disponible; cualquier error desconocido se **relanza** (no se oculta).
+  `getSession` captura excepciones de `getUser()` con la misma clasificación; `proxy.ts` la reutiliza (no redirige a `/admin/login` si el
+  servicio falla o el error es desconocido; lo registra y deja que `requireAdmin` falle visiblemente). 13 tests unitarios puros (`tests/session.test.ts`).
+- Borrado de recetas: confirmado en `pg_policies` que DELETE en `prescriptions` y en `storage.objects` (bucket `prescriptions`) es dueño o admin.
+  La documentación oficial indica que el borrado de objetos debe hacerse por la API de Storage (no por SQL) y **no documenta** si `remove()` es
+  idempotente con objetos inexistentes; por eso `DELETE /api/recetas/[id]` no lo supone: si `remove()` falla y `exists()` indica que el archivo ya no
+  está, cierra el registro; si existe o no puede comprobarse, conserva el registro y responde 502 para reintentar (ambos casos en el e2e).
+- Foco de la confirmación de borrado: ahora en `useEffect` (tras el commit del DOM) en vez de `queueMicrotask`.
+- `tests/prescriptions-delete-rls.sql` (rollback forzado): aislamiento de borrado entre personas y no-op al borrar un objeto inexistente. **Escrito, no ejecutado por mí.**
+- Rendimiento: el cliente de Supabase (≈250 KB sin comprimir) viajaba en todas las páginas por la precarga del enlace "Selección"; ahora se importa bajo demanda
+  en `/cotizar`. JS inicial de la ficha 752 KB -> 500 KB; three.js/R3F no se descarga hasta pulsar "Vista 3D" (verificado).
+
 ## Pruebas
-- `npm test` (14 unitarias), `npx tsc --noEmit`, `npm run lint`.
-- `npm run test:e2e` (145 comprobaciones, 390×844 y 1440×900) contra un Supabase **simulado en memoria**
+- `npm test` (27 unitarias), `npx tsc --noEmit`, `npm run lint`.
+- `npm run test:e2e` (148 comprobaciones, 390×844 y 1440×900) contra un Supabase **simulado en memoria**
   (`scripts/mock-supabase.mjs`): filtros combinados, favoritos persistentes, selección, ficha, 3D con GLB sintético
   de prueba (solo en el simulador, nunca en la base), 404, cotización sin precios del cliente, menú móvil, cuenta/recetas,
   APIs anónimas 401 y origen ajeno 403.
@@ -44,6 +58,6 @@
 
 ## Pendiente
 - Alta del admin de Pablo (docs/ALTA-ADMIN.md), fotos/GLB comerciales, precios, importación desde Lentia (requiere identificación autorizada).
-- Política de privacidad y condiciones validadas, canal de contacto real, derecho de eliminación de recetas (no hay botón ni API de borrado).
+- Política de privacidad y condiciones validadas y canal de contacto real. La eliminación de **recetas** ya existe (`DELETE /api/recetas/[id]` + botón en `/mi-cuenta`); sigue pendiente eliminar la cuenta y las cotizaciones.
 - Apertura de cotizaciones: migración GRANT de `create_quote` + `QUOTES_OPEN=true` (la flag sola no basta; el RPC está revocado).
 - Pagos, OCR e IA: no integrados.

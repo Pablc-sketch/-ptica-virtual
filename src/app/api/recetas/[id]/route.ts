@@ -32,8 +32,14 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
   const { data: record, error: readError } = await supabase.from("prescriptions").select("path").eq("id", id).eq("user_id", session.user.id).maybeSingle();
   if (readError) return NextResponse.json({ error: "No pudimos consultar la receta. Intenta nuevamente." }, { status: 502, headers });
   if (!record) return NextResponse.json({ error: "Receta no disponible." }, { status: 404, headers });
-  const { error: removeError } = await supabase.storage.from("prescriptions").remove([record.path]);
-  if (removeError) return NextResponse.json({ error: "No pudimos eliminar el archivo. Tu receta sigue guardada; intenta nuevamente." }, { status: 502, headers });
+  const bucket = supabase.storage.from("prescriptions");
+  const { error: removeError } = await bucket.remove([record.path]);
+  if (removeError) {
+    // No damos por hecho que remove() sea idempotente con objetos inexistentes: si el archivo ya no existe
+    // (reintento tras un fallo parcial) se continúa; si existe o no podemos comprobarlo, se conserva el registro.
+    const probe = await bucket.exists(record.path).catch(() => ({ data: null as boolean | null }));
+    if (probe.data !== false) return NextResponse.json({ error: "No pudimos eliminar el archivo. Tu receta sigue guardada; intenta nuevamente." }, { status: 502, headers });
+  }
   const { error: deleteError } = await supabase.from("prescriptions").delete().eq("id", id).eq("user_id", session.user.id);
   if (deleteError) return NextResponse.json({ error: "El archivo se eliminó pero no pudimos cerrar el registro. Vuelve a intentar para terminar." }, { status: 502, headers });
   return NextResponse.json({ deleted: true }, { headers });

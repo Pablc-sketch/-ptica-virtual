@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Confirmación en línea (no window.confirm): accesible con teclado y lector de pantalla.
 export function DeletePrescriptionButton({ id }: { id: string }) {
@@ -12,14 +12,23 @@ export function DeletePrescriptionButton({ id }: { id: string }) {
   const askRef = useRef<HTMLButtonElement>(null);
   const confirmRef = useRef<HTMLButtonElement>(null);
 
+  // El foco se mueve en un efecto, cuando el DOM ya refleja el nuevo estado (no antes).
+  const returnFocus = useRef(false);
+  useEffect(() => {
+    if (confirming) confirmRef.current?.focus();
+    else if (returnFocus.current) {
+      returnFocus.current = false;
+      askRef.current?.focus();
+    }
+  }, [confirming]);
+
   function ask() {
     setErr("");
     setConfirming(true);
-    queueMicrotask(() => confirmRef.current?.focus());
   }
   function cancel() {
+    returnFocus.current = true;
     setConfirming(false);
-    queueMicrotask(() => askRef.current?.focus());
   }
   async function remove() {
     setBusy(true);

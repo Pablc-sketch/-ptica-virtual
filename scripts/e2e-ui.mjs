@@ -170,9 +170,13 @@ try {
     await page.getByRole("button", { name: "Sí, eliminar" }).click();
     await page.waitForSelector("text=Tu receta sigue guardada");
     check(`${label}: si falla Storage el registro se conserva y se puede reintentar`, rx.some((r) => r.user_id === "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"));
+    // Reintento: remove() sigue fallando pero el archivo ya no existe -> se cierra el registro (no depende de que remove sea idempotente)
+    control.failStorageDelete = 1;
+    control.objectMissing = true;
     await page.getByRole("button", { name: "Sí, eliminar" }).click();
     await page.waitForSelector("text=Aún no has enviado ninguna receta");
-    check(`${label}: reintento elimina la receta propia y deja la ajena intacta`, !rx.some((r) => r.user_id === "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa") && rx.some((r) => r.id.endsWith("0000000000ff")));
+    control.objectMissing = false;
+    check(`${label}: reintento con archivo ya inexistente cierra el registro; la receta ajena queda intacta`, !rx.some((r) => r.user_id === "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa") && rx.some((r) => r.id.endsWith("0000000000ff")));
     const delAnon = await page.request.delete(`${base}/api/recetas/bbbbbbbb-bbbb-4bbb-8bbb-0000000000ff`, { headers: { origin: "https://evil.example" } });
     check(`${label}: DELETE con origen ajeno -> 403`, delAnon.status() === 403);
     const delForeign = await page.request.delete(`${base}/api/recetas/bbbbbbbb-bbbb-4bbb-8bbb-0000000000ff`, { headers: { origin: base } });
@@ -249,6 +253,28 @@ try {
       if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)) overflowing.push(path);
     }
     check(`${w}px: sin desborde horizontal en ${PAGES.length} páginas`, overflowing.length === 0, overflowing.join(" "));
+    await ctx.close();
+  }
+
+  // ---- Rendimiento: three/R3F no se descarga hasta pulsar "Vista 3D" ----
+  {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await ctx.newPage();
+    const base = `http://localhost:${APP}`;
+    const js = new Map();
+    page.on("response", async (r) => {
+      if (r.request().resourceType() === "script") js.set(r.url(), await r.text().catch(() => ""));
+    });
+    await page.goto(`${base}/marcos/ambar`, { waitUntil: "networkidle" });
+    await hydrated(page, "main button");
+    const kb = () => Math.round([...js.values()].reduce((a, t) => a + Buffer.byteLength(t), 0) / 1024);
+    const hasThree = () => [...js.values()].some((t) => t.includes("WebGLRenderer"));
+    const beforeKb = kb();
+    check("rendimiento: la ficha NO descarga three.js antes de pedir el 3D", !hasThree(), `(JS inicial ${beforeKb} KB sin comprimir)`);
+    check("rendimiento: la ficha NO descarga el cliente de Supabase (se carga solo en /cotizar)", ![...js.values()].some((t) => t.includes("GoTrueClient")), `(JS ${beforeKb} KB)`);
+    await page.getByRole("button", { name: "Vista 3D" }).click();
+    await page.waitForTimeout(3000);
+    check("rendimiento: three.js se descarga solo tras pulsar Vista 3D", hasThree(), `(JS tras 3D ${kb()} KB)`);
     await ctx.close();
   }
 } finally {

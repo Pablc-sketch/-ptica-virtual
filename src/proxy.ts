@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { classifyAuthError, type AuthClass } from "@/lib/session";
 
 // Refresca la sesión de Supabase y exige usuario para /admin (el rol admin se
 // verifica además en cada página con requireAdmin()).
@@ -19,13 +20,20 @@ export async function proxy(request: NextRequest) {
       },
     },
   );
-  // Una cookie de sesión corrupta no debe tumbar el sitio: se trata como visitante anónimo.
-  const claims = await supabase.auth
-    .getClaims()
-    .then((r) => r.data?.claims ?? null)
-    .catch(() => null);
+  // Una cookie corrupta o caducada se trata como visitante anónimo; un fallo del servicio de acceso o un error
+  // desconocido NO se disfraza de "sin sesión": no se redirige, y la página (requireAdmin) decide y falla visiblemente.
+  let hasClaims = false;
+  let kind: AuthClass = "anonymous";
+  try {
+    const { data, error } = await supabase.auth.getClaims();
+    if (data?.claims) hasClaims = true;
+    else if (error) kind = classifyAuthError(error);
+  } catch (thrown) {
+    kind = classifyAuthError(thrown);
+    if (kind === "unknown") console.error("proxy: error de sesión no clasificado", thrown);
+  }
   const { pathname } = request.nextUrl;
-  if (!claims && pathname.startsWith("/admin") && pathname !== "/admin/login") {
+  if (!hasClaims && kind === "anonymous" && pathname.startsWith("/admin") && pathname !== "/admin/login") {
     return NextResponse.redirect(new URL("/admin/login", request.url));
   }
   return response;

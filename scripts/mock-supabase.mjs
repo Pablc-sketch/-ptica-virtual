@@ -31,7 +31,7 @@ const PRODUCTS = [
 ];
 
 export const quoteCalls = [];
-export const control = { authDown: false, productsDown: false, failStorageDelete: 0 };
+export const control = { authDown: false, productsDown: false, failStorageDelete: 0, objectMissing: false };
 const FOREIGN = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 // Receta y cotización de OTRA persona: la UI de cuenta nunca debe mostrarlas (RLS de admin las dejaría pasar).
 export const rx = [{ id: "bbbbbbbb-bbbb-4bbb-8bbb-0000000000ff", user_id: FOREIGN, created_at: "2026-03-03T10:00:00Z", quote_id: null, path: `${FOREIGN}/x.png` }];
@@ -99,6 +99,7 @@ export function startMock(port) {
       if (i >= 0) rx.splice(i, 1);
       return res.writeHead(204).end();
     }
+    if (url.pathname.startsWith("/storage/v1/object/prescriptions/") && req.method === "HEAD") return res.writeHead(control.objectMissing ? 404 : 200).end();
     if (url.pathname === "/storage/v1/object/prescriptions" && req.method === "DELETE") return readBody(() => { if (control.failStorageDelete > 0) { control.failStorageDelete--; return json({ message: "storage down" }, 500); } json([{ name: "x" }]); });
     if (url.pathname.startsWith("/storage/v1/object/prescriptions/") && req.method === "POST") return readBody(() => json({ Key: url.pathname }));
     if (url.pathname.startsWith("/storage/v1/object/sign/prescriptions/")) return readBody(() => json({ signedURL: `/object/sign/prescriptions/x?token=t${Date.now()}` }));
