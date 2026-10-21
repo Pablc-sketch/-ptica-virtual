@@ -34,7 +34,7 @@ export const quoteCalls = [];
 export const control = { authDown: false, productsDown: false, failStorageDelete: 0, objectMissing: false };
 const FOREIGN = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 // Receta y cotización de OTRA persona: la UI de cuenta nunca debe mostrarlas (RLS de admin las dejaría pasar).
-export const rx = [{ id: "bbbbbbbb-bbbb-4bbb-8bbb-0000000000ff", user_id: FOREIGN, created_at: "2026-03-03T10:00:00Z", quote_id: null, path: `${FOREIGN}/x.png` }];
+export const rx = [{ id: "bbbbbbbb-bbbb-4bbb-8bbb-0000000000ff", user_id: FOREIGN, created_at: "2026-03-03T10:00:00Z", quote_id: null, path: `${FOREIGN}/x.png`, status: "pending", version: 0, status_changed_at: "2026-03-03T10:00:00Z", client_message: null, replaces_id: null }];
 const QUOTES = [
   { id: "dddddddd-dddd-4ddd-8ddd-000000000001", user_id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", created_at: "2026-02-01T10:00:00Z" },
   { id: "dddddddd-dddd-4ddd-8ddd-000000000002", user_id: FOREIGN, created_at: "2026-03-03T10:00:00Z" },
@@ -43,6 +43,11 @@ const USER = { id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", email: "cliente@test.
 export const GOOD_PASSWORD = "clave-segura-123";
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
 const TOKEN = `${b64({ alg: "HS256", typ: "JWT" })}.${b64({ sub: USER.id, aud: "authenticated", role: "authenticated", email: USER.email, iat: 1700000000, exp: 4102444800 })}.${Buffer.from("firma-simulada").toString("base64url")}`;
+const ADMIN = { ...USER, id: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee", email: "admin@test.cl" };
+const ADMIN_TOKEN = `${b64({ alg: "HS256", typ: "JWT" })}.${b64({ sub: ADMIN.id, aud: "authenticated", role: "authenticated", email: ADMIN.email, iat: 1700000000, exp: 4102444800 })}.${Buffer.from("firma-admin").toString("base64url")}`;
+export const events = [];
+const adminSession = () => ({ access_token: ADMIN_TOKEN, token_type: "bearer", expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: "ra", user: ADMIN });
+const TRANSITIONS = { pending: ["in_review"], in_review: ["pending", "needs_new_file", "reviewed"], needs_new_file: [], reviewed: [] };
 const session = () => ({ access_token: TOKEN, token_type: "bearer", expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: "r", user: USER });
 
 export function startMock(port) {
@@ -78,8 +83,30 @@ export function startMock(port) {
     }
     const readBody = (cb) => { let b = ""; req.on("data", (c) => (b += c)); req.on("end", () => cb(b)); };
     if (url.pathname === "/auth/v1/user" && control.authDown) return json({ message: "down" }, 503);
-    if (url.pathname === "/auth/v1/user") return (req.headers.authorization ?? "").includes(TOKEN) ? json(USER) : json({ message: "no session" }, 401);
-    if (url.pathname === "/auth/v1/token") return readBody((b) => { const d = JSON.parse(b || "{}"); d.password === GOOD_PASSWORD ? json(session()) : json({ error: "invalid_grant", error_description: "Invalid login credentials" }, 400); });
+    const who = () => { const a = req.headers.authorization ?? ""; return a.includes(ADMIN_TOKEN) ? ADMIN : a.includes(TOKEN) ? USER : null; };
+    if (url.pathname === "/auth/v1/user") return who() ? json(who()) : json({ message: "no session" }, 401);
+    if (url.pathname === "/rest/v1/rpc/is_admin") return json(who()?.id === ADMIN.id);
+    if (url.pathname === "/rest/v1/rpc/review_prescription") return readBody((b) => {
+      const d = JSON.parse(b || "{}");
+      const err = (message, code = "P0001") => json({ code, message, details: null, hint: null }, 400);
+      if (who()?.id !== ADMIN.id) return err("not_admin", "42501");
+      const r = rx.find((x) => x.id === d.p_id);
+      if (!r) return err("not_found", "P0002");
+      if (r.version !== d.p_expected_version) return err("version_conflict", "40001");
+      if (!TRANSITIONS[r.status].includes(d.p_to)) return err("invalid_transition", "22023");
+      const msg = (d.p_message ?? "").trim() || null;
+      if (d.p_to === "needs_new_file" && (!msg || msg.length < 5 || msg.length > 300)) return err("reason_required", "22023");
+      events.push({ prescription_id: r.id, from_status: r.status, to_status: d.p_to, message: d.p_to === "needs_new_file" ? msg : null, created_at: new Date().toISOString() });
+      Object.assign(r, { status: d.p_to, version: r.version + 1, status_changed_at: new Date().toISOString(), client_message: d.p_to === "needs_new_file" ? msg : null });
+      json([{ status: r.status, version: r.version, status_changed_at: r.status_changed_at }]);
+    });
+    if (url.pathname === "/rest/v1/prescription_events") {
+      if (who()?.id !== ADMIN.id) return json([]);
+      const inq = url.searchParams.get("prescription_id");
+      const set = inq?.startsWith("in.(") ? inq.slice(4, -1).split(",") : null;
+      return json(events.filter((e) => !set || set.includes(e.prescription_id)));
+    }
+    if (url.pathname === "/auth/v1/token") return readBody((b) => { const d = JSON.parse(b || "{}"); d.password === GOOD_PASSWORD ? json(d.email === ADMIN.email ? adminSession() : session()) : json({ error: "invalid_grant", error_description: "Invalid login credentials" }, 400); });
     if (url.pathname === "/auth/v1/signup") return readBody(() => json({ ...USER, identities: [] }));
     if (url.pathname === "/auth/v1/logout") return res.writeHead(204).end();
     if (url.pathname === "/rest/v1/quotes") { const uq = url.searchParams.get("user_id"); return json(QUOTES.filter((q) => !uq?.startsWith("eq.") || q.user_id === uq.slice(3))); }
@@ -87,12 +114,25 @@ export function startMock(port) {
       res.setHeader("Content-Range", `0-${Math.max(rx.length - 1, 0)}/${rx.length}`);
       const idq = url.searchParams.get("id");
       const uq = url.searchParams.get("user_id");
-      const rows = rx.filter((r) => (!idq?.startsWith("eq.") || r.id === idq.slice(3)) && (!uq?.startsWith("eq.") || r.user_id === uq.slice(3)));
+      const rq = url.searchParams.get("replaces_id");
+      const sq = url.searchParams.get("status");
+      const sset = sq?.startsWith("in.(") ? sq.slice(4, -1).split(",") : null;
+      const rows = rx.filter((r) => (!idq?.startsWith("eq.") || r.id === idq.slice(3)) && (!uq?.startsWith("eq.") || r.user_id === uq.slice(3))
+        && (!rq?.startsWith("eq.") || r.replaces_id === rq.slice(3)) && (!sset || sset.includes(r.status)));
       if ((req.headers.accept ?? "").includes("vnd.pgrst.object")) return rows[0] ? json(rows[0]) : json({ message: "no rows" }, 406);
       return json(rows);
     }
     if (url.pathname === "/rest/v1/prescriptions" && req.method === "HEAD") { res.setHeader("Content-Range", `*/${rx.length}`); return res.writeHead(200).end(); }
-    if (url.pathname === "/rest/v1/prescriptions" && req.method === "POST") return readBody((b) => { const r = { id: `bbbbbbbb-bbbb-4bbb-8bbb-${String(rx.length + 1).padStart(12, "0")}`, created_at: new Date().toISOString(), quote_id: null, path: JSON.parse(b).path, user_id: USER.id }; rx.push(r); json({ id: r.id }, 201); });
+    if (url.pathname === "/rest/v1/prescriptions" && req.method === "POST") return readBody((b) => {
+      const d = JSON.parse(b);
+      if (d.replaces_id) {
+        const old = rx.find((o) => o.id === d.replaces_id && o.user_id === USER.id && o.status === "needs_new_file");
+        if (!old || rx.some((o) => o.replaces_id === d.replaces_id)) return json({ code: "42501", message: "replacement_not_allowed" }, 403);
+      }
+      const r = { id: `bbbbbbbb-bbbb-4bbb-8bbb-${String(rx.length + 1).padStart(12, "0")}`, created_at: new Date().toISOString(), quote_id: null, path: d.path, user_id: USER.id,
+        status: "pending", version: 0, status_changed_at: new Date().toISOString(), client_message: null, replaces_id: d.replaces_id ?? null };
+      rx.push(r); json({ id: r.id }, 201);
+    });
     if (url.pathname === "/rest/v1/prescriptions" && req.method === "DELETE") {
       const id = (url.searchParams.get("id") ?? "").slice(3);
       const i = rx.findIndex((r) => r.id === id && r.user_id === USER.id);

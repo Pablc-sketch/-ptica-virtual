@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/session";
 import { DeletePrescriptionButton } from "@/components/delete-prescription-button";
+import { CLIENT_LABEL, isReviewStatus } from "@/lib/prescription-review";
 import { signIn, signOut, signUp } from "./actions";
 import { PrescriptionUpload } from "@/components/prescription-upload";
 import { OpenPrescriptionButton } from "@/components/open-prescription-button";
@@ -59,7 +60,7 @@ async function Account({ userId, email }: { userId: string; email: string | unde
   const supabase = await createClient();
   // Filtro explícito de dueño: un administrador ve todas las filas por RLS, pero aquí solo van las suyas.
   const [{ data: rx, error: rxErr }, { data: quotes, error: quotesErr }] = await Promise.all([
-    supabase.from("prescriptions").select("id, created_at, quote_id").eq("user_id", userId).order("created_at", { ascending: false }).limit(50),
+    supabase.from("prescriptions").select("id, created_at, quote_id, status, status_changed_at, client_message, replaces_id").eq("user_id", userId).order("created_at", { ascending: false }).limit(50),
     supabase.from("quotes").select("id, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
   ]);
   const quoteOpts = (quotes ?? []).map((q) => ({ id: q.id, label: `Cotización del ${new Date(q.created_at).toLocaleDateString("es-CL")}` }));
@@ -82,9 +83,22 @@ async function Account({ userId, email }: { userId: string; email: string | unde
           <ul className="divide-y divide-line border-y border-line">
             {rx.map((r) => (
               <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-                <span className="text-sm">
+                <span className="max-w-prose text-sm">
                   Enviada el {new Date(r.created_at).toLocaleString("es-CL")}
-                  <span className="block text-xs text-muted">Pendiente de revisión por una persona</span>
+                  {isReviewStatus(r.status) ? (
+                    <>
+                      <span className="block font-medium">{CLIENT_LABEL[r.status].title}</span>
+                      <span className="block text-xs text-muted">{CLIENT_LABEL[r.status].detail}</span>
+                      {r.status === "needs_new_file" && r.client_message && (
+                        <span className="mt-1 block border-l-2 border-olive pl-2 text-sm">Motivo: {r.client_message}</span>
+                      )}
+                      {r.status === "needs_new_file" && (rx.some((o) => o.replaces_id === r.id)
+                        ? <span className="block text-xs text-muted">Ya enviaste el archivo nuevo.</span>
+                        : <a href="#enviar" className="mt-1 inline-flex min-h-11 items-center text-sm underline">Subir un archivo nuevo</a>)}
+                    </>
+                  ) : (
+                    <span className="block text-xs text-muted">Pendiente de revisión por una persona</span>
+                  )}
                 </span>
                 <span className="flex flex-wrap items-start gap-2">
                   <OpenPrescriptionButton id={r.id} />
