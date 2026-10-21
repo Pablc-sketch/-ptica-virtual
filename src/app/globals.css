@@ -47,7 +47,7 @@ input[type=checkbox] { accent-color:var(--olive); }
 .hero-title em { font-style:normal; color:var(--olive); }
 .hero-description { margin:28px 0; max-width:32ch; font-size:14px; line-height:1.8; color:#6c665b; }
 .hero-copy .btn { min-height:52px; min-width:208px; }
-.hero-bottom { margin-top:42px; display:flex; align-items:center; gap:14px; font-size:10px; color:#766b5f; }
+.hero-bottom { margin-top:42px; display:flex; align-items:center; gap:14px; font-size:10px; color:#56534c; }
 .hero-bottom::before { content:""; width:32px; height:1px; background:#bf9e87; }
 .hero-photo { position:relative; min-width:0; margin:0; background:#373b30; }
 .hero-photo img { width:100%; height:100%; object-fit:cover; object-position:58% center; }
@@ -262,3 +262,4 @@ input[type=checkbox] { accent-color:var(--olive); }
  .explorer-options button { font-size:10px; }
  .measure-visual { padding:30px 24px; }
 }
+
