@@ -6,8 +6,8 @@ export const metadata: Metadata = { title: "Cómo funciona", description: "Del c
 const STEPS = [
   ["Explora y guarda", "Filtra el catálogo, guarda favoritos (solo para ti, en este dispositivo) y agrega marcos a tu selección."],
   ["Solicita tu cotización", "Cuéntanos cuáles te gustaron y cómo podemos contactarte. Te ayudamos a elegir los cristales y a conocer el valor completo."],
-  ["Revisamos tu receta", "Una persona de la óptica revisa tu receta contigo. Las recetas se tratan como datos sensibles: acceso restringido y enlaces temporales."],
-  ["Confirma el total", "Marco + cristales, con el total confirmado por escrito. Sin esa confirmación no hay compra."],
+  ["Revisamos tu receta", "Un profesional revisa tu receta y confirma los cristales adecuados para tu graduación."],
+  ["Confirma el total", "Recibe el detalle de marco, cristales y entrega antes de confirmar tu pedido."],
   ["Tu entrega en Santiago", "La comuna, fecha y costo de entrega se acuerdan contigo al confirmar la cotización."],
 ];
 
@@ -26,9 +26,9 @@ export default function ComoFuncionaPage() {
       </ol>
       <h2 className="mb-3 mt-14 text-3xl">Imágenes y 3D</h2>
       <p className="max-w-[65ch] text-muted">
-        Las fotografías de catálogo corresponden al modelo real. En los marcos con vista 3D puedes girar y acercar
+        Las fichas muestran los marcos de la colección; las fotografías retocadas se identifican en cada ficha. En los marcos con vista 3D puedes girar y acercar
         la imagen para conocer su forma. Para elegir el ajuste, compara las medidas de la ficha o pide orientación.
-        Las imágenes marcadas como “conceptuales” son composiciones de ambiente.
+        En el probador puedes ver el estilo sobre tu foto.
       </p>
       <Link href="/marcos" className="btn mt-8">Ver marcos</Link>
     </main>

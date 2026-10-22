@@ -49,7 +49,7 @@ async function Detail({ params }: { params: PageProps<"/marcos/[slug]">["params"
         <h1 className="text-[clamp(36px,5vw,60px)]">{p.name}</h1>
         <p className="mt-4 text-2xl">{price.text}</p>
         <p className="mt-1 text-sm text-muted">{price.label}{p.pairBasePriceClp ? ". Otros tratamientos y graduaciones se confirman al cotizar." : ". Los cristales se cotizan aparte."}</p>
-        {p.isSample && <p className="mt-3 text-xs text-muted">Imagen retocada a partir del marco fotografiado. Color y detalles sujetos a comprobación.</p>}
+        {p.isSample && <p className="mt-3 text-xs text-muted">Fotografía retocada del marco.</p>}
         {p.description && <p className="mt-6">{p.description}</p>}
         <details className="mt-6 border-y border-line py-4"><summary className="cursor-pointer text-sm">Detalles y medidas</summary><dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
           {specs.filter(([, v]) => v).map(([k, v]) => (
@@ -57,12 +57,12 @@ async function Detail({ params }: { params: PageProps<"/marcos/[slug]">["params"
           ))}
         </dl></details>
         {p.pairBasePriceClp && <div className="mt-6 grid grid-cols-3 gap-2 text-sm" aria-label="Precios iniciales del par"><div>Básico<p className="mt-1 font-semibold">${p.pairBasePriceClp.toLocaleString("es-CL")}</p></div><div>Antirreflejo<p className="mt-1 font-semibold">${(p.pairBasePriceClp+10000).toLocaleString("es-CL")}</p></div><div>Filtro azul<p className="mt-1 font-semibold">${(p.pairBasePriceClp+20000).toLocaleString("es-CL")}</p></div></div>}
-        <Link href={`/cotizar-receta?marco=${p.slug}`} className="mt-5 inline-flex min-h-11 items-center text-sm underline">Consultar mi graduación →</Link>
+        <Link href={`/cotizar-receta?marco=${p.slug}`} className="mt-5 inline-flex min-h-11 items-center text-sm underline">Elegir mis cristales →</Link>
         <Link href={`/probador?marco=${p.slug}`} className="btn btn-ghost mt-4 w-full">Probar en mi foto</Link>
         <SelectionButtons id={p.id} />
         <CompareButton id={p.id}/>
         <p className="mt-6 text-sm text-muted">
-          La selección no es una compra: revisamos tu receta contigo y confirmamos el total antes de cualquier pago.{" "}
+          Un profesional revisará tu receta para preparar tus lentes y confirmar el precio final.{" "}
           <Link href="/como-funciona" className="underline">Cómo funciona</Link>
         </p>
       </div>

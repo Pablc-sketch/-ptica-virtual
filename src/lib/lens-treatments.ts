@@ -8,6 +8,7 @@ export const TREATMENT_CHOICES=[
 ] as const;
 export type TreatmentChoice=typeof TREATMENT_CHOICES[number]['id'];
 export type LensTint='gris'|'cafe'|'verde';
+export function supportedTint(choice:TreatmentChoice,tint:LensTint):LensTint {return choice==='photo'&&tint==='verde'?'gris':tint;}
 export function tariffTreatment(choice:TreatmentChoice,tint:LensTint,family:SaleFamily):string {
  if(choice==='basic')return 'Lente básico';
  if(choice==='photo')return tint==='cafe'?'Fotocromático Café Antirreflejo':'Fotocromático Gris Filtro Azul';

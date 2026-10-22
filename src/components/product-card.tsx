@@ -57,9 +57,9 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
         type="button"
         onClick={() => toggleSelection(p.id)}
         aria-pressed={inSel}
-        className={`btn mt-3 ${inSel ? "" : "btn-ghost"}`}
+        className="compare-toggle"
       >
-        {inSel ? "En tu selección ✓" : "Agregar a selección"}
+        {inSel ? "En tu selección ✓" : "+ Guardar en selección"}
       </button>
       <CompareButton id={p.id}/>
     </article>

@@ -1,52 +1,15 @@
-import Link from "next/link";
-import { FrameOutline } from "@/components/frame-outline";
-import { Suspense } from "react";
-import { HomeCollection } from "@/components/home-collection";
-import { LENS_OPTIONS } from "@/lib/lens-options";
-import { clp } from "@/lib/format";
-
-const STEPS = [
- ["Encuentra tu forma", "Explora los marcos, compara sus medidas y guarda tus favoritos."],
- ["Arma tu selección", "Reúne los que te gustan. Puedes decidir con calma y volver después."],
- ["Hablemos de tu receta", "Una persona revisa lo que necesitas y te explica las opciones de cristales."],
- ["Todo claro, antes de pagar", "Confirma tu cotización completa y coordina la entrega en Santiago."],
-];
-const SHAPES = [
- {name:"Rectangulares",sub:"Líneas definidas. Actitud propia.",shape:"rectangular" as const},
- {name:"Redondos",sub:"Un clásico con otra mirada.",shape:"round" as const},
- {name:"Cat eye",sub:"Un gesto que cambia todo.",shape:"cat-eye" as const},
-];
-
-export default function Home() {
- return <main>
-  <div className="container-page hero-shell">
-   <section className="home-hero" aria-labelledby="home-title">
-    <div className="hero-copy">
-     <p className="eyebrow">Óptica Global / Santiago</p>
-     <h1 id="home-title" className="hero-title">Visión sin<br /><em>fronteras.</em></h1>
-     <p className="hero-description">Tu próximo par empieza aquí. Marco y lente básico desde $28.000, con tu receta revisada por una persona.</p>
-     <Link href="/configurar" className="btn">Arma tus lentes <span aria-hidden="true">↗</span></Link>
-     <Link href="/marcos" className="mt-3 inline-flex min-h-11 items-center text-sm underline underline-offset-4">Explorar los marcos</Link>
-     <p className="hero-bottom">Cerca o lejos. Una elección personal.</p>
-    </div>
-    <Suspense fallback={<div className="frame-explorer"><p role="status">Cargando colección…</p></div>}><HomeCollection /></Suspense>
-   </section>
-   <div className="brand-strip" aria-label="Cómo elegir">
-    <p><span className="strip-number">01</span>Marcos con medidas claras</p>
-    <p><span className="strip-number">02</span>Cristales según tu receta</p>
-    <p><span className="strip-number">03</span>Atención de persona a persona</p>
-   </div>
-  </div>
-  <section className="container-page price-section" aria-labelledby="precios-title"><div className="section-intro"><div><p className="eyebrow">Sin adivinar el precio</p><h2 id="precios-title">Tu marco. Tus cristales.<br />Todo más claro.</h2></div><Link href="/cristales" className="arrow-link">Qué incluye cada opción ↗</Link></div><div className="home-price-grid">{LENS_OPTIONS.map(o=><Link href="/configurar" key={o.id} className="home-price-option"><span className="eyebrow">Marco y cristales desde</span><strong>{clp(o.fromClp)}</strong><span>{o.name}<span aria-hidden="true">↗</span></span></Link>)}</div><p className="mt-4 text-xs text-muted">Precios iniciales. El marco, la receta y las características de los cristales se confirman antes del pago.</p></section>
-  <section className="container-page shape-section" aria-labelledby="formas-title">
-   <div className="section-intro"><div><p className="eyebrow">Una forma de empezar</p><h2 id="formas-title">Elige por forma.<br />Quédate por cómo te ves.</h2></div><Link href="/marcos" className="arrow-link">Ver catálogo <span aria-hidden="true">↗</span></Link></div>
-   <div className="shape-grid">{SHAPES.map(s=><Link href={`/marcos?forma=${s.shape}`} key={s.shape} className="shape-card"><div className="shape-visual"><FrameOutline shape={s.shape} /></div><div className="shape-meta"><div><h3>{s.name}</h3><p>{s.sub}</p></div><span aria-hidden="true">↗</span></div></Link>)}</div>
-   <p className="shape-disclaimer">Ilustraciones de formas. La disponibilidad de modelos se muestra en el catálogo.</p>
-  </section>
-  <section className="container-page" aria-labelledby="detalle-title"><div className="detail-story">
-   <div className="measure-visual"><FrameOutline /><p className="measure-sample" aria-label="Ejemplo de medidas: lente52, puente18 y varilla140 milímetros"><span>52</span><small aria-hidden="true">□</small><span>18</span><small aria-hidden="true">—</small><span>140</span></p><div className="measure-legend"><span>Lente</span><span>Puente</span><span>Varilla</span></div><p className="illustration-note">Ejemplo ilustrativo en milímetros. No corresponde a un producto.</p></div>
-   <div className="story-copy"><p className="eyebrow">Más información. Mejor elección.</p><h2 id="detalle-title">Que se vean bien.<br />Y que sean tuyos.</h2><p>Una forma práctica de empezar: compara las medidas publicadas con las de tus lentes actuales. En el comparador puedes revisar hasta tres marcos lado a lado.</p><p className="mt-4">Si una medida no está informada, te lo mostramos así. La elección del ajuste se revisa contigo.</p><Link href="/comparar" className="arrow-link">Ir al comparador <span aria-hidden="true">↗</span></Link></div>
-  </div></section>
-  <section className="container-page journey-section" aria-labelledby="pasos-title"><div className="section-intro"><div><p className="eyebrow">De tu elección a tu día a día</p><h2 id="pasos-title">Así de personal.<br />Así de simple.</h2></div><Link href="/como-funciona" className="arrow-link">Cómo funciona <span aria-hidden="true">↗</span></Link></div><ol className="journey-grid">{STEPS.map(([title,description],i)=><li key={title}><span className="journey-number">0{i+1}</span><h3>{title}</h3><p>{description}</p></li>)}</ol></section>
- </main>;
-}
+import Image from 'next/image';
+import Link from 'next/link';
+import {Suspense} from 'react';
+import {HomeCollection} from '@/components/home-collection';
+import {LENS_OPTIONS} from '@/lib/lens-options';
+import {clp} from '@/lib/format';
+const SHAPES=[{name:'Ovalados',shape:'oval',image:'ovalo',detail:'Contorno suave y perfil fino.'},{name:'Cat eye',shape:'cat-eye',image:'ambar',detail:'Esquinas elevadas y líneas definidas.'}];
+const STEPS=[['Elige tu marco','Revisa sus fotos, color y medidas. Pruébalo sobre tu foto.'],['Personaliza los cristales','Elige el tratamiento y comparte tu receta.'],['Revisión profesional','Confirmamos tu graduación, las medidas necesarias y el precio del par.']];
+export default function Home(){return <main>
+ <div className="container-page hero-shell"><section className="home-hero" aria-labelledby="home-title"><div className="hero-copy"><p className="eyebrow">Óptica Global · Santiago</p><h1 id="home-title" className="hero-title">Visión sin<br/><em>fronteras.</em></h1><p className="hero-description">Marcos para tu estilo. Cristales para tu día a día.</p><div className="hero-price"><span>Marco + lentes básicos con receta</span><strong>Desde $28.000</strong></div><Link href="/marcos" className="btn">Encuentra tu marco <span aria-hidden="true">↗</span></Link><Link href="/configurar" className="hero-secondary">Ya tengo mi receta →</Link></div><Suspense fallback={<div className="frame-explorer"><p role="status">Cargando colección…</p></div>}><HomeCollection/></Suspense></section><div className="brand-strip"><p><span className="strip-number">01</span>Elige el marco</p><p><span className="strip-number">02</span>Personaliza los cristales</p><p><span className="strip-number">03</span>Revisión profesional</p></div></div>
+ <section className="container-page shape-section" aria-labelledby="formas-title"><div className="section-intro"><div><p className="eyebrow">La colección</p><h2 id="formas-title">Una forma que va contigo.</h2></div><Link href="/marcos" className="arrow-link">Todos los marcos ↗</Link></div><div className="shape-collection">{SHAPES.map(s=><Link href={`/marcos?forma=${s.shape}`} key={s.shape} className={`shape-product shape-${s.shape}`}><div><Image src={`/products/tryon-${s.image}.webp`} alt={`Marco de forma ${s.name.toLowerCase()}`} width={1440} height={720} sizes="(min-width:768px) 50vw,100vw"/></div><footer><span><h3>{s.name}</h3><p>{s.detail}</p></span><span aria-hidden="true">↗</span></footer></Link>)}</div></section>
+ <section className="container-page price-section" aria-labelledby="precios-title"><div className="section-intro"><div><p className="eyebrow">Elige tus cristales</p><h2 id="precios-title">Tu par, a tu manera.</h2></div><Link href="/cristales" className="arrow-link">Explorar tratamientos ↗</Link></div><div className="home-price-grid">{LENS_OPTIONS.map((o,i)=><Link href="/configurar" key={o.id} className="home-price-option"><div className={`lens-swatch ${i===0?'clear':i===1?'ar':'blue'}`} aria-hidden="true"/><span className="eyebrow">Marco y cristales desde</span><strong>{clp(o.fromClp)}</strong><span>{o.name}<span aria-hidden="true">↗</span></span></Link>)}</div><p className="price-footnote">El precio final depende del marco y de tu graduación. Lo confirmamos al revisar tu receta.</p></section>
+ <section className="container-page"><div className="tryon-story"><div><p className="eyebrow">Pruébatelos</p><h2>Tu foto.<br/>Tu próximo marco.</h2><p>Sube una foto de frente y compara los modelos. Ajusta la posición con dos marcas sobre tus ojos.</p><Link href="/probador" className="btn">Abrir el probador ↗</Link></div><Image src="/products/tryon-mosaico.webp" alt="Frontal retocado del marco Mosaico" width={1440} height={524} sizes="(min-width:768px) 50vw,100vw"/></div></section>
+ <section className="container-page journey-section" aria-labelledby="pasos-title"><div className="section-intro"><div><p className="eyebrow">De la elección a tus lentes</p><h2 id="pasos-title">Te acompañamos en cada paso.</h2></div><Link href="/como-funciona" className="arrow-link">Cómo funciona ↗</Link></div><ol className="journey-grid journey-three">{STEPS.map(([title,description],i)=><li key={title}><span className="journey-num">0{i+1}</span><h3>{title}</h3><p>{description}</p></li>)}</ol></section>
+ </main>;}

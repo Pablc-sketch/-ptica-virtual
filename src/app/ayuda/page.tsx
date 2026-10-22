@@ -4,10 +4,10 @@ export const metadata: Metadata = { title: "Ayuda", description: "Preguntas frec
 
 const FAQ = [
   ["¿Cómo compro mis lentes?", "Elige tu marco y solicita una cotización. Revisamos tu receta contigo y confirmamos el valor completo antes de pagar."],
-  ["¿El precio incluye cristales?", "No. El precio publicado es solo el del marco. Los cristales se cotizan con tu receta."],
+  ["¿El precio incluye cristales?", "Cuando la ficha dice «marco + lentes básicos», el precio inicial incluye ambos. Antirreflejo y filtro azul tienen un adicional visible. La graduación y las medidas se revisan para confirmar el total."],
   ["¿Qué son los favoritos y la selección?", "Los favoritos son un guardado personal. La selección es la lista de marcos que enviarás a cotizar. Ambos se guardan solo en tu navegador."],
-  ["¿Cómo se tratan mis datos y mi receta?", "La receta es un dato sensible: solo tú y el equipo autorizado pueden verla y los enlaces de acceso son temporales. Solo la pedimos cuando estás en una cotización."],
-  ["¿La vista 3D me dice cómo me queda?", "No. Es una referencia del modelo del marco. No es un probador facial ni garantiza el ajuste: usa las medidas de la ficha."],
+  ["¿Cómo se tratan mis datos y mi receta?", "Puedes subir una foto o PDF desde Mi cuenta. Solo tú y el equipo autorizado pueden acceder al archivo. Un profesional lo revisa para preparar tus lentes."],
+  ["¿Puedo probarme los marcos?", "Sí: en el probador puedes subir tu foto, usar la cámara o elegir un modelo de demostración. El marco se alinea con tus ojos y puedes corregirlo con dos marcas. Las fichas que tengan un modelo 3D también permiten girarlo para explorar su forma."],
   ["¿Por qué no veo ciertos marcos?", "Cada modelo se incorpora cuando hemos revisado su fotografía y precio. La disponibilidad se confirma en tu cotización."],
 ];
 

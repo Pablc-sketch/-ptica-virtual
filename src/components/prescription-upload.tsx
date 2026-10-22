@@ -98,7 +98,7 @@ export function PrescriptionUpload({ quotes, replacesId, context }: { quotes: { 
     <section className="border border-line bg-white/70 p-6 md:p-8" aria-labelledby="receta-recibida">
       <p className="eyebrow mb-4">Envío recibido</p>
       <h3 ref={heading} tabIndex={-1} id="receta-recibida" className="text-3xl focus:outline-none">Tu receta ya está en tu cuenta.</h3>
-      <p role="status" className="mt-4 text-muted">El siguiente paso es la revisión por el equipo autorizado. Recibir el archivo no confirma la receta ni inicia un pago.</p>
+      <p role="status" className="mt-4 text-muted">Un profesional revisará tu receta para preparar la cotización de tus lentes.</p>
       <p className="mt-4 border-l-2 border-olive pl-4 text-sm">Consulta su estado en Mis recetas. Si necesitamos un archivo más claro, podrás ver allí el motivo.</p>
       <button type="button" className="btn btn-ghost mt-6" onClick={() => { setSent(false); setQuote(""); go(0); }}>Enviar otra receta</button>
     </section>
@@ -114,7 +114,7 @@ export function PrescriptionUpload({ quotes, replacesId, context }: { quotes: { 
         </li>)}
       </ol>
       <div className="p-5 sm:p-7">
-        {context && <p className="mb-5 border-b border-line pb-4 text-sm"><strong>{context.productName}</strong> · {context.requested_family} · {context.requested_treatment} · {context.requested_use==='near'?'cerca':'lejos'}<span className="mt-1 block text-xs text-muted">Estas opciones se enviarán con tu archivo para revisión; no son una orden de fabricación.</span></p>}
+        {context && <p className="mb-5 border-b border-line pb-4 text-sm"><strong>{context.productName}</strong> · {context.requested_family} · {context.requested_treatment} · {context.requested_use==='near'?'cerca':'lejos'}<span className="mt-1 block text-xs text-muted">Tu selección acompañará la receta.</span></p>}
         {replacesId && <p className="mb-5 border-l-2 border-olive bg-paper p-3 text-sm">Envías un nuevo archivo para una receta que necesita corrección. El archivo anterior conserva su registro; no se sobrescribe.</p>}
         <p className="eyebrow mb-3">Paso {step + 1} de 3</p>
         <h3 ref={heading} tabIndex={-1} className="text-2xl focus:outline-none">{["Empecemos con una foto clara.", "Mira el archivo antes de enviarlo.", "Tu receta, con acceso privado."][step]}</h3>
@@ -129,7 +129,7 @@ export function PrescriptionUpload({ quotes, replacesId, context }: { quotes: { 
               onChange={(e) => choose(e.target.files?.[0])} />
           </label>
           {file && <p role="status" className="mt-3 break-words text-sm">Seleccionado: <strong>{file.name}</strong> · {file.size < 1024 * 1024 ? `${Math.max(1, Math.ceil(file.size / 1024))} KB` : `${(file.size / 1024 / 1024).toLocaleString("es-CL", { maximumFractionDigits: 2 })} MB`}</p>}
-          <p className="mt-4 text-xs leading-relaxed text-muted">El archivo se envía solo al confirmar el último paso. No escribas tus graduaciones a mano en este formulario.</p>
+          <p className="mt-4 text-xs leading-relaxed text-muted">Verás una vista previa antes de enviar.</p>
         </div>
 
         {step === 1 && file && <div className="mt-5">
@@ -137,7 +137,7 @@ export function PrescriptionUpload({ quotes, replacesId, context }: { quotes: { 
             {/* Blob local: no se envía al optimizador ni a otro servicio. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={preview} alt="Vista previa local de la receta seleccionada" className="max-h-80 w-full object-contain" />
-          </div> : <div className="border border-line bg-paper p-5"><span className="eyebrow">Documento PDF</span><p className="mt-2 break-words font-semibold">{file.name}</p><p className="mt-2 text-sm text-muted">Comprueba el PDF original en tu dispositivo. Aquí no se abre ni interpreta automáticamente.</p></div>}
+          </div> : <div className="border border-line bg-paper p-5"><span className="eyebrow">Documento PDF</span><p className="mt-2 break-words font-semibold">{file.name}</p><p className="mt-2 text-sm text-muted">Comprueba el PDF original en tu dispositivo. </p></div>}
           <ul className="my-5 space-y-2 text-sm text-muted"><li>01 · Aparecen las cuatro esquinas del documento.</li><li>02 · El nombre y las indicaciones se pueden leer.</li><li>03 · No faltan páginas ni hay reflejos sobre los datos.</li></ul>
           <label className="flex items-start gap-3 border-t border-line pt-4 text-sm"><input type="checkbox" checked={checked} onChange={e => setChecked(e.target.checked)} className="h-5 w-5 shrink-0 accent-olive" /><span>Revisé el archivo que elegí y corresponde a mi receta.</span></label>
         </div>}
@@ -145,9 +145,9 @@ export function PrescriptionUpload({ quotes, replacesId, context }: { quotes: { 
         {step === 2 && file && <div className="mt-5">
           <div className="border-y border-line py-4"><span className="eyebrow">Archivo que enviarás</span><p className="mt-2 break-words font-semibold">{file.name}</p><button type="button" onClick={() => go(0)} disabled={busy} className="mt-2 min-h-11 text-sm underline underline-offset-4">Cambiar archivo</button></div>
           {quotes.length > 0 && <label className="mt-5 block text-sm">Asociar a una cotización <span className="text-muted">(opcional)</span><select value={quote} onChange={e => setQuote(e.target.value)} disabled={busy} className="field mt-2"><option value="">Enviar sin asociar</option>{quotes.map(q => <option key={q.id} value={q.id}>{q.label}</option>)}</select></label>}
-          <p className="my-5 text-sm leading-relaxed text-muted">Solo tu cuenta y el equipo autorizado pueden abrirla. Una persona revisará el documento antes de continuar con la cotización.</p>
+          <p className="my-5 text-sm leading-relaxed text-muted">Solo tu cuenta y el equipo autorizado pueden abrirla. Un profesional revisará el documento para preparar tus lentes.</p>
           <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} disabled={busy} className="h-5 w-5 shrink-0 accent-olive" /><span>Autorizo al equipo de la óptica a revisar mi receta para cotizar. Leí el <Link href="/privacidad" className="underline underline-offset-2">aviso de privacidad (borrador)</Link>.</span></label>
-          <p className="mt-4 text-xs text-muted">Puedes abrir o eliminar tu archivo desde Mis recetas. No hay lectura automática ni cobro en este paso.</p>
+          <p className="mt-4 text-xs text-muted">Puedes consultar el estado y gestionar tu archivo desde Mis recetas.</p>
         </div>}
 
         {error && <p role="alert" className="mt-5 border-l-2 border-red-700 bg-red-50 p-3 text-sm text-red-800">{error}</p>}

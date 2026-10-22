@@ -1,5 +1,9 @@
 export type SignedPower = { sign: '' | '+' | '-'; magnitude: string };
 export const emptyPower = (): SignedPower => ({sign:'',magnitude:''});
+/** ADD must not silently turn distance powers into a near prescription. */
+export function requiresNearReview(use:string,additions:SignedPower[]):boolean {
+ return use==='near'&&additions.some(a=>a.magnitude.trim()!=='');
+}
 /** A pasted sign is explicit; never infer a negative cylinder or turn a blank into zero. */
 export function editPower(current:SignedPower, raw:string):SignedPower {
  const value=raw.trim().replaceAll('−','-').replaceAll(',','.');
