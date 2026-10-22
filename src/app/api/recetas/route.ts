@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/session";
+import {parsePrescriptionContext,type PrescriptionContext} from '@/lib/prescription-context';
 import { PRESCRIPTION_MAX_BYTES, PRESCRIPTION_CONSENT_VERSION, prescriptionFileType, readLimitedFormData, sameOrigin, validQuoteId } from "@/lib/prescriptions";
 
 const privateHeaders = { "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" };
@@ -41,9 +42,17 @@ export async function POST(request: Request) {
   // Reemplazo de una receta marcada "requiere nuevo archivo". El trigger de la base también lo exige (propia,
   // en needs_new_file, una sola vez); esta comprobación previa solo da un mensaje claro antes de subir el archivo.
   const replacesId = form.get("replaces_id");
+  let opticalContext:PrescriptionContext|null=null;
+  if(form.get('product_id')){
+    opticalContext=parsePrescriptionContext({product_id:form.get('product_id'),requested_treatment:form.get('requested_treatment'),requested_use:form.get('requested_use'),requested_family:form.get('requested_family')});
+    if(!opticalContext)return failure('Revisa el marco y las opciones de cristales.',400);
+    const {data:product,error:productError}=await supabase.from('products').select('id').eq('id',opticalContext.product_id).eq('status','published').maybeSingle();
+    if(productError)return failure('No pudimos comprobar el marco seleccionado.',503);
+    if(!product)return failure('Ese marco ya no está en el catálogo.',409);
+  }
   if (replacesId) {
     if (!validQuoteId(replacesId)) return failure("La receta a reemplazar no es válida.", 400);
-    const { data: old, error: oldError } = await supabase.from("prescriptions").select("id, status, quote_id").eq("id", replacesId).eq("user_id", user.id).maybeSingle();
+    const { data: old, error: oldError } = await supabase.from("prescriptions").select("id, status, quote_id, product_id, requested_treatment, requested_use, requested_family").eq("id", replacesId).eq("user_id", user.id).maybeSingle();
     if (oldError) return failure("No pudimos comprobar la receta a reemplazar. Intenta nuevamente.", 503);
     if (!old || old.status !== "needs_new_file") return failure("Esa receta no está esperando un nuevo archivo.", 409);
     const { data: already, error: alreadyError } = await supabase.from("prescriptions").select("id").eq("replaces_id", replacesId).eq("user_id", user.id).maybeSingle();
@@ -51,11 +60,13 @@ export async function POST(request: Request) {
     if (already) return failure("Ya enviaste un archivo de reemplazo para esa receta.", 409);
     // El reemplazo continúa la misma solicitud: hereda la cotización si no se eligió otra.
     if (!quoteId && old.quote_id) quoteId = old.quote_id;
+    // El reemplazo continúa la selección original; no acepta un cambio silencioso de fabricación.
+    opticalContext=old.product_id ? parsePrescriptionContext(old) : null;
   }
   const path = `${user.id}/${crypto.randomUUID()}.${detected.extension}`;
   const { error: uploadError } = await supabase.storage.from("prescriptions").upload(path, bytes, { contentType: detected.mime, cacheControl: "0", upsert: false });
   if (uploadError) return failure("No pudimos guardar el archivo. Intenta nuevamente.", 502);
-  const { data: record, error: insertError } = await supabase.from("prescriptions").insert({ user_id: user.id, quote_id: quoteId || null, replaces_id: replacesId || null, path, consent_version: PRESCRIPTION_CONSENT_VERSION }).select("id").single();
+  const { data: record, error: insertError } = await supabase.from("prescriptions").insert({ user_id: user.id, quote_id: quoteId || null, replaces_id: replacesId || null, path, consent_version: PRESCRIPTION_CONSENT_VERSION,...(opticalContext??{}) }).select("id").single();
   if (insertError || !record) {
     // El archivo subido no quedó registrado: se retira. Si la limpieza falla queda un objeto privado sin fila
     // (solo visible para su dueño/admin); se registra para conciliarlo, nunca se oculta.
@@ -69,4 +80,3 @@ export async function POST(request: Request) {
   }
   return NextResponse.json({ id: record.id, status: "pending" }, { status: 201, headers: privateHeaders });
 }
-

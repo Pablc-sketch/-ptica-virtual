@@ -8,6 +8,7 @@ import { signIn, signOut, signUp } from "./actions";
 import { PrescriptionUpload } from "@/components/prescription-upload";
 import { OpenPrescriptionButton } from "@/components/open-prescription-button";
 import Link from "next/link";
+import {parsePrescriptionContext,accountReturnPath,type PrescriptionContext} from '@/lib/prescription-context';
 
 export const metadata: Metadata = { title: "Mi cuenta", robots: { index: false } };
 
@@ -18,10 +19,14 @@ const ERRORS: Record<string, string> = {
   registro: "No pudimos crear la cuenta. Revisa los datos o intenta con otro correo.",
 };
 
-type SP = Promise<{ error?: string; aviso?: string; modo?: string; reemplazar?: string }>;
+type AccountQuery={ error?: string; aviso?: string; modo?: string; reemplazar?: string; marco?:string;tratamiento?:string;uso?:string;tipo?:string};
+type SP = Promise<AccountQuery>;
+const returnPath=(q:AccountQuery)=>accountReturnPath('/mi-cuenta?'+new URLSearchParams(Object.entries(q).filter((entry):entry is [string,string]=>typeof entry[1]==='string')).toString());
 
 async function AuthForms({ searchParams }: { searchParams: SP }) {
-  const { error, aviso, modo } = await searchParams;
+  const query=await searchParams;
+  const { error, aviso, modo } = query;
+  const back=returnPath(query);
   const registro = modo === "registro";
   return (
     <div className="max-w-md">
@@ -36,6 +41,7 @@ async function AuthForms({ searchParams }: { searchParams: SP }) {
       {error && <p role="alert" className="mb-4 text-sm text-red-700">{ERRORS[error] ?? "Ocurrió un problema."}</p>}
       <h2 className="mb-3 text-2xl">{registro ? "Crear cuenta" : "Ingresar"}</h2>
       <form action={registro ? signUp : signIn} className="flex flex-col gap-3">
+        <input type="hidden" name="return_to" value={back}/>
         <label>Correo<input name="email" type="email" required autoComplete="email" className="field mt-1" /></label>
         <label>
           Contraseña
@@ -47,25 +53,30 @@ async function AuthForms({ searchParams }: { searchParams: SP }) {
       </form>
       <p className="mt-4 text-sm">
         {registro ? (
-          <>¿Ya tienes cuenta? <Link href="/mi-cuenta" className="underline">Ingresar</Link></>
+          <>¿Ya tienes cuenta? <Link href={back} className="underline">Ingresar</Link></>
         ) : (
-          <>¿Primera vez? <Link href="/mi-cuenta?modo=registro" className="underline">Crear cuenta</Link></>
+          <>¿Primera vez? <Link href={back+(back.includes('?')?'&':'?')+'modo=registro'} className="underline">Crear cuenta</Link></>
         )}
       </p>
     </div>
   );
 }
 
-async function Account({ userId, email, replacement }: { userId: string; email: string | undefined; replacement?: string }) {
+async function Account({ userId, email, query }: { userId: string; email: string | undefined; query:AccountQuery }) {
+  const replacement=query.reemplazar;
   const supabase = await createClient();
   // Filtro explícito de dueño: un administrador ve todas las filas por RLS, pero aquí solo van las suyas.
   const [{ data: rx, error: rxErr }, { data: quotes, error: quotesErr }] = await Promise.all([
-    supabase.from("prescriptions").select("id, created_at, quote_id, status, status_changed_at, client_message, replaces_id").eq("user_id", userId).order("created_at", { ascending: false }).limit(50),
+    supabase.from("prescriptions").select("id, created_at, quote_id, status, status_changed_at, client_message, replaces_id, product_id, requested_treatment, requested_use, requested_family, products(name)").eq("user_id", userId).order("created_at", { ascending: false }).limit(50),
     supabase.from("quotes").select("id, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
   ]);
   const quoteOpts = (quotes ?? []).map((q) => ({ id: q.id, label: `Cotización del ${new Date(q.created_at).toLocaleDateString("es-CL")}` }));
   const replacementRow = rx?.find((r) => r.id === replacement && r.status === "needs_new_file" && !rx.some((o) => o.replaces_id === r.id));
   const replacementReceived = !!replacement && rx?.some((r) => r.replaces_id === replacement);
+  let opticalContext:(PrescriptionContext & {productName:string})|undefined;
+  const replacementContextRow=rx?.find(r=>r.id===replacement);
+  if(replacementContextRow){const original=parsePrescriptionContext(replacementContextRow);const product=Array.isArray(replacementContextRow.products)?replacementContextRow.products[0]:replacementContextRow.products;if(original&&product)opticalContext={...original,productName:product.name};}
+  else if(query.marco){const {data:p}=await supabase.from('products').select('id,name').eq('slug',query.marco).eq('status','published').maybeSingle();if(p){const parsed=parsePrescriptionContext({product_id:p.id,requested_treatment:query.tratamiento,requested_use:query.uso,requested_family:query.tipo});if(parsed)opticalContext={...parsed,productName:p.name};}}
   return (
     <div className="grid gap-10 lg:grid-cols-2">
       <section aria-labelledby="enviar">
@@ -75,7 +86,7 @@ async function Account({ userId, email, replacement }: { userId: string; email: 
         {replacement && !replacementRow && !replacementReceived && <p role="alert" className="mb-3 text-sm">Ese archivo ya no está esperando un reemplazo. Puedes enviar una receta nueva.</p>}
         {replacementReceived && <p role="status" className="mb-3 text-sm">El archivo de reemplazo ya fue recibido. Puedes verlo en Mis recetas.</p>}
         {replacementRow && <Link href="/mi-cuenta#enviar" className="mb-3 inline-flex min-h-11 items-center underline">Cancelar reemplazo</Link>}
-        <PrescriptionUpload key={replacement ?? "new"} quotes={quoteOpts} replacesId={replacementRow?.id} />
+        <PrescriptionUpload key={`${replacement??'new'}:${opticalContext?.product_id??''}:${opticalContext?.requested_treatment??''}:${opticalContext?.requested_family??''}:${opticalContext?.requested_use??''}`} quotes={quoteOpts} replacesId={replacementRow?.id} context={opticalContext}/>
         <form action={signOut} className="mt-6"><button className="btn btn-ghost">Cerrar sesión</button></form>
       </section>
       <section aria-labelledby="mis">
@@ -90,6 +101,7 @@ async function Account({ userId, email, replacement }: { userId: string; email: 
               <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
                 <span className="max-w-prose text-sm">
                   Enviada el {new Date(r.created_at).toLocaleString("es-CL")}
+                  {r.requested_family && <span className="block text-xs text-muted">{(Array.isArray(r.products)?r.products[0]:r.products)?.name??'Marco seleccionado'} · {r.requested_family} · {r.requested_treatment} · {r.requested_family==='Multifocal'?'cerca y lejos':r.requested_use==='near'?'cerca':'lejos'}</span>}
                   {isReviewStatus(r.status) ? (
                     <>
                       <span className="block font-medium">{CLIENT_LABEL[r.status].title}</span>
@@ -143,7 +155,7 @@ async function Content({ searchParams }: { searchParams: SP }) {
       </div>
     );
   }
-  return session.status === "user" ? <Account userId={session.user.id} email={session.user.email} replacement={(await searchParams).reemplazar} /> : <AuthForms searchParams={searchParams} />;
+  return session.status === "user" ? <Account userId={session.user.id} email={session.user.email} query={await searchParams} /> : <AuthForms searchParams={searchParams} />;
 }
 
 export default function MiCuentaPage({ searchParams }: PageProps<"/mi-cuenta">) {
@@ -157,4 +169,3 @@ export default function MiCuentaPage({ searchParams }: PageProps<"/mi-cuenta">) 
     </main>
   );
 }
-

@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import type {PrescriptionContext} from '@/lib/prescription-context';
 
 const MAX = 4 * 1024 * 1024;
 const TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
 const STEPS = ["Tu archivo", "Comprueba", "Autoriza y envía"];
 
-export function PrescriptionUpload({ quotes, replacesId }: { quotes: { id: string; label: string }[]; replacesId?: string }) {
+export function PrescriptionUpload({ quotes, replacesId, context }: { quotes: { id: string; label: string }[]; replacesId?: string; context?:PrescriptionContext & {productName:string} }) {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [file, setFile] = useState<File | null>(null);
@@ -63,6 +64,7 @@ export function PrescriptionUpload({ quotes, replacesId }: { quotes: { id: strin
     data.set("consent", "true");
     if (replacesId) data.set("replaces_id", replacesId);
     if (quote) data.set("quote_id", quote);
+    if(context)for(const key of ['product_id','requested_treatment','requested_use','requested_family'] as const)data.set(key,context[key]);
     sending.current = true;
     setBusy(true);
     setError(null);
@@ -112,6 +114,7 @@ export function PrescriptionUpload({ quotes, replacesId }: { quotes: { id: strin
         </li>)}
       </ol>
       <div className="p-5 sm:p-7">
+        {context && <p className="mb-5 border-b border-line pb-4 text-sm"><strong>{context.productName}</strong> · {context.requested_family} · {context.requested_treatment} · {context.requested_use==='near'?'cerca':'lejos'}<span className="mt-1 block text-xs text-muted">Estas opciones se enviarán con tu archivo para revisión; no son una orden de fabricación.</span></p>}
         {replacesId && <p className="mb-5 border-l-2 border-olive bg-paper p-3 text-sm">Envías un nuevo archivo para una receta que necesita corrección. El archivo anterior conserva su registro; no se sobrescribe.</p>}
         <p className="eyebrow mb-3">Paso {step + 1} de 3</p>
         <h3 ref={heading} tabIndex={-1} className="text-2xl focus:outline-none">{["Empecemos con una foto clara.", "Mira el archivo antes de enviarlo.", "Tu receta, con acceso privado."][step]}</h3>

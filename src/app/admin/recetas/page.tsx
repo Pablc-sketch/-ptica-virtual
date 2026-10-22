@@ -15,6 +15,8 @@ const FILTERS: { key: string; label: string; statuses: ReviewStatus[] }[] = [
 type Row = {
   id: string; user_id: string; created_at: string; consent_version: string; status: string; version: number;
   status_changed_at: string; client_message: string | null; replaces_id: string | null;
+  product_id:string|null;requested_family:string|null;requested_treatment:string|null;requested_use:string|null;
+  products:{name:string}|{name:string}[]|null;
   quotes: { customer_name: string } | { customer_name: string }[] | null;
 };
 type Event = { prescription_id: string; from_status: string; to_status: string; message: string | null; created_at: string };
@@ -25,7 +27,7 @@ async function List({ searchParams }: { searchParams: Promise<{ estado?: string 
   const { supabase } = await requireAdmin();
   const { data, error } = await supabase
     .from("prescriptions")
-    .select("id, user_id, created_at, consent_version, status, version, status_changed_at, client_message, replaces_id, quotes(customer_name)")
+    .select("id, user_id, created_at, consent_version, status, version, status_changed_at, client_message, replaces_id, product_id, requested_family, requested_treatment, requested_use, products(name), quotes(customer_name)")
     .in("status", filter.statuses)
     .order("created_at", { ascending: true })
     .limit(100)
@@ -35,6 +37,9 @@ async function List({ searchParams }: { searchParams: Promise<{ estado?: string 
     ? await supabase.from("prescription_events").select("prescription_id, from_status, to_status, message, created_at").in("prescription_id", ids).order("created_at", { ascending: true }).limit(500).overrideTypes<Event[], { merge: false }>()
     : { data: [] as Event[], error: null };
   const label = (s: string) => (isReviewStatus(s) ? ADMIN_LABEL[s] : s);
+  const productIds=[...new Set((data??[]).flatMap(r=>r.product_id?[r.product_id]:[]))];
+  const {data:refs,error:refsError}=productIds.length ? await supabase.from('product_procurement').select('product_id,supplier_code,color_code,confirmed').in('product_id',productIds) : {data:[],error:null};
+  const procurement=new Map((refs??[]).map(r=>[r.product_id,r]));
 
   return (
     <>
@@ -54,6 +59,8 @@ async function List({ searchParams }: { searchParams: Promise<{ estado?: string 
             const q = Array.isArray(r.quotes) ? r.quotes[0] : r.quotes;
             const status = isReviewStatus(r.status) ? r.status : null;
             const history = (events ?? []).filter((e) => e.prescription_id === r.id);
+            const product=Array.isArray(r.products)?r.products[0]:r.products;
+            const ref=r.product_id ? procurement.get(r.product_id) : null;
             return (
               <li key={r.id} className="grid gap-3 py-4 md:grid-cols-[1fr_auto]">
                 <div className="text-sm">
@@ -63,6 +70,7 @@ async function List({ searchParams }: { searchParams: Promise<{ estado?: string 
                     {r.replaces_id && " · reemplaza un archivo anterior"}
                   </p>
                   {r.client_message && <p className="mt-1">Motivo enviado: “{r.client_message}”</p>}
+                  {r.product_id && <div className="mt-3 border-l-2 border-olive pl-3"><p><strong>{product?.name??'Marco seleccionado'}</strong> · {r.requested_family} · {r.requested_treatment} · {r.requested_family==='Multifocal'?'cerca y lejos':r.requested_use==='near'?'cerca':'lejos'}</p><p className="text-xs text-muted">{ref ? `Compra proveedor: ${ref.supplier_code}${ref.color_code?` · ${ref.color_code}`:''}${ref.confirmed?'':' · código por comprobar'}` : refsError ? 'No se pudo cargar el código privado' : 'Referencia de proveedor pendiente'}</p><p className="mt-1 text-xs text-muted">Opciones solicitadas, pendientes de contrastar con la receta. Sin autorización de fabricación.</p></div>}
                   <details className="mt-2">
                     <summary className="cursor-pointer text-xs underline">Historial ({history.length})</summary>
                     {evErr ? <p className="text-xs text-red-700">No se pudo cargar el historial.</p> : (
