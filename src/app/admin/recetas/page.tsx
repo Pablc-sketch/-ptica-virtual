@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { AdminNav } from "@/components/admin-nav";
 import { OpenPrescriptionButton } from "@/components/open-prescription-button";
 import { ReviewActions } from "@/components/review-actions";
+import { CreateOrderButton } from "@/components/create-order-button";
 import { ADMIN_LABEL, isReviewStatus, type ReviewStatus } from "@/lib/prescription-review";
 
 const FILTERS: { key: string; label: string; statuses: ReviewStatus[] }[] = [
@@ -85,6 +86,7 @@ async function List({ searchParams }: { searchParams: Promise<{ estado?: string 
                 <div className="flex flex-col items-start gap-2">
                   <OpenPrescriptionButton id={r.id} />
                   {status && <ReviewActions id={r.id} status={status} version={r.version} />}
+                  {r.status === "reviewed" && r.product_id && <CreateOrderButton prescriptionId={r.id} />}
                 </div>
               </li>
             );
