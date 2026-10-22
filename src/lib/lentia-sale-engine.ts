@@ -19,7 +19,7 @@ export type LensSaleDecision = { kind: "requires_review"; reason: "measurements_
 function validEye(e: EyePrescription | null): e is EyePrescription {
   return !!e && Number.isFinite(e.sphere) && Number.isFinite(e.cylinder)
     && Number.isInteger(e.sphere * 4) && Number.isInteger(e.cylinder * 4)
-    && (e.cylinder === 0 || (Number.isInteger(e.axis) && e.axis! >= 0 && e.axis! <= 180));
+    && (e.axis == null ? e.cylinder === 0 : Number.isInteger(e.axis) && e.axis >= 0 && e.axis <= 180);
 }
 function limits(range: string): { sphere: number; cylinder: number } | null {
   const match = /^±(\d+(?:\.\d+)?)\s*\/\s*±(\d+(?:\.\d+)?)$/.exec(range);

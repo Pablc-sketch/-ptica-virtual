@@ -1,24 +1,10 @@
 "use client";
-import Link from "next/link";
-import { useState } from "react";
-import { FrameOutline } from "@/components/frame-outline";
-
-const SHAPES = [
-  {id:"rectangular", label:"Rectangular", note:"Líneas definidas", query:"rectangular"},
-  {id:"round", label:"Redondo", note:"Curvas suaves", query:"round"},
-  {id:"cat-eye", label:"Cat eye", note:"Ángulos que se hacen notar", query:"cat-eye"},
-] as const;
-
-export function FrameExplorer() {
-  const [index,setIndex] = useState(0);
-  const selected = SHAPES[index];
-  return <div className="frame-explorer">
-    <div className="explorer-label"><span>EL PUNTO DE PARTIDA</span><span aria-hidden="true">0{index+1} / 03</span></div>
-    <figure className="frame-stage">
-      <div className="explorer-drawing"><FrameOutline shape={selected.id}/></div>
-      <figcaption aria-live="polite"><strong>{selected.label}</strong><span>{selected.note}</span></figcaption>
-    </figure>
-    <div className="explorer-options" role="group" aria-label="Explorar formas de marcos">{SHAPES.map((s,i)=><button key={s.id} type="button" aria-pressed={i===index} onClick={()=>setIndex(i)}>{s.label}</button>)}</div>
-    <div className="explorer-bottom"><Link href={`/marcos?forma=${selected.query}`} className="arrow-link">Ver esta forma <span aria-hidden="true">↗</span></Link><p>Ilustraciones de siluetas.<br/>La disponibilidad está en el catálogo.</p></div>
-  </div>;
+import Image from 'next/image';
+import Link from 'next/link';
+import {useState} from 'react';
+export type FeaturedFrame={name:string;slug:string;shape:string;image:string;sample:boolean};
+export function FrameExplorer({frames}:{frames:FeaturedFrame[]}){
+ const [index,setIndex]=useState(0),selected=frames[index]??frames[0];
+ if(!selected)return <div className="frame-explorer"><p>Explora las opciones de cristales y envíanos tu receta.</p><Link href="/configurar" className="arrow-link mt-8">Configurar mis lentes →</Link></div>;
+ return <div className="frame-explorer actual-frames"><div className="explorer-label"><span>LA COLECCIÓN</span><span>{String(index+1).padStart(2,'0')} / {String(frames.length).padStart(2,'0')}</span></div><figure className="frame-stage"><Link href={`/marcos/${selected.slug}`} className="featured-photo"><Image src={selected.image} alt={`Marco ${selected.name}`} width={1440} height={1080} sizes="(min-width:1024px) 600px,100vw" priority className="object-contain"/></Link><figcaption aria-live="polite"><strong>{selected.name}</strong><span>{selected.shape}</span></figcaption></figure><div className="explorer-options" role="group" aria-label="Marcos de la colección">{frames.map((f,i)=><button type="button" key={f.slug} aria-pressed={i===index} onClick={()=>setIndex(i)}>{f.name}</button>)}</div><div className="explorer-bottom"><Link href={`/cotizar-receta?marco=${selected.slug}`} className="arrow-link">Elegir cristales <span aria-hidden="true">→</span></Link>{selected.sample&&<p>Imagen retocada.<br/>Disponibilidad por confirmar.</p>}</div></div>;
 }

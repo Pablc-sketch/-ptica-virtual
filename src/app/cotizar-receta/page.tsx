@@ -13,5 +13,5 @@ async function Estimator({searchParams}:{searchParams:PageProps<"/cotizar-receta
   return <><p role="status" className="mb-5 text-sm">No encontramos un precio conjunto para ese marco. Puedes consultar los cristales por separado.</p><LensEstimator/></>;
 }
 export default function CotizarRecetaPage({searchParams}:PageProps<"/cotizar-receta">) {
-  return <main className="container-page py-10 md:py-16"><div className="mb-10 max-w-3xl"><p className="eyebrow">Cada receta tiene sus opciones</p><h1 className="mt-4 text-[clamp(38px,6vw,70px)]">Cotiza con tus datos.</h1><p className="mt-5 max-w-xl text-muted">Consulta las opciones para tu graduación. Después revisamos la receta original y confirmamos el total del par.</p></div><Suspense fallback={<p role="status">Consultando tu marco…</p>}><Estimator searchParams={searchParams}/></Suspense></main>;
+  return <main className="container-page py-10 md:py-16"><div className="rx-heading"><p className="eyebrow">Marco · cristales · receta</p><h1>Configura tus lentes.</h1><p>Elige una opción y envíanos tu receta. Si prefieres escribirla, puedes consultar una estimación aquí.</p></div><Suspense fallback={<p role="status">Consultando tu marco…</p>}><Estimator searchParams={searchParams}/></Suspense></main>;
 }

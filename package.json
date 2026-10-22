@@ -8,9 +8,11 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:e2e": "node scripts/e2e-ui.mjs"
+    "test:e2e": "node scripts/e2e-ui.mjs",
+    "prebuild": "node scripts/prepare-vision-assets.mjs"
   },
   "dependencies": {
+    "@mediapipe/tasks-vision": "1.1.1",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
     "@supabase/ssr": "^0.12.7",

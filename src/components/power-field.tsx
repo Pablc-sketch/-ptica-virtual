@@ -1,0 +1,4 @@
+import {editPower,formatPower,type SignedPower} from '@/lib/prescription-input';
+export function PowerField({id,label,value,onChange,help}:{id:string;label:string;value:SignedPower;onChange:(v:SignedPower)=>void;help?:string}) {
+ return <div><label htmlFor={id} className="rx-label">{label}</label><div className="rx-power"><select aria-label={`Signo de ${label}`} value={value.sign} onChange={e=>onChange({...value,sign:e.target.value as SignedPower['sign']})}><option value="">±</option><option value="+">+</option><option value="-">−</option></select><input id={id} inputMode="decimal" autoComplete="off" placeholder="0.00" value={value.magnitude} onChange={e=>onChange(editPower(value,e.target.value))} onBlur={()=>onChange(formatPower(value))} aria-describedby={help?`${id}-help`:undefined}/></div>{help&&<p id={`${id}-help`} className="rx-help">{help}</p>}</div>;
+}

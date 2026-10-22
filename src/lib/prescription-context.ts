@@ -1,5 +1,5 @@
 import {LENTIA_SALE_TARIFFS} from './lentia-sale-engine';
-const TREATMENTS=new Set(['Cristal blanco',...LENTIA_SALE_TARIFFS.map(t=>t.treatment)]);
+const TREATMENTS=new Set(['Lente básico','Cristal blanco',...LENTIA_SALE_TARIFFS.map(t=>t.treatment)]);
 export type PrescriptionContext={product_id:string;requested_treatment:string;requested_use:'distance'|'near';requested_family:'Monofocal'|'Bifocal'|'Multifocal'};
 export function parsePrescriptionContext(value:{product_id:unknown;requested_treatment:unknown;requested_use:unknown;requested_family:unknown}):PrescriptionContext|null {
  if(typeof value.product_id!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value.product_id))return null;

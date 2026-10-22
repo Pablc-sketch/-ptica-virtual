@@ -39,7 +39,7 @@ async function Editor({ params, searchParams }: { params: Promise<{ id: string }
           <label>Identificador de tienda<input name="sku" defaultValue={p.sku ?? ""} required maxLength={80} className="field mt-1" /></label>
           <label>Marca<input name="brand" defaultValue={brand?.name ?? ""} maxLength={80} className="field mt-1" /></label>
           <label>Solo marco (CLP, vacío si falta confirmar)<input name="price_clp" type="number" min={1} step={1} defaultValue={p.price_clp ?? ""} className="field mt-1" /></label>
-          <label>Par con cristal blanco, desde (CLP)<input name="pair_base_price_clp" type="number" min={1} step={1} defaultValue={p.pair_base_price_clp ?? ""} className="field mt-1" /></label>
+          <label>Par con lente básico, desde (CLP)<input name="pair_base_price_clp" type="number" min={1} step={1} defaultValue={p.pair_base_price_clp ?? ""} className="field mt-1" /></label>
           <label className="flex items-start gap-3 text-sm"><input type="checkbox" name="is_sample" defaultChecked={p.is_sample} className="h-5 w-5"/>Mostrar como muestra: imagen retocada y disponibilidad por confirmar. No habilita venta.</label>
           <label>Descripción<textarea name="description" defaultValue={p.description ?? ""} maxLength={2000} className="field mt-1" /></label>
           <div className="grid grid-cols-2 gap-3">

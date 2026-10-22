@@ -56,8 +56,9 @@ async function Detail({ params }: { params: PageProps<"/marcos/[slug]">["params"
             <div key={k}><dt className="eyebrow">{k}</dt><dd>{v}</dd></div>
           ))}
         </dl></details>
-        {p.pairBasePriceClp && <div className="mt-6 grid grid-cols-3 gap-2 text-sm" aria-label="Precios iniciales del par"><div>Blanco<p className="mt-1 font-semibold">${p.pairBasePriceClp.toLocaleString("es-CL")}</p></div><div>Antirreflejo<p className="mt-1 font-semibold">${(p.pairBasePriceClp+10000).toLocaleString("es-CL")}</p></div><div>Filtro azul<p className="mt-1 font-semibold">${(p.pairBasePriceClp+20000).toLocaleString("es-CL")}</p></div></div>}
+        {p.pairBasePriceClp && <div className="mt-6 grid grid-cols-3 gap-2 text-sm" aria-label="Precios iniciales del par"><div>Básico<p className="mt-1 font-semibold">${p.pairBasePriceClp.toLocaleString("es-CL")}</p></div><div>Antirreflejo<p className="mt-1 font-semibold">${(p.pairBasePriceClp+10000).toLocaleString("es-CL")}</p></div><div>Filtro azul<p className="mt-1 font-semibold">${(p.pairBasePriceClp+20000).toLocaleString("es-CL")}</p></div></div>}
         <Link href={`/cotizar-receta?marco=${p.slug}`} className="mt-5 inline-flex min-h-11 items-center text-sm underline">Consultar mi graduación →</Link>
+        <Link href={`/probador?marco=${p.slug}`} className="btn btn-ghost mt-4 w-full">Probar en mi foto</Link>
         <SelectionButtons id={p.id} />
         <CompareButton id={p.id}/>
         <p className="mt-6 text-sm text-muted">

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { LensGuide } from "@/components/lens-guide";
+import { LensEstimator } from "@/components/lens-estimator";
 
-export const metadata: Metadata = { title: "Arma tus lentes", description: "Elige el par que necesitas y compara opciones de cristales. Marco y cristal blanco desde $28.000." };
+export const metadata: Metadata = { title: "Arma tus lentes", description: "Elige el par que necesitas y compara opciones de cristales. Marco y lente básico desde $28.000." };
 export default function ConfigurarPage() {
-  return <main className="container-page py-10 md:py-16"><div className="mb-10 max-w-3xl"><p className="eyebrow">A tu manera, paso a paso</p><h1 className="mt-4 text-[clamp(38px,6vw,70px)]">Arma tu próximo par.</h1><p className="mt-5 max-w-xl text-muted">Para cerca. Para lejos. O para ese segundo par que te faltaba. Empieza por lo que buscas y conoce los precios de partida, con tu receta revisada por una persona.</p></div><LensGuide /></main>;
+  return <main className="container-page py-10 md:py-16"><div className="rx-heading"><p className="eyebrow">Cristales y receta</p><h1>Arma tus lentes.</h1><p>Para lejos, para cerca o para ambos. Elige tus cristales y envía la receta para confirmar tu par.</p></div><LensEstimator /></main>;
 }

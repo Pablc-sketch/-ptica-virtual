@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FrameOutline } from "@/components/frame-outline";
-import { FrameExplorer } from "@/components/frame-explorer";
+import { Suspense } from "react";
+import { HomeCollection } from "@/components/home-collection";
 import { LENS_OPTIONS } from "@/lib/lens-options";
 import { clp } from "@/lib/format";
 
@@ -23,12 +24,12 @@ export default function Home() {
     <div className="hero-copy">
      <p className="eyebrow">Óptica Global / Santiago</p>
      <h1 id="home-title" className="hero-title">Visión sin<br /><em>fronteras.</em></h1>
-     <p className="hero-description">Tu próximo par empieza aquí. Marco y cristal blanco desde $28.000, con tu receta revisada por una persona.</p>
+     <p className="hero-description">Tu próximo par empieza aquí. Marco y lente básico desde $28.000, con tu receta revisada por una persona.</p>
      <Link href="/configurar" className="btn">Arma tus lentes <span aria-hidden="true">↗</span></Link>
      <Link href="/marcos" className="mt-3 inline-flex min-h-11 items-center text-sm underline underline-offset-4">Explorar los marcos</Link>
      <p className="hero-bottom">Cerca o lejos. Una elección personal.</p>
     </div>
-    <FrameExplorer />
+    <Suspense fallback={<div className="frame-explorer"><p role="status">Cargando colección…</p></div>}><HomeCollection /></Suspense>
    </section>
    <div className="brand-strip" aria-label="Cómo elegir">
     <p><span className="strip-number">01</span>Marcos con medidas claras</p>

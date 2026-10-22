@@ -51,6 +51,8 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
         </p>
       </div>
       {p.isSample && <p className="mt-2 text-[11px] text-muted">Imagen retocada · disponibilidad por confirmar</p>}
+      <Link href={`/cotizar-receta?marco=${p.slug}`} className="btn mt-3">Elegir cristales</Link>
+      <Link href={`/probador?marco=${p.slug}`} className="rx-change">Probar en mi foto →</Link>
       <button
         type="button"
         onClick={() => toggleSelection(p.id)}
@@ -63,4 +65,3 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
     </article>
   );
 }
-

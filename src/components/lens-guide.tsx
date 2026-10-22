@@ -28,7 +28,7 @@ export function LensGuide() {
       <fieldset><legend className="mb-5 text-2xl"><span className="lens-step">02</span> Elige una opción de cristal</legend>
         <div className="grid gap-3">{LENS_OPTIONS.map(o => <label key={o.id} className={`lens-choice ${lens === o.id ? "is-selected" : ""}`}>
           <input type="radio" name="cristal" value={o.id} checked={lens === o.id} onChange={() => setLens(o.id)} />
-          <span><strong>{o.name}</strong><small>{o.note}</small><small>{o.extraClp === 0 ? "Opción base" : `+ ${clp(o.extraClp)} respecto del blanco`}</small></span>
+          <span><strong>{o.name}</strong><small>{o.note}</small><small>{o.extraClp === 0 ? "Opción base" : `+ ${clp(o.extraClp)} respecto del básico`}</small></span>
           <span className="lens-choice-price"><small>Par desde</small>{clp(o.fromClp)}</span>
         </label>)}</div>
         <p className="mt-4 text-sm text-muted">Los valores iniciales corresponden a marco y cristales. El total depende del marco, la receta y las características que confirme el equipo. Otras opciones se cotizan por separado.</p>

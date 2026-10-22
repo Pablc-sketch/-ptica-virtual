@@ -20,7 +20,7 @@ function CatalogControls({ products }: { products: CatalogProduct[] }) {
   const [q, setQ] = useState("");
   const [filtersOpen,setFiltersOpen]=useState(false);
   const requestedShape = params.get("forma");
-  const shapeAliases: Record<string, string[]> = { rectangular: ["rectangular", "rectangulares"], round: ["redondo", "redondos", "round"], "cat-eye": ["cat eye", "cat-eye", "cateye"] };
+  const shapeAliases: Record<string, string[]> = { oval: ["oval", "ovalado"], rectangular: ["rectangular", "rectangulares"], round: ["redondo", "redondos", "round"], "cat-eye": ["cat eye", "cat-eye", "cateye"] };
   const initialShape = products.find(p => p.frameShape && (shapeAliases[requestedShape ?? ""] ?? []).includes(p.frameShape.toLowerCase()))?.frameShape ?? "";
   const [shape, setShape] = useState(initialShape);
   const [material, setMaterial] = useState("");
@@ -91,6 +91,7 @@ function CatalogControls({ products }: { products: CatalogProduct[] }) {
         </label>
       </form>
 
+      <div className="shape-tabs" role="group" aria-label="Colecciones por forma"><button type="button" aria-pressed={!shape} onClick={()=>setShape('')}>Todos</button>{shapes.map(s=><button type="button" key={s} aria-pressed={shape===s} onClick={()=>setShape(s)}>{s==='Cat eye'?'Cat eye · agatados':s}</button>)}</div>
       <p className="mt-4 text-sm text-muted" role="status" aria-live="polite">
         {result.length} {result.length === 1 ? "marco" : "marcos"}
         {filtered && (

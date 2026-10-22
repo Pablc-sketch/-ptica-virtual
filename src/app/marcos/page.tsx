@@ -30,7 +30,7 @@ async function CatalogLoader() {
 export default function MarcosPage() {
   return (
     <main className="container-page">
-      <div className="page-heading"><div><p className="eyebrow">Encuentra tu próxima mirada</p><h1>Los marcos.</h1></div><p className="heading-note">Una forma, un color, tu manera de mirar. Elige tu marco y revisa las opciones para tu receta.</p></div>
+      <div className="page-heading"><div><p className="eyebrow">La colección</p><h1>Marcos.</h1></div><p className="heading-note">Elige una forma, pruébala en tu foto y configura los cristales con tu receta.</p></div>
       <Suspense fallback={<p className="text-muted" role="status">Cargando marcos…</p>}>
         <CatalogLoader />
       </Suspense>

@@ -38,6 +38,6 @@ describe('paquete con marco sin duplicar cristales',()=>{
  it('distingue precios desconocidos del cero y paquetes de solo marco',()=>{
   expect(productPrice({priceClp:null}).amount).toBeNull();
   expect(productPrice({priceClp:0}).text).toBe('Precio por confirmar');
-  expect(productPrice({priceClp:null,pairBasePriceClp:28000})).toMatchObject({amount:28000,label:'marco + cristal blanco'});
+  expect(productPrice({priceClp:null,pairBasePriceClp:28000})).toMatchObject({amount:28000,label:'marco + lentes básicos'});
  });
 });
