@@ -22,7 +22,7 @@ try{
  check('AR muestra precio completo 38.000',await page.locator('.rx-total').innerText().then(s=>s.includes('$38.000')));
  await page.getByRole('radio',{name:/^Polarizado/}).check();await page.getByRole('button',{name:'Verde',exact:true}).click();await page.getByRole('radio',{name:/^Fotocromático/}).check();
  check('fotocromático no conserva verde incompatible',await page.getByRole('button',{name:'Gris',exact:true}).getAttribute('aria-pressed')==='true'&&!(await page.locator('.rx-summary').innerText()).includes('verde'));
- await page.getByLabel('Uso de la receta').selectOption('near');await power('right-addition','+','2.00');await page.getByRole('checkbox',{name:/Revisé los signos/}).check();
+ await page.getByLabel('Uso de la receta').selectOption('near');await power('common-addition','+','2.00');await page.getByRole('checkbox',{name:/Revisé los signos/}).check();
  check('ADD para cerca deriva a revisión sin sumar automáticamente',await page.locator('.rx-total').innerText().then(s=>s.includes('Revisión profesional')));
  await page.locator('#left-sphere').click();await page.keyboard.press('Escape');check('Escape devuelve el foco al selector',await page.locator('#left-sphere').evaluate(el=>el===document.activeElement));
  const href=await page.getByRole('link',{name:'Continuar con mi receta',exact:true}).getAttribute('href');check('selección se conserva sin graduaciones en URL',href.includes('marco=cat-eye-ambar')&&!href.includes('sphere')&&!href.includes('2.00'));
