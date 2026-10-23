@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -8,6 +7,7 @@ import { REGIONES } from "@/lib/addresses";
 import { clp } from "@/lib/format";
 import { paymentsEnabled } from "@/lib/mercadopago";
 import { startCheckout } from "../actions";
+import { CheckoutColor } from "@/components/checkout-color";
 
 export const metadata: Metadata = { title: "Comprar", robots: { index: false } };
 
@@ -31,15 +31,12 @@ async function Checkout({ params, searchParams }: { params: PageProps<"/comprar/
   const optical = p.use !== "solar";
   const variants = p.variants ?? [];
   const chosen = variants.find((v) => v.id === q.color) ?? variants[0];
-  const img = chosen?.front ?? p.images[0];
   const enabled = paymentsEnabled();
   const error = typeof q.error === "string" ? ERROR_TEXT[q.error] : undefined;
   return (
     <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr]">
       <aside className="min-w-0">
-        <div className="relative aspect-[4/3] overflow-hidden border border-line bg-white">
-          {img && <Image src={img.url} alt={img.alt} fill sizes="(min-width:1024px) 40vw,100vw" className="object-contain" />}
-        </div>
+        <CheckoutColor variants={variants} initial={chosen?.id} fallback={p.images[0]} formId="checkout" />
         <h2 className="mt-4 text-3xl">{p.name}</h2>
         <p className="text-sm text-muted">{[p.frameShape, p.material].filter(Boolean).join(" · ")}</p>
         <p className="mt-4 text-sm text-muted">
@@ -50,24 +47,10 @@ async function Checkout({ params, searchParams }: { params: PageProps<"/comprar/
         {p.isSample && <p className="mt-2 text-xs text-muted">Imagen retocada del marco. Confirmamos disponibilidad al recibir tu compra.</p>}
       </aside>
 
-      <form action={startCheckout.bind(null, slug)} className="flex flex-col gap-4">
+      <form id="checkout" action={startCheckout.bind(null, slug)} className="flex flex-col gap-4">
         <input type="hidden" name="product_id" value={p.id} />
         {error && <p role="alert" className="border border-red-300 bg-red-50 p-3 text-red-800">{error}</p>}
 
-        {variants.length > 1 && (
-          <fieldset>
-            <legend className="mb-2 font-medium">Color</legend>
-            <div className="flex flex-wrap gap-2">
-              {variants.map((v) => (
-                <label key={v.id} className="color-swatch" title={v.name}>
-                  <input type="radio" name="variant_id" value={v.id} defaultChecked={v.id === chosen?.id} className="sr-only" />
-                  <span aria-hidden="true" style={{ background: v.hex2 ? `linear-gradient(135deg, ${v.hex} 50%, ${v.hex2} 50%)` : v.hex }} />
-                  <span className="sr-only">{v.name}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-        )}
         {variants.length === 1 && <input type="hidden" name="variant_id" value={variants[0].id} />}
 
         {optical ? (
