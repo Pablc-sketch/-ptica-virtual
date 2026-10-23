@@ -5,18 +5,20 @@ import { AdminNav } from "@/components/admin-nav";
 
 async function Summary() {
   const { supabase } = await requireAdmin();
-  const [drafts, published, quotes] = await Promise.all([
+  const [drafts, published, quotes, prescriptions] = await Promise.all([
     supabase.from("products").select("id", { count: "exact", head: true }).eq("status", "draft"),
     supabase.from("products").select("id", { count: "exact", head: true }).eq("status", "published"),
     supabase.from("quotes").select("id", { count: "exact", head: true }).eq("status", "new"),
+    supabase.from("prescriptions").select("id", {count:"exact",head:true}).eq("status","pending"),
   ]);
   const cards: [string, number | null, string][] = [
+    ["Recetas por revisar", prescriptions.count, "/admin/recetas"],
     ["Borradores", drafts.count, "/admin/productos"],
     ["Publicados", published.count, "/admin/productos"],
     ["Cotizaciones nuevas", quotes.count, "/admin/cotizaciones"],
   ];
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map(([t, n, href]) => (
         <Link key={t} href={href} className="border border-line bg-white/60 p-5 hover:bg-sage/40">
           <p className="eyebrow">{t}</p>
@@ -30,7 +32,7 @@ async function Summary() {
 export default function AdminPage() {
   return (
     <main className="container-page py-10">
-      <h1 className="mb-6 text-4xl">Administración</h1>
+      <h1 className="mb-6 text-4xl">Panel de Óptica Global</h1>
       <AdminNav />
       <Suspense fallback={<p role="status">Cargando…</p>}>
         <Summary />

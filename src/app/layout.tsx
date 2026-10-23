@@ -1,8 +1,9 @@
+import {Suspense} from "react";
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
+import { SiteShell } from "@/components/site-shell";
+
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-global", display: "swap" });
 
@@ -24,11 +25,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Saltar al contenido
         </a>
-        <SiteHeader />
-        <div id="contenido" className="flex-1">
-          {children}
-        </div>
-        <SiteFooter />
+        <Suspense fallback={<div id="contenido">{children}</div>}><SiteShell>{children}</SiteShell></Suspense>
       </body>
     </html>
   );

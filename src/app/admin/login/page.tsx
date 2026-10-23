@@ -10,6 +10,8 @@ async function signIn(formData: FormData) {
     password: String(formData.get("password") ?? ""),
   });
   if (error) redirect("/admin/login?error=credenciales");
+  const {data:allowed,error:roleError}=await supabase.rpc("is_admin");
+  if(roleError||!allowed){await supabase.auth.signOut();redirect("/admin/login?error=credenciales");}
   redirect("/admin");
 }
 
@@ -17,7 +19,7 @@ async function LoginForm({ searchParams }: { searchParams: Promise<{ error?: str
   const { error } = await searchParams;
   return (
     <main className="mx-auto max-w-sm p-8">
-      <h1 className="mb-6 text-4xl">Administración</h1>
+      <h1 className="mb-6 text-4xl">Óptica Global</h1><p className="mb-6 text-muted">Acceso privado de administración</p>
       {error && (
         <p role="alert" className="mb-4 text-sm text-red-700">
           {error === "no-admin" ? "Tu usuario no tiene permisos de administrador." : "Credenciales incorrectas."}

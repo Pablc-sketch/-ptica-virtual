@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import {redirect} from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/session";
 import { DeletePrescriptionButton } from "@/components/delete-prescription-button";
@@ -155,6 +156,7 @@ async function Content({ searchParams }: { searchParams: SP }) {
       </div>
     );
   }
+  if(session.status==='user'){const {data:admin,error}=await supabase.rpc('is_admin');if(error)throw new Error('admin_check_failed');if(admin)redirect('/admin');}
   return session.status === "user" ? <Account userId={session.user.id} email={session.user.email} query={await searchParams} /> : <AuthForms searchParams={searchParams} />;
 }
 
