@@ -44,6 +44,7 @@ export function adapt(r: Row): CatalogProduct {
       url: publicStorageUrl("product-images", i.path),
       alt: i.alt?.trim() || `${r.name}, fotografía real`,
     }));
+  if(r.slug==='ovalo-negro')images.push({url:'/products/soho-ambiente.webp',alt:'Imagen ambientada de Soho sobre una toalla junto al mar'});
   return {
     id: r.id,
     slug: r.slug,

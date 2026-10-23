@@ -25,6 +25,7 @@ export function ProductGallery({ images, modelUrl, name }: { images: CatalogImag
           <Image key={img.url} src={img.url} alt={img.alt} fill priority sizes="(min-width: 1024px) 50vw, 100vw" className="object-contain" />
         )}
       </div>
+      {!show3d&&img.alt.startsWith('Imagen ambientada')&&<p className="mt-2 text-xs text-muted">Imagen ambientada digitalmente.</p>}
       {failed && (
         <p role="alert" className="mt-2 text-sm text-muted">
           No pudimos cargar el modelo 3D en este dispositivo. Puedes seguir viendo las fotografías.
