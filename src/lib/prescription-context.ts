@@ -10,5 +10,5 @@ export function parsePrescriptionContext(value:{product_id:unknown;requested_tre
 }
 /** Solo conserva contexto de selección en el ingreso; jamás acepta destinos externos ni graduaciones en URL. */
 export function accountReturnPath(raw:string):string {
- try {const u=new URL(raw,'https://local.invalid');if(u.origin!=='https://local.invalid'||u.pathname!=='/mi-cuenta')return '/mi-cuenta';const q=new URLSearchParams();for(const key of ['marco','tratamiento','uso','tipo','reemplazar']){const v=u.searchParams.get(key);if(v&&v.length<=120)q.set(key,v);}return `/mi-cuenta${q.size?'?'+q.toString():''}`;}catch{return '/mi-cuenta';}
+ try {const u=new URL(raw,'https://local.invalid');if(u.origin!=='https://local.invalid')return '/mi-cuenta';if(u.pathname==='/cotizar')return '/cotizar';if(u.pathname!=='/mi-cuenta')return '/mi-cuenta';const q=new URLSearchParams();for(const key of ['marco','tratamiento','uso','tipo','reemplazar']){const v=u.searchParams.get(key);if(v&&v.length<=120)q.set(key,v);}return `/mi-cuenta${q.size?'?'+q.toString():''}`;}catch{return '/mi-cuenta';}
 }

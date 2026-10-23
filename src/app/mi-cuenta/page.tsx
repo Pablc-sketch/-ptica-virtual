@@ -5,7 +5,9 @@ import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/session";
 import { DeletePrescriptionButton } from "@/components/delete-prescription-button";
 import { CLIENT_LABEL, isReviewStatus } from "@/lib/prescription-review";
-import { signIn, signOut, signUp } from "./actions";
+import { deleteAddress, signIn, signOut, signUp } from "./actions";
+import { AddressForm } from "@/components/address-form";
+import { formatAddress } from "@/lib/addresses";
 import { PrescriptionUpload } from "@/components/prescription-upload";
 import { OpenPrescriptionButton } from "@/components/open-prescription-button";
 import Link from "next/link";
@@ -20,9 +22,9 @@ const ERRORS: Record<string, string> = {
   registro: "No pudimos crear la cuenta. Revisa los datos o intenta con otro correo.",
 };
 
-type AccountQuery={ error?: string; aviso?: string; modo?: string; reemplazar?: string; marco?:string;tratamiento?:string;uso?:string;tipo?:string};
+type AccountQuery={ error?: string; aviso?: string; modo?: string; reemplazar?: string; marco?:string;tratamiento?:string;uso?:string;tipo?:string;volver?:string;direccion?:string;campo?:string};
 type SP = Promise<AccountQuery>;
-const returnPath=(q:AccountQuery)=>accountReturnPath('/mi-cuenta?'+new URLSearchParams(Object.entries(q).filter((entry):entry is [string,string]=>typeof entry[1]==='string')).toString());
+const returnPath=(q:AccountQuery)=>q.volver==='cotizar'?'/cotizar':accountReturnPath('/mi-cuenta?'+new URLSearchParams(Object.entries(q).filter((entry):entry is [string,string]=>typeof entry[1]==='string')).toString());
 
 async function AuthForms({ searchParams }: { searchParams: SP }) {
   const query=await searchParams;
@@ -67,10 +69,12 @@ async function Account({ userId, email, query }: { userId: string; email: string
   const replacement=query.reemplazar;
   const supabase = await createClient();
   // Filtro explícito de dueño: un administrador ve todas las filas por RLS, pero aquí solo van las suyas.
-  const [{ data: rx, error: rxErr }, { data: quotes, error: quotesErr }] = await Promise.all([
+  const [{ data: rx, error: rxErr }, { data: quotes, error: quotesErr }, { data: addresses, error: addrErr }] = await Promise.all([
     supabase.from("prescriptions").select("id, created_at, quote_id, status, status_changed_at, client_message, replaces_id, product_id, requested_treatment, requested_use, requested_family, products(name)").eq("user_id", userId).order("created_at", { ascending: false }).limit(50),
     supabase.from("quotes").select("id, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
+    supabase.from("customer_addresses").select("id, recipient, phone, region, comuna, street, street_number, unit, is_default").eq("user_id", userId).order("created_at"),
   ]);
+  const ADDRESS_NOTICE: Record<string, string> = { guardada: "Dirección guardada.", borrada: "Dirección eliminada.", tope: "Puedes guardar hasta 5 direcciones. Elimina una para agregar otra.", error: "No pudimos guardar la dirección. Inténtalo de nuevo.", revisar: "Revisa los datos de la dirección." };
   const quoteOpts = (quotes ?? []).map((q) => ({ id: q.id, label: `Cotización del ${new Date(q.created_at).toLocaleDateString("es-CL")}` }));
   const replacementRow = rx?.find((r) => r.id === replacement && r.status === "needs_new_file" && !rx.some((o) => o.replaces_id === r.id));
   const replacementReceived = !!replacement && rx?.some((r) => r.replaces_id === replacement);
@@ -137,6 +141,21 @@ async function Account({ userId, email, query }: { userId: string; email: string
         <p className="mt-4 text-xs text-muted">
           Los enlaces para abrir una receta duran 60 segundos. Solo tú y el equipo autorizado pueden verla. Puedes eliminarla cuando quieras.
         </p>
+        <section id="direcciones" aria-labelledby="dir-title" className="mt-10 border-t border-line pt-6">
+          <h2 id="dir-title" className="mb-3 text-2xl">Mis direcciones de despacho</h2>
+          {query.direccion && ADDRESS_NOTICE[query.direccion] && <p role={query.direccion === "guardada" || query.direccion === "borrada" ? "status" : "alert"} className="mb-3 text-sm">{ADDRESS_NOTICE[query.direccion]}</p>}
+          {addrErr ? <p role="alert" className="text-sm text-red-700">No pudimos cargar tus direcciones.</p> : addresses?.length ? (
+            <ul className="mb-5 divide-y divide-line border-y border-line">
+              {addresses.map((a) => (
+                <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
+                  <span><strong>{a.recipient}</strong>{a.is_default && <span className="text-muted"> · principal</span>}<span className="block text-muted">{formatAddress(a)} · {a.phone}</span></span>
+                  <form action={deleteAddress.bind(null, a.id)}><button className="min-h-11 px-2 underline">Eliminar</button></form>
+                </li>
+              ))}
+            </ul>
+          ) : <p className="mb-4 text-sm text-muted">Aún no tienes direcciones. Agrega una para recibir tus lentes.</p>}
+          {(addresses?.length ?? 0) < 5 && <details open={!addresses?.length}><summary className="cursor-pointer text-sm underline">Agregar dirección</summary><div className="mt-4"><AddressForm /></div></details>}
+        </section>
       </section>
     </div>
   );

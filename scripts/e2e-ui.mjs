@@ -46,7 +46,10 @@ try {
     check(`${label}: catálogo sin desborde`, await noOverflow());
     check(`${label}: precio rotulado "solo marco"`, (await page.locator("article").first().textContent()).includes("solo marco"));
 
-    await page.selectOption("#shape", "Rectangular");
+    // Filtros: la forma va en botones; material, favoritos y búsqueda viven en "Más filtros" (plegado en móvil).
+    const openFilters = async () => { if (!(await page.locator("#material").isVisible())) await page.locator(".catalog-filter-toggle").click(); };
+    await page.getByRole("group", { name: "Forma" }).getByRole("button", { name: "Rectangular" }).click();
+    await openFilters();
     await page.selectOption("#material", "Acetato");
     check(`${label}: forma+material combinados -> Cedro`, (await page.locator("article").count()) === 1 && (await page.locator("article").first().textContent()).includes("Cedro"));
     await page.fill("#q", "zzz");
@@ -57,18 +60,19 @@ try {
     await page.getByRole("button", { name: /Guardar Ámbar en favoritos/ }).click();
     await page.reload({ waitUntil: "networkidle" });
     await hydrated(page, "#q");
+    await openFilters();
     check(`${label}: favorito persiste tras recargar`, await page.getByRole("button", { name: /Quitar Ámbar de favoritos/ }).count() === 1);
     await page.getByLabel("Solo favoritos").check();
     check(`${label}: solo favoritos -> 1`, (await page.locator("article").count()) === 1);
     await page.getByLabel("Solo favoritos").uncheck();
 
-    await page.getByRole("button", { name: "Agregar a selección" }).nth(1).click();
-    check(`${label}: selección actualiza contador del header`, (await page.locator("header").textContent()).includes("Selección(1)"));
+    await page.getByRole("button", { name: "+ Guardar en selección" }).nth(1).click();
+    check(`${label}: selección actualiza contador del header`, (await page.locator("header").textContent()).includes("Selección1"));
 
     await page.goto(`${base}/marcos/ambar`, { waitUntil: "networkidle" });
     await hydrated(page, "main button");
     const main = await page.textContent("main");
-    check(`${label}: ficha con medidas y "solo el marco"`, main.includes("48 mm") && main.includes("solo el marco"));
+    check(`${label}: ficha con medidas y "solo el marco"`, main.includes("48 mm") && main.includes("solo marco"));
     check(`${label}: ficha sin desborde`, await noOverflow());
     check(`${label}: ficha con GLB verificado ofrece Vista 3D`, await page.getByRole("button", { name: "Vista 3D" }).count() === 1);
     await page.getByRole("button", { name: "Vista 3D" }).click();
@@ -88,6 +92,19 @@ try {
     check(`${label}: cotizar lista la selección con total`, (await page.textContent("main")).includes("Basalto"));
     await page.fill('input[type="number"]', "2");
     check(`${label}: total refleja cantidad (2 × $50.000)`, (await page.textContent("main")).replace(/\s/g, " ").includes("100.000"));
+    check(`${label}: cotizar sin cuenta pide crear cuenta o ingresar (sin invitados)`, (await page.textContent("main")).includes("Para cotizar y comprar necesitas tu cuenta") && (await page.locator('input[name="name"]').count()) === 0);
+    const anonQuote = await page.request.post(`${base}/api/cotizaciones`, { data: { name: "X Y", email: "x@y.cl", items: [{ product_id: "22222222-2222-4222-8222-222222222222" }], delivery: { method: "retiro" } } });
+    check(`${label}: API de cotización anónima -> 401`, anonQuote.status() === 401, `(${anonQuote.status()})`);
+    await page.getByRole("link", { name: "Ya tengo cuenta" }).click();
+    await page.waitForSelector('input[name="password"]');
+    await page.fill('input[name="email"]', "cliente@test.cl");
+    await page.fill('input[name="password"]', GOOD_PASSWORD);
+    await page.getByRole("button", { name: "Ingresar" }).click();
+    await page.waitForURL(/\/cotizar$/, { timeout: 10000 }).catch(() => {});
+    await hydrated(page, 'input[name="name"]');
+    check(`${label}: tras ingresar vuelve a la selección`, page.url().endsWith("/cotizar"), `(${page.url()})`);
+    check(`${label}: sin dirección, despacho ofrece agregar una`, (await page.textContent("main")).includes("Agrega una dirección de despacho"));
+    await page.getByLabel("Retiro coordinado (te escribimos para acordarlo)").check();
     await page.fill('input[name="name"]', "Ana Pérez");
     await page.fill('input[name="email"]', "ana@correo.cl");
     await page.check('input[name="consent"]');
@@ -97,6 +114,8 @@ try {
     check(`${label}: cotización enviada muestra confirmación real`, (await page.textContent("main")).includes("Recibimos tu cotización"));
     const sent = quoteCalls.at(-1);
     check(`${label}: payload sin precios del cliente`, quoteCalls.length === before + 1 && JSON.stringify(sent.p_items) === JSON.stringify([{ product_id: "22222222-2222-4222-8222-222222222222", quantity: 2 }]));
+    check(`${label}: la cotización registra la forma de entrega`, String(sent?.p_notes ?? "").includes("Entrega: retiro coordinado."));
+    await page.context().clearCookies();
 
     // ---- Menú móvil ----
     if (label === "móvil") {
@@ -105,8 +124,8 @@ try {
       const burger = page.locator('button[aria-controls="menu-movil"]');
       await burger.click();
       check(`${label}: menú se abre (aria-expanded)`, (await burger.getAttribute("aria-expanded")) === "true");
-      await page.getByRole("link", { name: "Cristales" }).first().click();
-      await page.waitForURL("**/cristales");
+      await page.locator("#menu-movil").getByRole("link", { name: "Probador" }).click();
+      await page.waitForURL("**/probador");
       check(`${label}: menú se cierra al navegar`, (await page.locator("#menu-movil").count()) === 0);
       await burger.click();
       await page.keyboard.press("Escape");

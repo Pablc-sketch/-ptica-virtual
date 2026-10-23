@@ -70,6 +70,9 @@ export function startMock(port) {
       if ((req.headers.accept ?? "").includes("vnd.pgrst.object")) return list[0] ? json(list[0]) : json({ message: "no rows" }, 406);
       return json(list);
     }
+    // La cuenta de prueba es cliente: /mi-cuenta consulta is_admin para mandar al panel solo a administración.
+    if (url.pathname === "/rest/v1/rpc/is_admin") return json(false);
+    if (url.pathname === "/rest/v1/customer_addresses" && req.method === "GET") return json([]);
     if (url.pathname === "/rest/v1/rpc/create_quote" && req.method === "POST") {
       let body = "";
       req.on("data", (c) => (body += c));
