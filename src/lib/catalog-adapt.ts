@@ -44,7 +44,12 @@ export function adapt(r: Row): CatalogProduct {
       url: publicStorageUrl("product-images", i.path),
       alt: i.alt?.trim() || `${r.name}, fotografía real`,
     }));
-  if(r.slug==='ovalo-negro')images.push({url:'/products/soho-ambiente.webp',alt:'Imagen ambientada de Soho sobre una toalla junto al mar'});
+  const scenes:Record<string,[string,string][]>= {
+    'ovalo-negro':[['soho-ambiente','Soho sobre lino junto al mar'],['soho-cerrado','Soho cerrado sobre madera']],
+    'cat-eye-ambar':[['riviera-ambiente','Riviera sobre piedra clara'],['riviera-cerrado','Riviera cerrado sobre madera']],
+    'cat-eye-mosaico':[['brera-ambiente','Brera sobre un escritorio'],['brera-angulo','Brera en vista lateral sobre fondo azul']],
+  };
+  for(const [file,description] of scenes[r.slug]??[])images.push({url:`/products/${file}.webp`,alt:`Imagen ambientada de ${description}`});
   return {
     id: r.id,
     slug: r.slug,

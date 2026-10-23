@@ -25,6 +25,7 @@ function CatalogControls({ products }: { products: CatalogProduct[] }) {
   const initialShape = products.find(p => p.frameShape && (shapeAliases[requestedShape ?? ""] ?? []).includes(p.frameShape.toLowerCase()))?.frameShape ?? (requestedShape ? "__unavailable__" : "");
   const [shape, setShape] = useState(initialShape);
   const [usage,setUsage]=useState(params.get("uso")??"");
+  const [gender,setGender]=useState(params.get("genero")??"");
   const [material, setMaterial] = useState("");
   const [sort, setSort] = useState<Sort>("recomendado");
   const [onlyFavs, setOnlyFavs] = useState(params.get("favoritos") === "1");
@@ -32,13 +33,13 @@ function CatalogControls({ products }: { products: CatalogProduct[] }) {
   const shapes = useMemo(() => distinct(products, "frameShape"), [products]);
   const materials = useMemo(() => distinct(products, "material"), [products]);
   const result = useMemo(
-    () => filterProducts(products.filter(p=>!usage||frameDesign(p.slug)?.use===usage), { q, shape, material, onlyFavs, sort }, favs),
-    [products, q, shape, material, onlyFavs, favs, sort,usage],
+    () => filterProducts(products.filter(p=>(!usage||frameDesign(p.slug)?.use===usage)&&(!gender||[gender,'unisex',gender==='mujer'?'female':'male',gender==='mujer'?'femenino':'masculino'].includes((p.gender??'').toLowerCase()))), { q, shape, material, onlyFavs, sort }, favs),
+    [products, q, shape, material, onlyFavs, favs, sort,usage,gender],
   );
 
-  const filtered = Boolean(q || shape || material || onlyFavs || usage);
+  const filtered = Boolean(q || shape || material || onlyFavs || usage || gender);
   const clear = () => {
-    setQ("");setUsage("");
+    setQ("");setUsage("");setGender("");
     setShape("");
     setMaterial("");
     setOnlyFavs(false);
@@ -62,6 +63,7 @@ function CatalogControls({ products }: { products: CatalogProduct[] }) {
   return (
     <>
       <div className="shape-tabs" role="group" aria-label="Tipo de anteojos">{[['','Todos'],['optical','Lentes ópticos'],['solar','Lentes de sol']].map(([value,label])=><button key={value} type="button" aria-pressed={usage===value} onClick={()=>setUsage(value)}>{label}</button>)}</div>
+      <div className="shape-tabs" role="group" aria-label="Estilo">{[['','Todos los estilos'],['mujer','Mujer'],['hombre','Hombre']].map(([value,label])=><button key={value} type="button" aria-pressed={gender===value} onClick={()=>setGender(value)}>{label}</button>)}</div>
       <button type="button" onClick={()=>setFiltersOpen(v=>!v)} aria-expanded={filtersOpen} aria-controls="catalog-filters" className="btn btn-ghost catalog-filter-toggle mt-4 w-full">{filtersOpen ? "Cerrar filtros" : filtered ? "Filtrar y ordenar · filtros activos" : "Filtrar y ordenar"}</button>
       <form
         id="catalog-filters"
