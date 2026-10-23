@@ -169,7 +169,8 @@ export function QuoteForm({ open, account, sessionUnavailable = false, addressSl
               <span>Acepto que usen mis datos para responder esta cotización. Leí el <Link href="/privacidad" className="underline">aviso de privacidad (borrador)</Link>.</span>
             </label>
             {state === "error" && <p role="alert" className="text-sm text-red-700">{message}</p>}
-            {!canSubmit && lines !== null && <p role="status" className="text-sm">Esta selección necesita comprobar precio o disponibilidad antes del envío.</p>}
+            {!deliveryReady ? <p role="status" className="text-sm">Agrega una dirección de despacho o elige retiro coordinado.</p>
+              : !canSubmit && lines !== null && <p role="status" className="text-sm">Esta selección necesita comprobar precio o disponibilidad antes del envío.</p>}
             <button className="btn" disabled={state === "sending" || !canSubmit}>{state === "sending" ? "Enviando…" : "Enviar cotización"}</button>
             <p className="text-xs text-muted">Pagas solo después de que confirmemos tu receta y el total final. Te enviaremos el enlace de pago.</p>
           </form>
