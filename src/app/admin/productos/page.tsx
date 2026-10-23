@@ -24,7 +24,7 @@ async function List() {
             <Link href={`/admin/productos/${p.id}`} className="flex min-h-14 flex-wrap items-center justify-between gap-2 py-3 hover:bg-sage/30">
               <span>{p.name}</span>
               <span className="text-sm text-muted">
-                {productPrice({priceClp:p.price_clp,pairBasePriceClp:p.pair_base_price_clp}).text} · {verified} foto(s) verificada(s) · {p.is_sample ? "Muestra" : LABEL[p.status] ?? p.status}
+                {productPrice({priceClp:p.price_clp,pairBasePriceClp:p.pair_base_price_clp}).text} · {verified} foto(s) verificada(s) · {LABEL[p.status] ?? p.status}{p.is_sample ? " · muestra" : ""}
               </span>
             </Link>
           </li>

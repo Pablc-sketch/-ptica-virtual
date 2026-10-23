@@ -78,6 +78,7 @@ export async function updateProduct(id: string, formData: FormData) {
       material: text(formData, "material"),
       color: text(formData, "color"),
       gender: text(formData, "gender"),
+      use: formData.get("use") === "solar" ? "solar" : "optical",
       lens_width_mm: dims[0],
       bridge_mm: dims[1],
       temple_mm: dims[2],
@@ -97,6 +98,20 @@ export async function updateProcurement(id: string, formData: FormData) {
   if(error) back("No se pudo guardar el código privado");
   revalidatePath(`/admin/productos/${id}`);
   redirect(`/admin/productos/${id}?ok=Referencia%20privada%20guardada`);
+}
+
+// Código del proveedor por color: privado (RLS solo administración), nunca en el catálogo.
+export async function updateVariantProcurement(productId: string, variantId: string, formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const code = text(formData, "supplier_code"), color = text(formData, "color_code"), notes = text(formData, "notes");
+  const back = (m: string) => redirect(`/admin/productos/${productId}?error=${encodeURIComponent(m)}`);
+  if (!code || code.length > 80 || (color?.length ?? 0) > 80 || (notes?.length ?? 0) > 1000) back("Revisa el código del color");
+  const { data: v } = await supabase.from("product_variants").select("id").eq("id", variantId).eq("product_id", productId).maybeSingle();
+  if (!v) back("Ese color no pertenece a este marco");
+  const { error } = await supabase.from("product_variant_procurement").upsert({ variant_id: variantId, supplier_code: code, color_code: color, notes, confirmed: formData.get("confirmed") === "on" });
+  if (error) back("No se pudo guardar el código del color");
+  revalidatePath(`/admin/productos/${productId}`);
+  redirect(`/admin/productos/${productId}?ok=C%C3%B3digo%20del%20color%20guardado`);
 }
 
 export async function setProductStatus(id: string, status: "draft" | "published" | "archived") {

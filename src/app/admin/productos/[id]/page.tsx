@@ -6,7 +6,7 @@ import { AdminNav } from "@/components/admin-nav";
 import { MediaUploader } from "@/components/media-uploader";
 import { MediaRowActions } from "@/components/media-row-actions";
 import { publicStorageUrl } from "@/lib/catalog";
-import { setProductStatus, updateProduct, updateProcurement } from "@/app/admin/actions";
+import { setProductStatus, updateProduct, updateProcurement, updateVariantProcurement } from "@/app/admin/actions";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -17,7 +17,7 @@ async function Editor({ params, searchParams }: { params: Promise<{ id: string }
   if (!UUID.test(id)) notFound();
   const { data: p } = await supabase
     .from("products")
-    .select("*, brands(name), product_images(id, path, alt, position, verified, kind), product_models(glb_path, verified, size_bytes)")
+    .select("*, brands(name), product_images(id, path, alt, position, verified, kind, variant_id, view), product_models(glb_path, verified, size_bytes), product_variants(id, color_name, color_hex, color_hex_2, position, status, product_variant_procurement(supplier_code, color_code, confirmed, notes))")
     .eq("id", id)
     .maybeSingle();
   if (!p) notFound();
@@ -26,7 +26,12 @@ async function Editor({ params, searchParams }: { params: Promise<{ id: string }
   const model = Array.isArray(p.product_models) ? p.product_models[0] : p.product_models;
   const images = [...(p.product_images ?? [])].sort((a, b) => a.position - b.position);
   const hasVerified = images.some((i) => i.verified);
-  const canPublish = hasVerified && p.price_clp > 0 && p.name.trim().length > 0 && Boolean(p.sku?.trim());
+  // Igual que el trigger enforce_publishable: la muestra exige imagen retocada; el producto real, foto verificada y precio del marco.
+  const canPublish = p.name.trim().length > 0 && Boolean(p.sku?.trim()) &&
+    (p.is_sample ? images.some((i) => i.kind === "retouched") : hasVerified && p.price_clp > 0);
+  type Variant = { id: string; color_name: string; color_hex: string; color_hex_2: string | null; position: number; status: string;
+    product_variant_procurement: { supplier_code: string; color_code: string | null; confirmed: boolean; notes: string | null } | { supplier_code: string; color_code: string | null; confirmed: boolean; notes: string | null }[] | null };
+  const variants = [...((p.product_variants ?? []) as Variant[])].sort((a, b) => a.position - b.position);
 
   return (
     <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
@@ -41,6 +46,7 @@ async function Editor({ params, searchParams }: { params: Promise<{ id: string }
           <label>Solo marco (CLP, vacío si falta confirmar)<input name="price_clp" type="number" min={1} step={1} defaultValue={p.price_clp ?? ""} className="field mt-1" /></label>
           <label>Par con lente básico, desde (CLP)<input name="pair_base_price_clp" type="number" min={1} step={1} defaultValue={p.pair_base_price_clp ?? ""} className="field mt-1" /></label>
           <label className="flex items-start gap-3 text-sm"><input type="checkbox" name="is_sample" defaultChecked={p.is_sample} className="h-5 w-5"/>Mostrar como muestra: imagen retocada y disponibilidad por confirmar. No habilita venta.</label>
+          <label>Uso<select name="use" defaultValue={p.use ?? "optical"} className="field mt-1"><option value="optical">Óptico (con receta)</option><option value="solar">Lentes de sol</option></select></label>
           <label>Descripción<textarea name="description" defaultValue={p.description ?? ""} maxLength={2000} className="field mt-1" /></label>
           <div className="grid grid-cols-2 gap-3">
             <label>Forma<input name="frame_shape" defaultValue={p.frame_shape ?? ""} className="field mt-1" /></label>
@@ -56,10 +62,39 @@ async function Editor({ params, searchParams }: { params: Promise<{ id: string }
 
         <section className="mt-10 border-t border-line pt-6" aria-labelledby="abastecimiento"><h2 id="abastecimiento" className="text-2xl">Referencia privada del proveedor</h2><p className="my-3 text-sm text-muted">Solo administración. Este código no aparece en el catálogo ni se envía al cliente.</p>{procurementError ? <p role="alert">No se pudo cargar la referencia privada.</p> : <form action={updateProcurement.bind(null,id)} className="flex flex-col gap-3"><label>Proveedor<input name="supplier_name" defaultValue={procurement?.supplier_name??""} maxLength={120} className="field mt-1"/></label><label>Código de compra<input name="supplier_code" defaultValue={procurement?.supplier_code??""} required maxLength={80} className="field mt-1"/></label><label>Variante / color del proveedor<input name="color_code" defaultValue={procurement?.color_code??""} maxLength={80} className="field mt-1"/></label><label>Notas internas<textarea name="procurement_notes" defaultValue={procurement?.notes??""} maxLength={1000} className="field mt-1"/></label><label className="flex gap-3 text-sm"><input name="procurement_confirmed" type="checkbox" defaultChecked={procurement?.confirmed} className="h-5 w-5"/>Código comprobado</label><button className="btn self-start">Guardar referencia privada</button></form>}</section>
 
+        {variants.length > 0 && (
+          <section className="mt-10 border-t border-line pt-6" aria-labelledby="colores">
+            <h2 id="colores" className="text-2xl">Colores y códigos del proveedor</h2>
+            <p className="my-3 text-sm text-muted">Solo administración. Con el código y el color le pides el marco a la importadora.</p>
+            <ul className="space-y-5">
+              {variants.map((v) => {
+                const proc = Array.isArray(v.product_variant_procurement) ? v.product_variant_procurement[0] : v.product_variant_procurement;
+                const front = images.find((i) => i.variant_id === v.id && i.view === "front");
+                return (
+                  <li key={v.id} className="border border-line p-3">
+                    <div className="flex items-center gap-3">
+                      {front && <div className="relative h-14 w-20 shrink-0 bg-white"><Image src={publicStorageUrl("product-images", front.path)} alt="" fill sizes="80px" className="object-contain" /></div>}
+                      <span aria-hidden="true" className="h-6 w-6 shrink-0 rounded-full border border-line" style={{ background: v.color_hex_2 ? `linear-gradient(135deg, ${v.color_hex} 50%, ${v.color_hex_2} 50%)` : v.color_hex }} />
+                      <p className="text-sm"><strong>{v.color_name}</strong>{v.status !== "published" ? " · oculto" : ""}{proc?.confirmed ? " · ✓ comprobado" : " · por comprobar"}</p>
+                    </div>
+                    <form action={updateVariantProcurement.bind(null, id, v.id)} className="mt-3 grid gap-2 sm:grid-cols-2">
+                      <label className="text-sm">Código<input name="supplier_code" defaultValue={proc?.supplier_code ?? ""} required maxLength={80} className="field mt-1" /></label>
+                      <label className="text-sm">Color del proveedor<input name="color_code" defaultValue={proc?.color_code ?? ""} maxLength={80} className="field mt-1" /></label>
+                      <label className="text-sm sm:col-span-2">Notas<input name="notes" defaultValue={proc?.notes ?? ""} maxLength={1000} className="field mt-1" /></label>
+                      <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="confirmed" defaultChecked={proc?.confirmed} className="h-5 w-5" />Comprobado con la importadora</label>
+                      <button className="btn btn-ghost justify-self-start">Guardar</button>
+                    </form>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
+
         <h2 className="mb-2 mt-10 text-2xl">Publicación</h2>
         <p className="mb-3 text-sm text-muted">
-          Estado actual: <strong>{p.is_sample ? "Muestra de catálogo" : p.status === "published" ? "Publicado" : p.status === "archived" ? "Archivado" : "Borrador"}</strong>.
-          Para publicar se exige código real, precio mayor a 0 y al menos una foto verificada
+          Estado actual: <strong>{p.status === "published" ? "Publicado" : p.status === "archived" ? "Archivado" : "Borrador"}{p.is_sample ? " · muestra" : ""}</strong>.
+          {p.is_sample ? " Para publicar una muestra se exige nombre, identificador de tienda y una imagen retocada identificada" : " Para publicar se exige código real, precio mayor a 0 y al menos una foto verificada"}
           {canPublish ? " (cumplido)." : " (aún no se cumple)."}
         </p>
         <div className="flex flex-wrap gap-2">
