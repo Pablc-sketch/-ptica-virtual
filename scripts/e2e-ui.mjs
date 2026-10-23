@@ -92,18 +92,9 @@ try {
     check(`${label}: cotizar lista la selección con total`, (await page.textContent("main")).includes("Basalto"));
     await page.fill('input[type="number"]', "2");
     check(`${label}: total refleja cantidad (2 × $50.000)`, (await page.textContent("main")).replace(/\s/g, " ").includes("100.000"));
-    check(`${label}: cotizar sin cuenta pide crear cuenta o ingresar (sin invitados)`, (await page.textContent("main")).includes("Para cotizar y comprar necesitas tu cuenta") && (await page.locator('input[name="name"]').count()) === 0);
-    const anonQuote = await page.request.post(`${base}/api/cotizaciones`, { data: { name: "X Y", email: "x@y.cl", items: [{ product_id: "22222222-2222-4222-8222-222222222222" }], delivery: { method: "retiro" } } });
-    check(`${label}: API de cotización anónima -> 401`, anonQuote.status() === 401, `(${anonQuote.status()})`);
-    await page.getByRole("link", { name: "Ya tengo cuenta" }).click();
-    await page.waitForSelector('input[name="password"]');
-    await page.fill('input[name="email"]', "cliente@test.cl");
-    await page.fill('input[name="password"]', GOOD_PASSWORD);
-    await page.getByRole("button", { name: "Ingresar" }).click();
-    await page.waitForURL(/\/cotizar$/, { timeout: 10000 }).catch(() => {});
+    check(`${label}: cotizar sin cuenta muestra el formulario (sin obligar a registrarse)`, (await page.locator('input[name="name"]').count()) === 1);
     await hydrated(page, 'input[name="name"]');
-    check(`${label}: tras ingresar vuelve a la selección`, page.url().endsWith("/cotizar"), `(${page.url()})`);
-    check(`${label}: sin dirección, despacho ofrece agregar una`, (await page.textContent("main")).includes("Agrega una dirección de despacho"));
+    check(`${label}: despacho sin cuenta pide la dirección en el formulario`, (await page.locator('input[name="addr_street"]').count()) === 1);
     await page.getByLabel("Retiro coordinado (te escribimos para acordarlo)").check();
     await page.fill('input[name="name"]', "Ana Pérez");
     await page.fill('input[name="email"]', "ana@correo.cl");
@@ -115,7 +106,6 @@ try {
     const sent = quoteCalls.at(-1);
     check(`${label}: payload sin precios del cliente`, quoteCalls.length === before + 1 && JSON.stringify(sent.p_items) === JSON.stringify([{ product_id: "22222222-2222-4222-8222-222222222222", quantity: 2 }]));
     check(`${label}: la cotización registra la forma de entrega`, String(sent?.p_notes ?? "").includes("Entrega: retiro coordinado."));
-    await page.context().clearCookies();
 
     // ---- Menú móvil ----
     if (label === "móvil") {

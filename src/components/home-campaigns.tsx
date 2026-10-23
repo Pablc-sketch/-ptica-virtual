@@ -4,9 +4,9 @@ import Link from 'next/link';
 import {useEffect,useState} from 'react';
 
 const CAMPAIGNS=[
- {tag:'Óptica Global',title:'Una mirada.\nTodo tu estilo.',copy:'Marco + cristales básicos con tu receta, desde $28.000.',cta:'Encuentra tu marco',href:'/marcos?uso=optical',image:'/products/ambar.webp',alt:'Riviera, marco agatado negro y ámbar',theme:'amber'},
- {tag:'La colección de sol',title:'Días de sol.\nEstilo propio.',copy:'Descubre Soho: líneas suaves y negro esencial.',cta:'Ver lentes de sol',href:'/marcos?uso=solar',image:'/products/soho-ambiente.webp',alt:'Soho sobre lino junto al mar, imagen ambientada',theme:'sand'},
- {tag:'Tu próximo par',title:'El detalle\nque te distingue.',copy:'Brera. Una mirada al color, en mosaico azul.',cta:'Descubrir Brera',href:'/marcos/cat-eye-mosaico',image:'/products/mosaico.webp',alt:'Brera, marco agatado con mosaico azul',theme:'blue'},
+ {tag:'Óptica Global',title:'Una mirada.\nTodo tu estilo.',copy:'Marco + cristales básicos con tu receta, desde $28.000.',cta:'Encuentra tu marco',href:'/marcos?categoria=mujer',image:'/img/banner-optico.webp',alt:'Mujer con lentes ópticos junto a una ventana, imagen ambientada',theme:'amber'},
+ {tag:'La colección de sol',title:'Días de sol.\nEstilo propio.',copy:'Lentes de sol desde $28.000 el par.',cta:'Ver lentes de sol',href:'/marcos?categoria=sol',image:'/img/banner-sol.webp',alt:'Mujer con lentes de sol leyendo en la playa, imagen ambientada',theme:'sand'},
+ {tag:'Tu próximo par',title:'El detalle\nque te distingue.',copy:'Ópticos y de sol, con nombres que viajan contigo.',cta:'Ver la colección',href:'/marcos',image:'/img/banner-color.webp',alt:'Pareja caminando con lentes ópticos y de sol, imagen ambientada',theme:'blue'},
 ];
 
 // Carrusel con desplazamiento lateral suave: todas las diapositivas viven en una pista que se traslada.

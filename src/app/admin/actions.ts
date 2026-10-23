@@ -114,6 +114,15 @@ export async function updateVariantProcurement(productId: string, variantId: str
   redirect(`/admin/productos/${productId}?ok=C%C3%B3digo%20del%20color%20guardado`);
 }
 
+export async function setStoreOrderStatus(id: string, formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const status = String(formData.get("status") ?? "");
+  if (!["paid", "ordered", "shipped", "delivered", "cancelled"].includes(status)) redirect("/admin/compras");
+  await supabase.from("store_orders").update({ status }).eq("id", id);
+  revalidatePath("/admin/compras");
+  redirect("/admin/compras");
+}
+
 export async function setProductStatus(id: string, status: "draft" | "published" | "archived") {
   const { supabase } = await requireAdmin();
   if (!["draft", "published", "archived"].includes(status)) redirect(`/admin/productos/${id}?error=Estado%20inv%C3%A1lido`);

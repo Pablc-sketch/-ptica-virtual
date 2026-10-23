@@ -445,3 +445,6 @@ input[type=checkbox] { accent-color:var(--olive); }
 .card-swatches button[aria-pressed=true]>span{outline:1.5px solid #142238;outline-offset:2px}
 .card-swatches button:focus-visible{outline:3px solid #2945ed;outline-offset:0}
 .card-swatches{min-height:32px}
+.lens-photo{position:relative;aspect-ratio:4/3;margin:0 0 18px;overflow:hidden;border-radius:6px;background:#f2eee7}
+.campaign .campaign-photo img{object-fit:cover}
+.btn-mp{background:#009ee3;border-color:#009ee3;color:#fff}.btn-mp:hover{background:#0084bf}.btn-mp:disabled{opacity:.55}

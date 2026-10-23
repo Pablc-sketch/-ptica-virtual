@@ -1,17 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { clearSelection, setQuantity, toggleSelection, useSelection } from "@/lib/local-store";
 import { clp } from "@/lib/format";
 import { productPrice } from "@/lib/product-price";
+import { REGIONES } from "@/lib/addresses";
 import { FrameOutline } from "@/components/frame-outline";
 
 type Line = { id: string; name: string; price_clp: number | null; pair_base_price_clp?: number | null; is_sample?: boolean };
 
 export type QuoteAccount = { email: string; addresses: { id: string; text: string; isDefault: boolean }[] };
 
-export function QuoteForm({ open, account, sessionUnavailable = false, addressSlot }: { open: boolean; account: QuoteAccount | null; sessionUnavailable?: boolean; addressSlot?: ReactNode }) {
+export function QuoteForm({ open, account, sessionUnavailable = false }: { open: boolean; account: QuoteAccount | null; sessionUnavailable?: boolean }) {
   const [delivery, setDelivery] = useState<"despacho" | "retiro">("despacho");
   const defaultAddress = account?.addresses.find((a) => a.isDefault)?.id ?? account?.addresses[0]?.id ?? "";
   const selection = useSelection();
@@ -45,8 +46,9 @@ export function QuoteForm({ open, account, sessionUnavailable = false, addressSl
   const pricing = (l: Line) => productPrice({priceClp:l.price_clp,pairBasePriceClp:l.pair_base_price_clp});
   const complete = !loadError && selection.every(s=>{const l=byId.get(s.id);return l && pricing(l).amount !== null;});
   const total = complete ? selection.reduce((acc,s)=>acc+pricing(byId.get(s.id)!).amount!*s.quantity,0) : null;
-  const deliveryReady = delivery === "retiro" || Boolean(account?.addresses.length);
-  const canSubmit = Boolean(account) && deliveryReady && complete && selection.every(s=>{const l=byId.get(s.id);return l && !l.is_sample && l.price_clp !== null && l.price_clp>0;});
+  // Sin cuenta también se puede: quien no tiene direcciones guardadas escribe la dirección aquí mismo.
+  const savedAddresses = account?.addresses ?? [];
+  const canSubmit = complete && selection.every(s=>{const l=byId.get(s.id);return l && !l.is_sample && l.price_clp !== null && l.price_clp>0;});
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -63,7 +65,9 @@ export function QuoteForm({ open, account, sessionUnavailable = false, addressSl
           email: f.get("email"),
           phone: f.get("phone"),
           notes: f.get("notes"),
-          delivery: { method: delivery, address_id: delivery === "despacho" ? f.get("address_id") : null },
+          delivery: delivery === "retiro" ? { method: "retiro" }
+            : savedAddresses.length ? { method: "despacho", address_id: f.get("address_id") }
+            : { method: "despacho", address: Object.fromEntries(["recipient", "phone", "region", "comuna", "street", "street_number", "unit", "notes"].map((k) => [k, f.get(`addr_${k}`)])) },
           items: selection.map((s) => ({ product_id: s.id, quantity: s.quantity })),
         }),
       });
@@ -131,16 +135,6 @@ export function QuoteForm({ open, account, sessionUnavailable = false, addressSl
         <h2 id="datos" className="mb-4 text-2xl">Tus datos</h2>
         {sessionUnavailable ? (
           <p role="alert" className="border border-line bg-white/60 p-5 text-sm">No pudimos verificar tu sesión. Recarga la página en un momento.</p>
-        ) : !account ? (
-          <div className="border border-line bg-white/60 p-5">
-            <p className="font-medium">Para cotizar y comprar necesitas tu cuenta.</p>
-            <p className="mt-1 text-sm text-muted">Con ella guardas tu receta, tu dirección de despacho y sigues tu pedido y tu pago. No vendemos como invitado.</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Link href="/mi-cuenta?volver=cotizar&modo=registro" className="btn">Crear mi cuenta</Link>
-              <Link href="/mi-cuenta?volver=cotizar" className="btn btn-ghost">Ya tengo cuenta</Link>
-            </div>
-            <p className="mt-3 text-xs text-muted">Tu selección se mantiene guardada en este dispositivo.</p>
-          </div>
         ) : !open ? (
           <div className="border border-line bg-sage/40 p-5" role="status">
             <p className="font-medium">Las cotizaciones todavía no están abiertas.</p>
@@ -149,17 +143,28 @@ export function QuoteForm({ open, account, sessionUnavailable = false, addressSl
         ) : (
           <form onSubmit={submit} className="flex flex-col gap-3">
             <label>Nombre<input name="name" required minLength={2} maxLength={120} autoComplete="name" className="field mt-1" /></label>
-            <label>Email<input name="email" type="email" defaultValue={account.email} autoComplete="email" className="field mt-1" /></label>
+            <label>Email<input name="email" type="email" defaultValue={account?.email} autoComplete="email" className="field mt-1" /></label>
             <label>Teléfono<input name="phone" type="tel" minLength={6} maxLength={30} autoComplete="tel" className="field mt-1" /></label>
             <p className="-mt-1 text-xs text-muted">Indica al menos email o teléfono.</p>
             <fieldset className="mt-2">
               <legend className="mb-2 font-medium">Entrega</legend>
               <label className="flex items-center gap-2 text-sm"><input type="radio" name="delivery" checked={delivery === "despacho"} onChange={() => setDelivery("despacho")} className="h-5 w-5" />Despacho a domicilio</label>
-              {delivery === "despacho" && (account.addresses.length ? (
+              {delivery === "despacho" && (savedAddresses.length ? (
                 <div className="ml-7 mt-2 flex flex-col gap-2">
-                  {account.addresses.map((a) => <label key={a.id} className="flex items-start gap-2 text-sm"><input type="radio" name="address_id" value={a.id} defaultChecked={a.id === defaultAddress} required className="mt-0.5 h-5 w-5" />{a.text}</label>)}
+                  {savedAddresses.map((a) => <label key={a.id} className="flex items-start gap-2 text-sm"><input type="radio" name="address_id" value={a.id} defaultChecked={a.id === defaultAddress} required className="mt-0.5 h-5 w-5" />{a.text}</label>)}
                 </div>
-              ) : <p className="ml-7 mt-2 text-sm">Agrega una dirección de despacho más abajo.</p>)}
+              ) : (
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <label className="text-sm sm:col-span-2">Quién recibe<input name="addr_recipient" required minLength={2} maxLength={120} autoComplete="name" className="field mt-1" /></label>
+                  <label className="text-sm">Teléfono de contacto<input name="addr_phone" type="tel" required minLength={6} maxLength={30} autoComplete="tel" className="field mt-1" /></label>
+                  <label className="text-sm">Región<select name="addr_region" required defaultValue="Metropolitana" className="field mt-1">{REGIONES.map((r) => <option key={r}>{r}</option>)}</select></label>
+                  <label className="text-sm">Comuna<input name="addr_comuna" required minLength={2} maxLength={60} className="field mt-1" /></label>
+                  <label className="text-sm">Calle<input name="addr_street" required minLength={2} maxLength={120} autoComplete="address-line1" className="field mt-1" /></label>
+                  <label className="text-sm">Número<input name="addr_street_number" required maxLength={20} className="field mt-1" /></label>
+                  <label className="text-sm">Depto. / casa (opcional)<input name="addr_unit" maxLength={40} className="field mt-1" /></label>
+                  <input type="hidden" name="addr_notes" value="" />
+                </div>
+              ))}
               <label className="mt-2 flex items-center gap-2 text-sm"><input type="radio" name="delivery" checked={delivery === "retiro"} onChange={() => setDelivery("retiro")} className="h-5 w-5" />Retiro coordinado (te escribimos para acordarlo)</label>
               <p className="mt-2 text-xs text-muted">El costo y el plazo de despacho se confirman junto con el total, antes de pagar.</p>
             </fieldset>
@@ -169,18 +174,12 @@ export function QuoteForm({ open, account, sessionUnavailable = false, addressSl
               <span>Acepto que usen mis datos para responder esta cotización. Leí el <Link href="/privacidad" className="underline">aviso de privacidad (borrador)</Link>.</span>
             </label>
             {state === "error" && <p role="alert" className="text-sm text-red-700">{message}</p>}
-            {!deliveryReady ? <p role="status" className="text-sm">Agrega una dirección de despacho o elige retiro coordinado.</p>
-              : !canSubmit && lines !== null && <p role="status" className="text-sm">Esta selección necesita comprobar precio o disponibilidad antes del envío.</p>}
+            {!canSubmit && lines !== null && <p role="status" className="text-sm">Esta selección necesita comprobar precio o disponibilidad antes del envío.</p>}
             <button className="btn" disabled={state === "sending" || !canSubmit}>{state === "sending" ? "Enviando…" : "Enviar cotización"}</button>
             <p className="text-xs text-muted">Pagas solo después de que confirmemos tu receta y el total final. Te enviaremos el enlace de pago.</p>
           </form>
         )}
-        {account && !account.addresses.length && addressSlot && (
-          <details className="mt-6 border-t border-line pt-4" open={delivery === "despacho"} id="direcciones">
-            <summary className="cursor-pointer text-sm underline">Agregar dirección de despacho</summary>
-            <div className="mt-4">{addressSlot}</div>
-          </details>
-        )}
+        {!account && open && <p className="mt-4 text-xs text-muted">No necesitas cuenta. Si la creas, guardas tus direcciones y tu receta. <Link href="/mi-cuenta?volver=cotizar&modo=registro" className="underline">Crear cuenta</Link></p>}
       </section>
     </div>
   );

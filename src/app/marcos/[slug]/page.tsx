@@ -59,7 +59,8 @@ async function Detail({ params, searchParams }: { params: PageProps<"/marcos/[sl
           ))}
         </dl></details>
         {p.pairBasePriceClp && !solar && <div className="mt-6 grid grid-cols-3 gap-2 text-sm" aria-label="Precios iniciales del par"><div>Básico<p className="mt-1 font-semibold">${p.pairBasePriceClp.toLocaleString("es-CL")}</p></div><div>Antirreflejo<p className="mt-1 font-semibold">${(p.pairBasePriceClp+10000).toLocaleString("es-CL")}</p></div><div>Filtro azul<p className="mt-1 font-semibold">${(p.pairBasePriceClp+20000).toLocaleString("es-CL")}</p></div></div>}
-        <Link href={`/cotizar-receta?marco=${p.slug}`} className="mt-5 inline-flex min-h-11 items-center text-sm underline">{solar ? "¿Los necesitas con aumento? Cotiza con tu receta →" : "Elegir mis cristales →"}</Link>
+        <Link href={`/comprar/${p.slug}${typeof color === "string" ? `?color=${encodeURIComponent(color)}` : ""}`} className="btn btn-mp mt-6 w-full">Comprar con Mercado Pago</Link>
+        <Link href={`/cotizar-receta?marco=${p.slug}`} className="mt-3 inline-flex min-h-11 items-center text-sm underline">{solar ? "¿Los necesitas con aumento? Cotiza con tu receta →" : "Elegir mis cristales →"}</Link>
         <Link href={`/probador?marco=${p.slug}`} className="btn btn-ghost mt-4 w-full">Probar en mi foto</Link>
         <SelectionButtons id={p.id} />
         <CompareButton id={p.id}/>
