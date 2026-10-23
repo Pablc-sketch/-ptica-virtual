@@ -43,7 +43,7 @@ async function Detail({ params }: { params: PageProps<"/marcos/[slug]">["params"
   const price = productPrice(p);
   return (
     <div className="product-detail grid gap-7 md:grid-cols-2">
-      <div className="min-w-0"><ProductGallery images={p.images} modelUrl={p.modelUrl} name={p.name} /></div>
+      <div className="min-w-0"><ProductGallery images={p.images} modelUrl={p.modelUrl} name={p.name} variants={p.variants} /></div>
       <div className="product-info min-w-0">
         {p.brand && <p className="eyebrow">{p.brand}</p>}
         <h1 className="text-[clamp(36px,5vw,60px)]">{p.name}</h1>

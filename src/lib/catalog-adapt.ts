@@ -26,7 +26,9 @@ export type Row = {
   bridge_mm: number | null;
   temple_mm: number | null;
   brands: { name: string } | { name: string }[] | null;
-  product_images: { path: string; alt: string | null; position: number; verified: boolean; kind?: string }[] | null;
+  product_images: { path: string; alt: string | null; position: number; verified: boolean; kind?: string; variant_id?: string | null; view?: string }[] | null;
+  use?: "optical" | "solar";
+  product_variants?: { id: string; color_name: string; color_hex: string; color_hex_2: string | null; position: number; status: string }[] | null;
   product_models:
     | { glb_path: string; verified: boolean }
     | { glb_path: string; verified: boolean }[]
@@ -37,13 +39,26 @@ export type Row = {
 export function adapt(r: Row): CatalogProduct {
   const brand = Array.isArray(r.brands) ? r.brands[0] : r.brands;
   const model = Array.isArray(r.product_models) ? r.product_models[0] : r.product_models;
-  const images = [...(r.product_images ?? [])]
+  const visible = [...(r.product_images ?? [])]
     .filter((i) => i.verified || (r.is_sample && i.kind === "retouched"))
+    .sort((a, b) => a.position - b.position);
+  const toImage = (i: (typeof visible)[number]) => ({
+    url: publicStorageUrl("product-images", i.path),
+    alt: i.alt?.trim() || `${r.name}, fotografía real`,
+  });
+  // Colores: la foto de frente es por color; el contexto es del modelo.
+  const variants = [...(r.product_variants ?? [])]
+    .filter((v) => v.status === "published")
     .sort((a, b) => a.position - b.position)
-    .map((i) => ({
-      url: publicStorageUrl("product-images", i.path),
-      alt: i.alt?.trim() || `${r.name}, fotografía real`,
-    }));
+    .map((v) => {
+      const front = visible.find((i) => i.variant_id === v.id && (i.view ?? "front") === "front");
+      return { id: v.id, name: v.color_name, hex: v.color_hex, hex2: v.color_hex_2, front: front ? toImage(front) : null };
+    })
+    .filter((v) => v.front);
+  const contextImages = visible.filter((i) => !i.variant_id && i.view === "context").map(toImage);
+  const images = variants.length
+    ? [variants[0].front!, ...contextImages]
+    : visible.filter((i) => !i.variant_id).map(toImage);
   const scenes:Record<string,[string,string][]>= {
     'ovalo-negro':[['soho-ambiente','Soho sobre lino junto al mar'],['soho-cerrado','Soho cerrado sobre madera']],
     'cat-eye-ambar':[['riviera-ambiente','Riviera sobre piedra clara'],['riviera-cerrado','Riviera cerrado sobre madera']],
@@ -68,6 +83,9 @@ export function adapt(r: Row): CatalogProduct {
     bridgeMm: r.bridge_mm,
     templeMm: r.temple_mm,
     images,
+    use: r.use ?? frameDesign(r.slug)?.use ?? "optical",
+    variants,
+    contextImages,
     modelUrl: model?.verified ? publicStorageUrl("product-models", model.glb_path) : null,
   };
 }

@@ -1,4 +1,6 @@
 export type CatalogImage = { url: string; alt: string };
+/** Color de un modelo. `front` es la foto de frente en fondo blanco de ese color (la que cambia al elegir color). */
+export type CatalogVariant = { id: string; name: string; hex: string; hex2: string | null; front: CatalogImage | null };
 export type CatalogProduct = {
   id: string;
   slug: string;
@@ -18,4 +20,8 @@ export type CatalogProduct = {
   templeMm: number | null;
   images: CatalogImage[];
   modelUrl: string | null;
+  use?: "optical" | "solar";
+  variants?: CatalogVariant[];
+  /** Fotos de contexto del modelo (no cambian con el color). */
+  contextImages?: CatalogImage[];
 };

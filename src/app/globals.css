@@ -422,3 +422,18 @@ input[type=checkbox] { accent-color:var(--olive); }
 .guide-terms dt{font-weight:700}
 /* Las fotos de producto tienen fondo blanco: se funden con el fondo de color de la colección. */
 .collection-art .collection-media img,.collection-essentials .collection-media img{mix-blend-mode:multiply;padding:12%}
+
+/* Catálogo simplificado: categoría -> forma -> más filtros */
+.catalog-categories{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.catalog-categories button{min-height:44px;padding:0 18px;border:1px solid var(--line);border-radius:999px;background:#fff;font-size:14px;cursor:pointer;transition:all .2s}
+.catalog-categories button[aria-pressed="true"]{background:#142238;color:#fff;border-color:#142238}
+.catalog-shapes{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:16px}
+.catalog-shapes .eyebrow{margin-right:6px}
+.catalog-shapes button{min-height:40px;padding:0 14px;border:0;border-bottom:2px solid transparent;background:none;font-size:14px;cursor:pointer}
+.catalog-shapes button[aria-pressed="true"]{border-bottom-color:#c4552f;font-weight:600}
+
+/* Selector de color: círculos del color real del marco */
+.color-swatch{position:relative;display:inline-flex;width:44px;height:44px;align-items:center;justify-content:center;cursor:pointer}
+.color-swatch>span[aria-hidden]{width:30px;height:30px;border-radius:50%;border:1px solid #0003;box-shadow:inset 0 0 0 2px #fff}
+.color-swatch input:checked+span{outline:2px solid #142238;outline-offset:3px}
+.color-swatch input:focus-visible+span{outline:3px solid #2945ed;outline-offset:3px}
