@@ -41,7 +41,7 @@ export function ProductGallery({ images: baseImages, modelUrl, name, variants = 
             {variants.map((v, idx) => (
               <label key={v.id} className="color-swatch" title={v.name}>
                 <input type="radio" name="color" value={v.id} checked={idx === colorIdx} className="sr-only"
-                  onChange={() => { setColorIdx(idx); setI(0); setShow3d(false); const u = new URL(window.location.href); u.searchParams.set("color", v.id); window.history.replaceState(window.history.state, "", u); }} />
+                  onChange={() => { setColorIdx(idx); setI(0); setShow3d(false); const u = new URL(window.location.href); u.searchParams.set("color", v.id); window.history.replaceState(window.history.state, "", u); window.dispatchEvent(new CustomEvent("opticaglobal:color", {detail:{slug:window.location.pathname.split("/").pop(),color:v.id}})); }} />
                 <span aria-hidden="true" style={{ background: v.hex2 ? `linear-gradient(135deg, ${v.hex} 50%, ${v.hex2} 50%)` : v.hex }} />
                 <span className="sr-only">{v.name}</span>
               </label>
@@ -49,7 +49,6 @@ export function ProductGallery({ images: baseImages, modelUrl, name, variants = 
           </div>
         </fieldset>
       )}
-      {!show3d&&img.alt.startsWith('Imagen ambientada')&&<p className="mt-2 text-xs text-muted">Imagen ambientada digitalmente.</p>}
       {failed && (
         <p role="alert" className="mt-2 text-sm text-muted">
           No pudimos cargar el modelo 3D en este dispositivo. Puedes seguir viendo las fotografías.

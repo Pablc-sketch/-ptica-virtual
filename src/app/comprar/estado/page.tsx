@@ -29,6 +29,10 @@ async function Estado({ searchParams }: { searchParams: PageProps<"/comprar/esta
       <p className="eyebrow">Compra {ref}</p>
       <h2 className="mt-2 text-3xl">{paid ? "¡Pago recibido!" : o.status === "rejected" ? "El pago no se completó" : "Pago pendiente"}</h2>
       <p className="mt-3">{o.product_name}{o.color_name ? `, ${o.color_name.toLowerCase()}` : ""}{o.lens_option ? `, ${LENS[o.lens_option]}` : ""} · <strong>{clp(o.total_clp)}</strong></p>
+      {typeof o.subtotal_clp === "number" && typeof o.shipping_clp === "number" && <dl className="mt-4 border-y border-line py-3 text-sm">
+        <div className="flex justify-between"><dt>Lentes</dt><dd>{clp(o.subtotal_clp)}</dd></div>
+        <div className="mt-2 flex justify-between"><dt>Envío</dt><dd>{o.shipping_clp ? clp(o.shipping_clp) : "Gratis"}</dd></div>
+      </dl>}
       {paid && o.needs_prescription && (
         <div className="mt-5 border-l-2 border-olive pl-4">
           <p className="font-medium">Siguiente paso: envíanos tu receta.</p>

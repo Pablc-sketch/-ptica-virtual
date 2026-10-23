@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { CatalogProduct } from "@/lib/catalog-types";
 import { productPrice } from "@/lib/product-price";
+import { frameDesign } from "@/lib/frame-design";
 import { CompareButton } from "@/components/compare-button";
 import { useState } from "react";
 import { toggleFavorite, toggleSelection, useFavorites, useSelection } from "@/lib/local-store";
@@ -44,6 +45,7 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
       </div>
       <div className="product-meta mt-3">
         <div className="min-w-0">
+          {frameDesign(p.slug)?.collection && <p className="product-collection">{frameDesign(p.slug)!.collection}</p>}
           {p.brand && <p className="eyebrow">{p.brand}</p>}
           <h3 className="truncate text-lg">
             <Link href={href}>{p.name}</Link>
@@ -65,11 +67,10 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
           <span className="block text-[11px] text-muted">{price.label}</span>
         </p>
       </div>
-      {p.isSample && <p className="mt-2 text-[11px] text-muted">Imagen retocada · disponibilidad por confirmar</p>}
       {p.use === "solar"
         ? <Link href={href} className="btn mt-3">Ver colores y detalle</Link>
         : <Link href={`/cotizar-receta?marco=${p.slug}`} className="btn mt-3">Elegir cristales</Link>}
-      <Link href={`/probador?marco=${p.slug}`} className="rx-change">Probar en mi foto →</Link>
+      <Link href={`/probador?marco=${p.slug}${variant?`&color=${variant.id}`:""}`} className="rx-change">Probar en mi foto →</Link>
       <button
         type="button"
         onClick={() => toggleSelection(p.id)}

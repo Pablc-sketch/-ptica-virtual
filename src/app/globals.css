@@ -448,3 +448,38 @@ input[type=checkbox] { accent-color:var(--olive); }
 .lens-photo{position:relative;aspect-ratio:4/3;margin:0 0 18px;overflow:hidden;border-radius:6px;background:#f2eee7}
 .campaign .campaign-photo img{object-fit:cover}
 .btn-mp{background:#009ee3;border-color:#009ee3;color:#fff}.btn-mp:hover{background:#0084bf}.btn-mp:disabled{opacity:.55}
+
+/* Global — quieter cards, material-focused photography, clear guest checkout. */
+.product-card{padding:0;border-radius:0;border:0;background:transparent;box-shadow:none}
+.product-card .product-image{border:1px solid #dedbd3;border-radius:0;aspect-ratio:4/3}
+.product-card .product-image img{padding:8px}
+.product-card .product-meta{padding:12px 0 0;margin-top:0}
+.product-card h3{font-size:24px;font-weight:500;letter-spacing:-.04em}
+.product-card>.btn{background:transparent;color:#30332c;border:1px solid #bcb9ae;min-height:44px;border-radius:0;margin-top:14px}
+.product-card>.btn:hover{background:#303b33;color:#fff;border-color:#303b33}
+.product-card>.rx-change{margin:7px 0 0}
+.product-card>.compare-toggle{padding:8px 0;min-height:36px;text-align:left;font-size:11px}
+.product-collection{font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:#976243;margin-bottom:8px}
+.campaigns{border-bottom:1px solid #d7d2c8}
+.campaign-copy .eyebrow{letter-spacing:.2em}
+.collections-grid{gap:24px}
+.collection-card{border-radius:0;background:transparent}
+.collection-card footer{padding:22px 0}
+.collection-card .eyebrow{font-size:10px;letter-spacing:.17em}
+.discovery-card>div,.lens-photo{border-radius:0}
+.guide-grid a{border:0;border-top:1px solid #bdb9af;border-radius:0;padding:22px 0}
+.checkout-lenses legend{margin-bottom:12px;font-weight:600}
+.checkout-lenses label{display:flex;align-items:center;gap:12px;padding:16px;margin-bottom:8px;border:1px solid var(--line);background:#fff;cursor:pointer}
+.checkout-lenses label.is-selected{border-color:#384b3e;background:#f1f3ed}
+.checkout-lenses input{width:20px;height:20px;accent-color:#34493e}
+.checkout-lenses label span{flex:1}
+.checkout-summary{padding:24px;background:#eeeee6;border-top:2px solid #34493e}
+.checkout-summary dl>div{display:flex;justify-content:space-between;gap:16px;padding:8px 0}
+.checkout-summary dd{font-variant-numeric:tabular-nums;font-weight:600}
+.checkout-summary .checkout-total{border-top:1px solid #c2c6b9;margin-top:10px;padding-top:18px;font-size:22px}
+.checkout-summary>p{margin-top:12px;font-size:12px;color:#5c6258}
+.tryon-model-picker .tryon-products{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:12px;max-height:340px;overflow:auto}
+.tryon-model-picker .tryon-products button img{object-fit:contain;background:#fff;aspect-ratio:4/3}
+.tryon-model-picker .tryon-products small{display:block;padding:8px;font-size:12px}
+@media(min-width:768px){.collections-grid{grid-template-columns:1.2fr 1fr 1fr}.collection-art .collection-media{aspect-ratio:1/1.16}.collection-card:not(.collection-art){margin-top:48px}}
+@media(max-width:600px){.product-card h3{font-size:21px}.product-card .product-image img{padding:4px}.checkout-summary{padding:18px}.checkout-lenses label{padding:12px;font-size:14px}}
