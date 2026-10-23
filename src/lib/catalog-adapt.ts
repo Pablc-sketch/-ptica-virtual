@@ -52,12 +52,13 @@ export function adapt(r: Row): CatalogProduct {
     .sort((a, b) => a.position - b.position)
     .map((v) => {
       const front = visible.find((i) => i.variant_id === v.id && (i.view ?? "front") === "front");
-      return { id: v.id, name: v.color_name, hex: v.color_hex, hex2: v.color_hex_2, front: front ? toImage(front) : null };
+      const back = visible.find((i) => i.variant_id === v.id && i.view === "back");
+      return { id: v.id, name: v.color_name, hex: v.color_hex, hex2: v.color_hex_2, front: front ? toImage(front) : null, back: back ? toImage(back) : null };
     })
     .filter((v) => v.front);
   const contextImages = visible.filter((i) => !i.variant_id && i.view === "context").map(toImage);
   const images = variants.length
-    ? [variants[0].front!, ...contextImages]
+    ? [variants[0].front!, ...(variants[0].back ? [variants[0].back] : []), ...contextImages]
     : visible.filter((i) => !i.variant_id).map(toImage);
   const scenes:Record<string,[string,string][]>= {
     'ovalo-negro':[['soho-ambiente','Soho sobre lino junto al mar'],['soho-cerrado','Soho cerrado sobre madera']],

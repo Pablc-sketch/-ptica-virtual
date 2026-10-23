@@ -26,14 +26,16 @@ async function Products(){
  let products;
  try{products=await getPublishedProducts();}catch{return <p className="text-muted" role="status">No pudimos cargar los marcos en este momento.</p>;}
  if(!products.length)return null;
+ // Llegan del más nuevo al más antiguo: los 4 primeros son "recién llegados"; con catálogo suficiente, el carrusel no los repite.
+ const newest=products.slice(0,4), rail=products.length>8?products.slice(4):products;
  return <>
   <section className="container-page home-rail-section" aria-labelledby="favoritos-title">
    <div className="section-intro"><div><p className="eyebrow">Elegidos por el equipo</p><h2 id="favoritos-title">Favoritos de la casa.</h2></div><Link href="/marcos" className="arrow-link">Todos los marcos ↗</Link></div>
-   <ProductRail products={products} label="Favoritos de la casa"/>
+   <ProductRail products={rail} label="Favoritos de la casa"/>
   </section>
   <section className="container-page home-rail-section" aria-labelledby="nuevos-title">
    <div className="section-intro"><div><p className="eyebrow">Recién llegados</p><h2 id="nuevos-title">Lo nuevo en la tienda.</h2></div></div>
-   <div className="new-arrivals">{products.slice(0,4).map(p=><ProductCard key={p.id} p={p}/>)}</div>
+   <div className="new-arrivals">{newest.map(p=><ProductCard key={p.id} p={p}/>)}</div>
   </section>
  </>;
 }

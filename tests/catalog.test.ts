@@ -71,4 +71,26 @@ describe("adapt (DB -> UI)", () => {
     expect(q.modelUrl).toMatch(/product-models\/2\/m\.glb$/);
     expect(q.images).toEqual([]);
   });
+  it("colores: frente y posterior por color, contexto del modelo; borradores de color ocultos", async () => {
+    const { adapt } = await import("../src/lib/catalog-adapt");
+    const img = (path: string, variant_id: string | null, view: string, position: number) => ({ path: `site/products/${path}.webp`, alt: null, position, verified: false, kind: "retouched", variant_id, view });
+    const p = adapt({
+      id: "s", slug: "sol-x", name: "X", sku: null, description: null, price_clp: null, pair_base_price_clp: 28000, is_sample: true,
+      frame_shape: null, material: null, color: null, gender: "unisex", lens_width_mm: null, bridge_mm: null, temple_mm: null,
+      brands: null, product_models: null, use: "solar",
+      product_variants: [
+        { id: "v2", color_name: "Negro", color_hex: "#111111", color_hex_2: null, position: 2, status: "published" },
+        { id: "v1", color_name: "Dorado", color_hex: "#c9a24a", color_hex_2: "#6b4226", position: 1, status: "published" },
+        { id: "v3", color_name: "Oculto", color_hex: "#ffffff", color_hex_2: null, position: 3, status: "draft" },
+      ],
+      product_images: [img("x-negro-f", "v2", "front", 20), img("x-dorado-f", "v1", "front", 10), img("x-dorado-p", "v1", "back", 11),
+        img("x-oculto-f", "v3", "front", 30), img("x-contexto", null, "context", 50)],
+    });
+    expect(p.use).toBe("solar");
+    expect(p.variants?.map((v) => v.name)).toEqual(["Dorado", "Negro"]);
+    expect(p.variants?.[0].back?.url).toBe("/products/x-dorado-p.webp");
+    expect(p.variants?.[1].back).toBeNull();
+    expect(p.images.map((i) => i.url)).toEqual(["/products/x-dorado-f.webp", "/products/x-dorado-p.webp", "/products/x-contexto.webp"]);
+    expect(JSON.stringify(p)).not.toContain("oculto");
+  });
 });

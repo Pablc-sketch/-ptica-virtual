@@ -5,17 +5,22 @@ import Link from "next/link";
 import type { CatalogProduct } from "@/lib/catalog-types";
 import { productPrice } from "@/lib/product-price";
 import { CompareButton } from "@/components/compare-button";
+import { useState } from "react";
 import { toggleFavorite, toggleSelection, useFavorites, useSelection } from "@/lib/local-store";
 
 export function ProductCard({ p, priority = false }: { p: CatalogProduct; priority?: boolean }) {
   const isFav = useFavorites().includes(p.id);
   const inSel = useSelection().some((x) => x.id === p.id);
-  const img = p.images[0];
+  const variants = p.variants ?? [];
+  const [colorIdx, setColorIdx] = useState(0);
+  const variant = variants[colorIdx];
+  const img = variant?.front ?? p.images[0];
+  const href = `/marcos/${p.slug}${colorIdx > 0 && variant ? `?color=${variant.id}` : ""}`;
   const price = productPrice(p);
   return (
     <article className="product-card group flex flex-col">
       <div className="product-image relative aspect-[4/3] overflow-hidden !bg-white">
-        <Link href={`/marcos/${p.slug}`} aria-label={`Ver ${p.name}`}>
+        <Link href={href} aria-label={`Ver ${p.name}${variant ? `, ${variant.name}` : ""}`}>
           <Image
             src={img.url}
             alt={img.alt}
@@ -41,9 +46,19 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
         <div className="min-w-0">
           {p.brand && <p className="eyebrow">{p.brand}</p>}
           <h3 className="truncate text-lg">
-            <Link href={`/marcos/${p.slug}`}>{p.name}</Link>
+            <Link href={href}>{p.name}</Link>
           </h3>
-          <p className="text-xs text-muted">{[p.frameShape, p.color].filter(Boolean).join(" · ")}</p>
+          <p className="text-xs text-muted">{[p.frameShape, variant?.name ?? p.color].filter(Boolean).join(" · ")}</p>
+          {variants.length > 1 ? (
+            <div className="card-swatches" role="group" aria-label={`Colores de ${p.name}`}>
+              {variants.map((v, idx) => (
+                <button key={v.id} type="button" aria-pressed={idx === colorIdx} aria-label={v.name} title={v.name} onClick={() => setColorIdx(idx)}
+                  onMouseEnter={() => setColorIdx(idx)}>
+                  <span aria-hidden="true" style={{ background: v.hex2 ? `linear-gradient(135deg, ${v.hex} 50%, ${v.hex2} 50%)` : v.hex }} />
+                </button>
+              ))}
+            </div>
+          ) : <div className="card-swatches" aria-hidden="true" />}
         </div>
         <p className="mt-3 text-sm">
           {price.text}
@@ -51,7 +66,9 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
         </p>
       </div>
       {p.isSample && <p className="mt-2 text-[11px] text-muted">Imagen retocada · disponibilidad por confirmar</p>}
-      <Link href={`/cotizar-receta?marco=${p.slug}`} className="btn mt-3">Elegir cristales</Link>
+      {p.use === "solar"
+        ? <Link href={href} className="btn mt-3">Ver colores y detalle</Link>
+        : <Link href={`/cotizar-receta?marco=${p.slug}`} className="btn mt-3">Elegir cristales</Link>}
       <Link href={`/probador?marco=${p.slug}`} className="rx-change">Probar en mi foto →</Link>
       <button
         type="button"

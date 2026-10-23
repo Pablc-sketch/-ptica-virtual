@@ -14,21 +14,24 @@ const Viewer3D = dynamic(() => import("@/components/viewer3d"), {
 export function ProductGallery({ images: baseImages, modelUrl, name, variants = [], initialColor }: {
   images: CatalogImage[]; modelUrl: string | null; name: string; variants?: CatalogVariant[]; initialColor?: string;
 }) {
-  // Con colores, la primera foto (frente, fondo blanco) es la del color elegido; el resto son fotos de contexto del modelo.
+  // Con colores, las fotos en fondo blanco (frente y posterior) son las del color elegido; el resto son de contexto del modelo.
   const [colorIdx, setColorIdx] = useState(() => Math.max(0, variants.findIndex((v) => v.id === initialColor)));
   const variant = variants[colorIdx];
-  const images = variant?.front ? [variant.front, ...baseImages.slice(1)] : baseImages;
+  const colorUrls = new Set(variants.flatMap((v) => [v.front?.url, v.back?.url]));
+  const images = variant?.front
+    ? [variant.front, ...(variant.back ? [variant.back] : []), ...baseImages.filter((m) => !colorUrls.has(m.url))]
+    : baseImages;
   const [i, setI] = useState(0);
   const [show3d, setShow3d] = useState(false);
   const [failed, setFailed] = useState(false);
   const img = images[i];
   return (
     <div>
-      <div className="product-gallery relative aspect-square overflow-hidden">
+      <div className="product-gallery relative aspect-[4/3] overflow-hidden">
         {show3d && !failed && modelUrl ? (
           <Viewer3D url={modelUrl} onError={() => setFailed(true)} />
         ) : (
-          <Image key={img.url} src={img.url} alt={img.alt} fill priority sizes="(min-width: 1024px) 50vw, 100vw" className="object-contain" />
+          <Image key={img.url} src={img.url} alt={img.alt} fill priority sizes="(min-width: 1024px) 50vw, 100vw" className={i === 0 || colorUrls.has(img.url) ? "object-contain" : "object-cover"} />
         )}
       </div>
       {variants.length > 1 && (
@@ -38,7 +41,7 @@ export function ProductGallery({ images: baseImages, modelUrl, name, variants = 
             {variants.map((v, idx) => (
               <label key={v.id} className="color-swatch" title={v.name}>
                 <input type="radio" name="color" value={v.id} checked={idx === colorIdx} className="sr-only"
-                  onChange={() => { setColorIdx(idx); setI(0); setShow3d(false); window.dispatchEvent(new CustomEvent("optica:color", { detail: v.id })); }} />
+                  onChange={() => { setColorIdx(idx); setI(0); setShow3d(false); const u = new URL(window.location.href); u.searchParams.set("color", v.id); window.history.replaceState(window.history.state, "", u); }} />
                 <span aria-hidden="true" style={{ background: v.hex2 ? `linear-gradient(135deg, ${v.hex} 50%, ${v.hex2} 50%)` : v.hex }} />
                 <span className="sr-only">{v.name}</span>
               </label>

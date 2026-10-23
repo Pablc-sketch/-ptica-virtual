@@ -67,7 +67,7 @@ input[type=checkbox] { accent-color:var(--olive); }
 .site-nav a { padding:24px 0; font-size:12px; font-weight:500; }
 .site-nav a:hover { color:var(--olive); }
 .product-detail { padding-top:12px; }
-.product-gallery { border:1px solid var(--line); border-radius:4px; background:#eeede6; }
+.product-gallery { border:1px solid var(--line); border-radius:4px; background:#fff; }
 .product-info { background:white; padding:32px; border:1px solid var(--line); border-radius:4px; }
 .reading-page>h1 { max-width:17ch; }
 .reading-page details { background:white; padding:15px 20px; border-bottom:1px solid var(--line); }
@@ -437,3 +437,11 @@ input[type=checkbox] { accent-color:var(--olive); }
 .color-swatch>span[aria-hidden]{width:30px;height:30px;border-radius:50%;border:1px solid #0003;box-shadow:inset 0 0 0 2px #fff}
 .color-swatch input:checked+span{outline:2px solid #142238;outline-offset:3px}
 .color-swatch input:focus-visible+span{outline:3px solid #2945ed;outline-offset:3px}
+
+/* Colores en la tarjeta: objetivo táctil de 32px, círculo de 20px */
+.card-swatches{display:flex;flex-wrap:wrap;gap:2px;margin-top:6px;margin-left:-6px}
+.card-swatches button{display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;border-radius:50%}
+.card-swatches button>span{width:20px;height:20px;border-radius:50%;border:1px solid #0003;box-shadow:inset 0 0 0 1.5px #fff}
+.card-swatches button[aria-pressed=true]>span{outline:1.5px solid #142238;outline-offset:2px}
+.card-swatches button:focus-visible{outline:3px solid #2945ed;outline-offset:0}
+.card-swatches{min-height:32px}

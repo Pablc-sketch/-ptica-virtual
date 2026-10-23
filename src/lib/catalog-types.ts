@@ -1,6 +1,6 @@
 export type CatalogImage = { url: string; alt: string };
-/** Color de un modelo. `front` es la foto de frente en fondo blanco de ese color (la que cambia al elegir color). */
-export type CatalogVariant = { id: string; name: string; hex: string; hex2: string | null; front: CatalogImage | null };
+/** Color de un modelo. `front` (y `back`, si existe) son las fotos en fondo blanco de ese color: cambian al elegir color. */
+export type CatalogVariant = { id: string; name: string; hex: string; hex2: string | null; front: CatalogImage | null; back?: CatalogImage | null };
 export type CatalogProduct = {
   id: string;
   slug: string;
