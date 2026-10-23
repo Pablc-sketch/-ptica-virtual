@@ -8,7 +8,7 @@ const FAQ = [
   ["¿Qué son los favoritos y la selección?", "Los favoritos son un guardado personal. La selección es la lista de marcos que enviarás a cotizar. Ambos se guardan solo en tu navegador."],
   ["¿Cómo se tratan mis datos y mi receta?", "Puedes subir una foto o PDF desde Mi cuenta. Solo tú y el equipo autorizado pueden acceder al archivo. Un profesional lo revisa para preparar tus lentes."],
   ["¿Puedo probarme los marcos?", "Sí: en el probador puedes subir tu foto, usar la cámara o elegir un modelo de demostración. El marco se alinea con tus ojos y puedes corregirlo con dos marcas. Las fichas que tengan un modelo 3D también permiten girarlo para explorar su forma."],
-  ["¿Por qué no veo ciertos marcos?", "Cada modelo se incorpora cuando hemos revisado su fotografía y precio. La disponibilidad se confirma en tu cotización."],
+  ["¿Por qué no veo ciertos marcos?", "Puedes explorar los modelos por forma, material y color. Escríbenos si buscas un estilo en particular."],
 ];
 
 export default function AyudaPage() {

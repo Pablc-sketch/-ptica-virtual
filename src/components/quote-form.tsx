@@ -128,7 +128,7 @@ export function QuoteForm({ open, account, sessionUnavailable = false }: { open:
           })}
         </ul>
         <p className="mt-4 flex justify-between text-lg"><span>Total inicial de selección</span><span>{total === null ? "Por confirmar" : clp(total)}</span></p>
-        <p className="mt-1 text-sm text-muted">La graduación, los tratamientos y la entrega se confirman después de revisar tu receta. Las muestras necesitan comprobar disponibilidad y detalles antes de cotizar.</p>
+        <p className="mt-1 text-sm text-muted">La graduación, los tratamientos y la entrega se confirman después de revisar tu receta.</p>
       </section>
 
       <section aria-labelledby="datos">

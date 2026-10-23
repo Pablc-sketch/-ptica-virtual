@@ -26,7 +26,7 @@ export default function ComoFuncionaPage() {
       </ol>
       <h2 className="mb-3 mt-14 text-3xl">Imágenes y 3D</h2>
       <p className="max-w-[65ch] text-muted">
-        Las fichas muestran los marcos de la colección; las fotografías retocadas se identifican en cada ficha. En los marcos con vista 3D puedes girar y acercar
+        Las fichas muestran los marcos de la colección; puedes explorar sus colores y medidas. En los marcos con vista 3D puedes girar y acercar
         la imagen para conocer su forma. Para elegir el ajuste, compara las medidas de la ficha o pide orientación.
         En el probador puedes ver el estilo sobre tu foto.
       </p>

@@ -21,7 +21,6 @@ export async function startCheckout(slug: string, formData: FormData) {
   const productId = str("product_id"), variant = str("variant_id"), lens = str("lens");
   if (!UUID.test(productId) || (variant && !UUID.test(variant)) || (lens && !LENSES.includes(lens))) back("producto");
   if (!(REGIONES as readonly string[]).includes(str("region"))) back("direccion");
-  if (formData.get("acepto") !== "on") back("acepto");
 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("place_store_order", {
