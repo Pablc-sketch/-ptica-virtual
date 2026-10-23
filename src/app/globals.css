@@ -363,3 +363,62 @@ input[type=checkbox] { accent-color:var(--olive); }
 .discovery-card h3{font-size:19px;display:flex;justify-content:space-between;margin-top:16px}.discovery-card p{font-size:13px;color:#69665d;margin-top:6px}
 @media(max-width:767px){.campaign{grid-template-columns:1fr;min-height:0}.campaign-copy{padding:28px 24px 16px}.campaign-copy h1,.campaign-copy h2{font-size:44px;margin:12px 0}.campaign-copy>p:not(.eyebrow){font-size:15px;margin-bottom:16px}.campaign-photo{min-height:245px;margin-bottom:64px}.campaign-controls{left:24px;bottom:10px}.store-benefits{font-size:11px;gap:12px;align-items:center}.discovery-grid{grid-template-columns:1fr 1fr;gap:24px 14px}.discovery-card h3{font-size:16px}.discovery-card p{font-size:12px}.discovery-section{padding-top:32px;padding-bottom:32px}}
 @media(prefers-reduced-motion:reduce){.discovery-card img,.campaign-controls span{transition:none}}
+
+/* Banner con desplazamiento lateral suave */
+.campaign-viewport{overflow:hidden}
+.campaign-track{display:flex;transition:transform .9s cubic-bezier(.22,.61,.36,1);will-change:transform}
+.campaign-track>.campaign{flex:0 0 100%;min-width:100%}
+@media (prefers-reduced-motion: reduce){.campaign-track,.product-rail-track{transition:none}}
+
+/* Carrusel de marcos: grupos de 4 */
+.home-rail-section{padding:60px 0 10px}
+.product-rail-viewport{overflow:hidden}
+.product-rail-track{display:flex;transition:transform .8s cubic-bezier(.22,.61,.36,1);will-change:transform}
+.product-rail-page{flex:0 0 100%;min-width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;padding:2px}
+.product-rail-dots{display:flex;justify-content:center;gap:4px;margin-top:22px}
+.product-rail-dots button{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:none;border:0}
+.product-rail-dots button span{width:9px;height:9px;border-radius:50%;background:#c9c3b8;transition:all .3s}
+.product-rail-dots button[aria-pressed="true"] span{width:26px;border-radius:9px;background:#142238}
+.new-arrivals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
+@media(max-width:900px){.product-rail-page,.new-arrivals{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}}
+
+/* Colecciones destacadas */
+.collections-section{padding:60px 0}
+.collections-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.collection-card{display:flex;flex-direction:column;border-radius:8px;overflow:hidden;background:#f3ede4;transition:transform .4s}
+.collection-card:hover{transform:translateY(-3px)}
+.collection-media{position:relative;aspect-ratio:4/5;overflow:hidden}
+.collection-media.split{display:grid;grid-template-columns:1fr 1fr}
+.collection-media.split>div{position:relative}
+.collection-art .collection-media{background:radial-gradient(circle at 30% 25%,#f6c9a8 0,transparent 45%),radial-gradient(circle at 75% 70%,#9fb4e8 0,transparent 50%),linear-gradient(150deg,#f3e3d3,#dfe6f6)}
+.collection-essentials .collection-media{background:linear-gradient(160deg,#e9e4da,#fbfaf7)}
+.collection-card footer{padding:20px 22px 24px}
+.collection-card h3{font-size:22px;margin-top:8px}
+@media(max-width:900px){.collections-grid{grid-template-columns:1fr}.collection-media{aspect-ratio:4/3}}
+
+/* Cristales: demostración visual de cada tratamiento (ilustración, no fotografía) */
+.lens-demo{position:relative;width:110px;height:72px;margin:0 0 22px;border-radius:48% 48% 44% 44%;overflow:hidden;border:2px solid #2b2b2b;background:#fff}
+.lens-demo-glass{position:absolute;inset:0}
+.lens-demo-glare{position:absolute;width:120%;height:28px;left:-10%;top:16px;transform:rotate(-18deg);background:linear-gradient(90deg,transparent,#ffffffd0,transparent)}
+.lens-demo.clear .lens-demo-glass{background:linear-gradient(140deg,#e8eeee,#fff 45%,#dfe5e4)}
+.lens-demo.clear .lens-demo-glare{opacity:.9}
+.lens-demo.ar .lens-demo-glass{background:linear-gradient(140deg,#d3efe4,#f6fbf9 45%,#dde3f2)}
+.lens-demo.ar .lens-demo-glare{opacity:.15}
+.lens-demo.blue .lens-demo-glass{background:linear-gradient(140deg,#cfdcff,#f4f7ff 45%,#c7d4fb)}
+.lens-demo.blue .lens-demo-glare{opacity:.55;background:linear-gradient(90deg,transparent,#5b7cfa99,transparent)}
+
+/* Guía */
+.guide-section{padding:60px 0 80px}
+.guide-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;list-style:none;padding:0}
+.guide-grid a{display:block;height:100%;padding:24px;border:1px solid var(--line);border-radius:8px;transition:background .2s}
+.guide-grid a:hover{background:#f7f1e7}
+.guide-grid h3{font-size:20px;margin:12px 0 8px}
+@media(max-width:900px){.guide-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.guide-grid{grid-template-columns:1fr}}
+.guide-article{padding:26px 0;border-top:1px solid var(--line);scroll-margin-top:100px}
+.guide-article h2{font-size:30px;margin-bottom:12px}
+.guide-article p{margin-bottom:12px;line-height:1.7}
+.guide-terms{display:grid;gap:12px;margin:14px 0}
+.guide-terms dt{font-weight:700}
+/* Las fotos de producto tienen fondo blanco: se funden con el fondo de color de la colección. */
+.collection-art .collection-media img,.collection-essentials .collection-media img{mix-blend-mode:multiply;padding:12%}
