@@ -421,7 +421,7 @@ input[type=checkbox] { accent-color:var(--olive); }
 .guide-terms{display:grid;gap:12px;margin:14px 0}
 .guide-terms dt{font-weight:700}
 /* Las fotos de producto tienen fondo blanco: se funden con el fondo de color de la colección. */
-.collection-art .collection-media img,.collection-essentials .collection-media img{mix-blend-mode:multiply;padding:12%}
+.collection-art .collection-media img,.collection-essentials .collection-media img{mix-blend-mode:normal;padding:0}
 
 /* Catálogo simplificado: categoría -> forma -> más filtros */
 .catalog-categories{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
