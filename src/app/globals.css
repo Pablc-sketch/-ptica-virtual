@@ -334,3 +334,6 @@ input[type=checkbox] { accent-color:var(--olive); }
 .rx-power-field:has([id$="cylinder"])>.rx-label{border-left:3px solid #8a6897;padding-left:8px;}
 .rx-axis{border-left:3px solid #50816b;}
 .rx-common-add{max-width:460px;margin:24px 0;padding:18px;background:#fbf1df;border-radius:12px;border-left:3px solid #a17724;}
+
+.announcement-strip{display:flex;align-items:center;justify-content:center;gap:12px;background:linear-gradient(100deg,#27392e,#34493e 65%,#775039);color:#fff;min-height:44px;padding:0 12px;font-size:12px;text-align:center;}
+.announcement-strip p{margin:0;max-width:600px;flex:1;}.announcement-strip button{min-width:44px;min-height:44px;color:inherit;}

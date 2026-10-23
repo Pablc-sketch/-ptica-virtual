@@ -57,6 +57,7 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="header-actions flex items-center">
+          <Link href="/marcos?buscar=1" className="min-h-11 min-w-11 flex items-center justify-center" aria-label="Buscar marcos"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg></Link>
           <Link href="/marcos?favoritos=1" className="hidden min-h-11 items-center px-2 hover:text-olive sm:flex">
             Favoritos{favs > 0 && <span className="ml-1 text-muted">({favs})</span>}
           </Link>

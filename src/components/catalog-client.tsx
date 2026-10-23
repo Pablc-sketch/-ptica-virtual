@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import {frameDesign} from "@/lib/frame-design";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { CatalogProduct } from "@/lib/catalog-types";
@@ -17,12 +18,13 @@ export function CatalogClient({ products }: { products: CatalogProduct[] }) {
 function CatalogControls({ products }: { products: CatalogProduct[] }) {
   const params = useSearchParams();
   const favs = useFavorites();
-  const [q, setQ] = useState("");
-  const [filtersOpen,setFiltersOpen]=useState(false);
+  const [q, setQ] = useState(params.get("q")??"");
+  const [filtersOpen,setFiltersOpen]=useState(params.get("buscar")==="1");
   const requestedShape = params.get("forma");
   const shapeAliases: Record<string, string[]> = { oval: ["oval", "ovalado"], rectangular: ["rectangular", "rectangulares"], round: ["redondo", "redondos", "round"], "cat-eye": ["cat eye", "cat-eye", "cateye"] };
-  const initialShape = products.find(p => p.frameShape && (shapeAliases[requestedShape ?? ""] ?? []).includes(p.frameShape.toLowerCase()))?.frameShape ?? "";
+  const initialShape = products.find(p => p.frameShape && (shapeAliases[requestedShape ?? ""] ?? []).includes(p.frameShape.toLowerCase()))?.frameShape ?? (requestedShape ? "__unavailable__" : "");
   const [shape, setShape] = useState(initialShape);
+  const [usage,setUsage]=useState(params.get("uso")??"");
   const [material, setMaterial] = useState("");
   const [sort, setSort] = useState<Sort>("recomendado");
   const [onlyFavs, setOnlyFavs] = useState(params.get("favoritos") === "1");
@@ -30,13 +32,13 @@ function CatalogControls({ products }: { products: CatalogProduct[] }) {
   const shapes = useMemo(() => distinct(products, "frameShape"), [products]);
   const materials = useMemo(() => distinct(products, "material"), [products]);
   const result = useMemo(
-    () => filterProducts(products, { q, shape, material, onlyFavs, sort }, favs),
-    [products, q, shape, material, onlyFavs, favs, sort],
+    () => filterProducts(products.filter(p=>!usage||frameDesign(p.slug)?.use===usage), { q, shape, material, onlyFavs, sort }, favs),
+    [products, q, shape, material, onlyFavs, favs, sort,usage],
   );
 
-  const filtered = Boolean(q || shape || material || onlyFavs);
+  const filtered = Boolean(q || shape || material || onlyFavs || usage);
   const clear = () => {
-    setQ("");
+    setQ("");setUsage("");
     setShape("");
     setMaterial("");
     setOnlyFavs(false);
@@ -59,6 +61,7 @@ function CatalogControls({ products }: { products: CatalogProduct[] }) {
 
   return (
     <>
+      <div className="shape-tabs" role="group" aria-label="Tipo de anteojos">{[['','Todos'],['optical','Lentes ópticos'],['solar','Lentes de sol']].map(([value,label])=><button key={value} type="button" aria-pressed={usage===value} onClick={()=>setUsage(value)}>{label}</button>)}</div>
       <button type="button" onClick={()=>setFiltersOpen(v=>!v)} aria-expanded={filtersOpen} aria-controls="catalog-filters" className="btn btn-ghost catalog-filter-toggle mt-4 w-full">{filtersOpen ? "Cerrar filtros" : filtered ? "Filtrar y ordenar · filtros activos" : "Filtrar y ordenar"}</button>
       <form
         id="catalog-filters"

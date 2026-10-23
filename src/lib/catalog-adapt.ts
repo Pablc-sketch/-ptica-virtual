@@ -1,3 +1,4 @@
+import {frameDesign} from "./frame-design";
 import type { CatalogProduct } from "./catalog-types";
 
 export function publicStorageUrl(bucket: "product-images" | "product-models", path: string) {
@@ -46,7 +47,7 @@ export function adapt(r: Row): CatalogProduct {
   return {
     id: r.id,
     slug: r.slug,
-    name: r.name,
+    name: frameDesign(r.slug)?.name ?? r.name,
     sku: null,
     brand: brand?.name ?? null,
     description: r.description,
