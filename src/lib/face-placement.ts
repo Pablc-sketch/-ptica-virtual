@@ -20,7 +20,7 @@ export function eyePlacement(points:FacePoint[],image:Size,stage:Size):FacePlace
  if(dx<image.width*.04||dx>image.width*.6)return null;
  const rotation=Math.atan2(dy,dx)*180/Math.PI;if(Math.abs(rotation)>30)return null;
  const first=stagePoint(a,image,stage),second=stagePoint(b,image,stage);
- return {x:(first.x+second.x)*50,y:(first.y+second.y)*50,width:Math.min(100,Math.max(10,Math.hypot((second.x-first.x)*stage.width,(second.y-first.y)*stage.height)*2.15/stage.width*100)),rotation};
+ return {x:(first.x+second.x)*50,y:(first.y+second.y)*50,width:Math.min(100,Math.max(10,Math.hypot((second.x-first.x)*stage.width,(second.y-first.y)*stage.height)*2.35/stage.width*100)),rotation};
 }
 /** Coordinates for a contained image, in CSS percentages. This intentionally returns no millimetres. */
 export function facePlacement(points:FacePoint[],image:{width:number;height:number},stage:{width:number;height:number}):FacePlacement|null {
@@ -31,6 +31,10 @@ export function facePlacement(points:FacePoint[],image:{width:number;height:numb
  const first=a.x<b.x?a:b,second=a.x<b.x?b:a;
  const rotation=Math.atan2((second.y-first.y)*image.height,(second.x-first.x)*image.width)*180/Math.PI;
  if(Math.abs(rotation)>25)return null;
- const frameWidth=Math.abs(r.x-l.x)*w*1.04;
+ // Cheek landmarks can underestimate the front of the frame. Use both eye
+ // spacing and face width; this remains a visual fit, not a physical measurement.
+ const pupilSpan=Math.hypot((second.x-first.x)*w,(second.y-first.y)*h);
+ const frameWidth=Math.max(Math.abs(r.x-l.x)*w*1.08,pupilSpan*2.35);
  return {x:((stage.width-w)/2+(a.x+b.x)/2*w)/stage.width*100,y:((stage.height-h)/2+(a.y+b.y)/2*h)/stage.height*100,width:Math.min(100,Math.max(10,frameWidth/stage.width*100)),rotation};
 }
+
