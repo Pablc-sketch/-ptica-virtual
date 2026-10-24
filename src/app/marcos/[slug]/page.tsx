@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound,redirect } from "next/navigation";
 import { Suspense } from "react";
-import { getPublishedProduct } from "@/lib/catalog";
+import { getPublishedProduct,getPublishedVariantProductSlug } from "@/lib/catalog";
 import { productPrice } from "@/lib/product-price";
 import { ProductGallery } from "@/components/product-gallery";
 import { SelectionButtons } from "@/components/selection-button";
@@ -33,6 +33,10 @@ async function Detail({ params, searchParams }: { params: PageProps<"/marcos/[sl
     );
   }
   if (!p) notFound();
+  if(typeof color==='string'&&!p.variants?.some(v=>v.id===color)){
+    const target=await getPublishedVariantProductSlug(color);
+    if(target&&target!==slug)redirect(`/marcos/${encodeURIComponent(target)}?color=${encodeURIComponent(color)}`);
+  }
   const specs: [string, string | null][] = [
     ["Forma", p.frameShape],
     ["Material", p.material],
@@ -47,7 +51,7 @@ async function Detail({ params, searchParams }: { params: PageProps<"/marcos/[sl
     <div className="product-detail grid gap-7 md:grid-cols-2">
       <div className="min-w-0"><ProductGallery images={p.images} modelUrl={p.modelUrl} name={p.name} variants={p.variants} initialColor={typeof color === "string" ? color : undefined} /></div>
       <div className="product-info min-w-0">
-        {p.brand && <p className="eyebrow">{p.brand}</p>}
+        <p className="eyebrow">{p.use==='solar'?'La colección de sol':'La colección óptica'}{p.brand?` · ${p.brand}`:''}</p>
         <h1 className="text-[clamp(36px,5vw,60px)]">{p.name}</h1>
         <p className="mt-4 text-2xl">{price.text}</p>
         <p className="mt-1 text-sm text-muted">{price.label}{solar ? "." : p.pairBasePriceClp ? ". Otros tratamientos y graduaciones se confirman al cotizar." : ". Los cristales se cotizan aparte."}</p>
@@ -65,7 +69,7 @@ async function Detail({ params, searchParams }: { params: PageProps<"/marcos/[sl
         <SelectionButtons id={p.id} />
         <CompareButton id={p.id}/>
         <p className="mt-6 text-sm text-muted">
-          Un profesional revisará tu receta para preparar tus lentes y confirmar el precio final.{" "}
+          {solar?'Elige tus lentes de sol y coordinamos la entrega contigo.':'Un profesional revisará tu receta para preparar tus lentes y confirmar el precio final.'}{" "}
           <Link href="/como-funciona" className="underline">Cómo funciona</Link>
         </p>
       </div>

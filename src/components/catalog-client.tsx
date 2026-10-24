@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {frameDesign} from "@/lib/frame-design";
+import {CATALOG_CATEGORIES, categoryHref, matchesCategory, type CatalogCategory} from "@/lib/catalog-categories";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { CatalogProduct } from "@/lib/catalog-types";
@@ -10,14 +10,12 @@ import { useFavorites } from "@/lib/local-store";
 import { ProductCard } from "@/components/product-card";
 import { FrameOutline } from "@/components/frame-outline";
 
-const CATEGORIES: [string, string][] = [["", "Todos"], ["mujer", "Mujer"], ["hombre", "Hombre"], ["sol", "Lentes de sol"], ["filtro-azul", "Filtro de luz azul"]];
-
-export function CatalogClient({ products }: { products: CatalogProduct[] }) {
+export function CatalogClient({ products, screen = false }: { products: CatalogProduct[]; screen?: boolean }) {
   const params = useSearchParams();
-  return <CatalogControls key={params.toString()} products={products} />;
+  return <CatalogControls key={params.toString()} products={products} screen={screen} />;
 }
 
-function CatalogControls({ products }: { products: CatalogProduct[] }) {
+function CatalogControls({ products, screen }: { products: CatalogProduct[]; screen: boolean }) {
   const params = useSearchParams();
   const favs = useFavorites();
   const [q, setQ] = useState(params.get("q")??"");
@@ -26,26 +24,26 @@ function CatalogControls({ products }: { products: CatalogProduct[] }) {
   const shapeAliases: Record<string, string[]> = { oval: ["oval", "ovalado"], rectangular: ["rectangular", "rectangulares"], round: ["redondo", "redondos", "round"], "cat-eye": ["cat eye", "cat-eye", "cateye"] };
   const initialShape = products.find(p => p.frameShape && (shapeAliases[requestedShape ?? ""] ?? []).includes(p.frameShape.toLowerCase()))?.frameShape ?? (requestedShape ? "__unavailable__" : "");
   const [shape, setShape] = useState(initialShape);
-  // Una sola categoría: Mujer / Hombre (ópticos), Lentes de sol, Filtro de luz azul (marcos ópticos).
+  // La colección de pantallas utiliza cristales neutros y su precio propio.
   // Se aceptan también los enlaces antiguos ?uso=solar|optical y ?genero=mujer|hombre.
   const initialCategory = params.get("categoria") ?? (params.get("uso") === "solar" ? "sol" : params.get("genero") ?? "");
-  const [category, setCategory] = useState(CATEGORIES.some(([v]) => v === initialCategory) ? initialCategory : "");
-  const usage = category === "sol" ? "solar" : category ? "optical" : "";
-  const gender = category === "mujer" || category === "hombre" ? category : "";
+  const category: CatalogCategory = screen ? 'filtro-azul' : CATALOG_CATEGORIES.some(([v]) => v === initialCategory) ? initialCategory as CatalogCategory : '';
+  const forScreens = category === 'filtro-azul';
   const [material, setMaterial] = useState("");
   const [sort, setSort] = useState<Sort>("recomendado");
   const [onlyFavs, setOnlyFavs] = useState(params.get("favoritos") === "1");
 
-  const shapes = useMemo(() => distinct(products, "frameShape"), [products]);
-  const materials = useMemo(() => distinct(products, "material"), [products]);
+  const collection = useMemo(() => products.filter(p => matchesCategory(p, category)), [products, category]);
+  const shapes = useMemo(() => distinct(collection, "frameShape"), [collection]);
+  const materials = useMemo(() => distinct(collection, "material"), [collection]);
   const result = useMemo(
-    () => filterProducts(products.filter(p=>(!usage||(p.use ?? frameDesign(p.slug)?.use)===usage)&&(!gender||[gender,'unisex',gender==='mujer'?'female':'male',gender==='mujer'?'femenino':'masculino'].includes((p.gender??'').toLowerCase()))), { q, shape, material, onlyFavs, sort }, favs),
-    [products, q, shape, material, onlyFavs, favs, sort,usage,gender],
+    () => filterProducts(collection, { q, shape, material, onlyFavs, sort }, favs),
+    [collection, q, shape, material, onlyFavs, favs, sort],
   );
 
-  const filtered = Boolean(q || shape || material || onlyFavs || category);
+  const filtered = Boolean(q || shape || material || onlyFavs);
   const clear = () => {
-    setQ("");setCategory("");
+    setQ("");
     setShape("");
     setMaterial("");
     setOnlyFavs(false);
@@ -69,11 +67,13 @@ function CatalogControls({ products }: { products: CatalogProduct[] }) {
   return (
     <>
       <div className="catalog-categories" role="group" aria-label="Categoría">
-        {CATEGORIES.map(([value, label]) => (
-          <button key={value} type="button" aria-pressed={category === value} onClick={() => setCategory(value)}>{label}</button>
+        {CATALOG_CATEGORIES.map(([value, label]) => (
+          <Link key={value} href={categoryHref(value)} aria-current={category === value ? 'page' : undefined}>{label}</Link>
         ))}
       </div>
-      {category === "filtro-azul" && <p className="mt-3 text-sm text-muted">Todos los marcos ópticos pueden llevar filtro de luz azul: elige tu marco y el tratamiento al armar tus lentes.</p>}
+      {forScreens && <p className="mt-3 text-sm text-muted">Marco + cristales con filtro de luz azul sin aumento, desde $38.000 el par. Elige tu color; no necesitas enviar una receta.</p>}
+      {(category === 'mujer' || category === 'hombre') && <p className="mt-3 text-sm text-muted">Marcos ópticos para preparar con tu receta. Incluye diseños unisex.</p>}
+      {category === 'sol' && <p className="mt-3 text-sm text-muted">Lentes de sol con sus cristales de color, sin graduación. Elige tu modelo y color.</p>}
       {shapes.length > 0 && (
         <div className="catalog-shapes" role="group" aria-label="Forma">
           <span className="eyebrow">Forma</span>
@@ -125,7 +125,7 @@ function CatalogControls({ products }: { products: CatalogProduct[] }) {
         </div>
       ) : (
         <div className="mt-6 grid grid-cols-1 gap-x-5 gap-y-8 min-[480px]:grid-cols-2 lg:grid-cols-3">
-          {result.map((p, i) => <ProductCard key={p.id} p={p} priority={i < 4} />)}
+          {result.map((p, i) => <ProductCard key={p.id} p={p} priority={i < 4} screen={forScreens} />)}
         </div>
       )}
     </>

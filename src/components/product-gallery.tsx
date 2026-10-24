@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
+import {useRouter} from 'next/navigation';
 import type { CatalogImage, CatalogVariant } from "@/lib/catalog-types";
 
 // El visor 3D (three/R3F) solo se descarga cuando la persona pulsa "Vista 3D".
@@ -24,16 +25,26 @@ export function ProductGallery({ images: baseImages, modelUrl, name, variants = 
   const [i, setI] = useState(0);
   const [show3d, setShow3d] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [zoomed,setZoomed]=useState(false);
+  const [tone,setTone]=useState('linen');
+  const router=useRouter();
   const img = images[i];
+  const studio=i===0||colorUrls.has(img.url);
+  const chooseImage=(idx:number)=>{setI(idx);setShow3d(false);setZoomed(false);};
   return (
-    <div>
-      <div className="product-gallery relative aspect-[4/3] overflow-hidden">
+    <div className="gallery-shell">
+      <div className="gallery-heading"><span className="eyebrow">El detalle hace la diferencia</span><span>{name}</span></div>
+      <div className={`product-gallery gallery-stage stage-${tone} relative aspect-[4/3] overflow-hidden ${studio?'is-studio':'is-lifestyle'} ${zoomed?'is-zoomed':''}`}>
         {show3d && !failed && modelUrl ? (
           <Viewer3D url={modelUrl} onError={() => setFailed(true)} />
         ) : (
-          <Image key={img.url} src={img.url} alt={img.alt} fill priority sizes="(min-width: 1024px) 50vw, 100vw" className={i === 0 || colorUrls.has(img.url) ? "object-contain" : "object-cover"} />
+          <button type="button" className="gallery-zoom-hit" aria-label={zoomed?'Reducir fotografía':'Ampliar fotografía'} aria-pressed={zoomed} onClick={()=>setZoomed(v=>!v)} onPointerMove={e=>{if(zoomed){const r=e.currentTarget.getBoundingClientRect();e.currentTarget.style.setProperty('--zoom-x',`${(e.clientX-r.left)/r.width*100}%`);e.currentTarget.style.setProperty('--zoom-y',`${(e.clientY-r.top)/r.height*100}%`);}}}>
+            <Image key={img.url} src={img.url} alt={img.alt} fill priority sizes="(min-width: 1024px) 50vw, 100vw" className={studio ? "object-contain" : "object-cover"} />
+          </button>
         )}
+        {!show3d&&<div className="gallery-caption"><span>{variant?.name??'Una mirada personal'}</span><span>{zoomed?'Toca para volver −':'Explora los detalles +'}</span></div>}
       </div>
+      {!show3d&&studio&&<div className="gallery-tools"><span>Tu marco, en otro ambiente</span><div role="group" aria-label="Fondo de la fotografía">{[['linen','Lino'],['stone','Piedra'],['rose','Arcilla']].map(([value,label])=><button key={value} type="button" className={`gallery-tone tone-${value}`} aria-label={`Fondo ${label}`} aria-pressed={tone===value} onClick={()=>setTone(value)}><span/>{label}</button>)}</div></div>}
       {variants.length > 1 && (
         <fieldset className="color-picker mt-4">
           <legend className="text-sm">Color: <strong>{variant?.name}</strong></legend>
@@ -41,7 +52,7 @@ export function ProductGallery({ images: baseImages, modelUrl, name, variants = 
             {variants.map((v, idx) => (
               <label key={v.id} className="color-swatch" title={v.name}>
                 <input type="radio" name="color" value={v.id} checked={idx === colorIdx} className="sr-only"
-                  onChange={() => { setColorIdx(idx); setI(0); setShow3d(false); const u = new URL(window.location.href); u.searchParams.set("color", v.id); window.history.replaceState(window.history.state, "", u); }} />
+                  onChange={() => { setColorIdx(idx); chooseImage(0); const u = new URL(window.location.href); u.searchParams.set("color", v.id); router.replace(u.pathname+u.search,{scroll:false}); }} />
                 <span aria-hidden="true" style={{ background: v.hex2 ? `linear-gradient(135deg, ${v.hex} 50%, ${v.hex2} 50%)` : v.hex }} />
                 <span className="sr-only">{v.name}</span>
               </label>
@@ -60,10 +71,10 @@ export function ProductGallery({ images: baseImages, modelUrl, name, variants = 
           <button
             key={m.url}
             type="button"
-            onClick={() => { setI(idx); setShow3d(false); }}
+            onClick={() => chooseImage(idx)}
             aria-label={`Ver foto ${idx + 1} de ${images.length}`}
             aria-pressed={!show3d && idx === i}
-            className={`relative h-16 w-16 overflow-hidden border ${!show3d && idx === i ? "border-ink" : "border-line"}`}
+            className={`gallery-thumbnail relative h-16 w-16 overflow-hidden border ${!show3d && idx === i ? "border-ink" : "border-line"}`}
           >
             <Image src={m.url} alt="" fill sizes="64px" className="object-cover" />
           </button>

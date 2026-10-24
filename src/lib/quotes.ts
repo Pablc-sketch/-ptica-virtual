@@ -1,3 +1,4 @@
+import {formatName,normalizeMobile} from './contact-format';
 export type QuoteInput = {
   name: string;
   email: string | null;
@@ -14,13 +15,15 @@ export function parseQuote(body: unknown): { ok: true; value: QuoteInput } | { o
   const b = body as Record<string, unknown>;
   const text = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
 
-  const name = text(b.name);
+  const rawName = text(b.name);
+  const name = rawName ? formatName(rawName) : null;
   if (!name || name.length < 2 || name.length > 120) return { ok: false, error: "Nombre inválido" };
-  const email = text(b.email);
-  const phone = text(b.phone);
+  const email = text(b.email)?.toLowerCase() ?? null;
+  const rawPhone = text(b.phone);
+  const phone = rawPhone ? normalizeMobile(rawPhone) : null;
   if (!email && !phone) return { ok: false, error: "Indica email o teléfono" };
   if (email && !EMAIL.test(email)) return { ok: false, error: "Email inválido" };
-  if (phone && (phone.length < 6 || phone.length > 30)) return { ok: false, error: "Teléfono inválido" };
+  if (rawPhone && !phone) return { ok: false, error: 'Celular inválido: usa +569 y 8 dígitos' };
   const notes = text(b.notes);
   if (notes && notes.length > 2000) return { ok: false, error: "Notas demasiado largas" };
 

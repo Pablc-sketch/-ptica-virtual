@@ -7,6 +7,7 @@ import { clp } from "@/lib/format";
 import { productPrice } from "@/lib/product-price";
 import { REGIONES } from "@/lib/addresses";
 import { FrameOutline } from "@/components/frame-outline";
+import {PhoneInput,ContactInput} from '@/components/contact-input';
 
 type Line = { id: string; name: string; price_clp: number | null; pair_base_price_clp?: number | null; is_sample?: boolean };
 
@@ -142,9 +143,9 @@ export function QuoteForm({ open, account, sessionUnavailable = false }: { open:
           </div>
         ) : (
           <form onSubmit={submit} className="flex flex-col gap-3">
-            <label>Nombre<input name="name" required minLength={2} maxLength={120} autoComplete="name" className="field mt-1" /></label>
-            <label>Email<input name="email" type="email" defaultValue={account?.email} autoComplete="email" className="field mt-1" /></label>
-            <label>Teléfono<input name="phone" type="tel" minLength={6} maxLength={30} autoComplete="tel" className="field mt-1" /></label>
+            <label>Nombre<ContactInput format="name" name="name" required minLength={2} maxLength={120} autoComplete="name" className="field mt-1" /></label>
+            <label>Email<ContactInput format="email" name="email" type="email" defaultValue={account?.email} autoComplete="email" className="field mt-1" /></label>
+            <label>Celular<PhoneInput name="phone" className="field mt-1"/></label>
             <p className="-mt-1 text-xs text-muted">Indica al menos email o teléfono.</p>
             <fieldset className="mt-2">
               <legend className="mb-2 font-medium">Entrega</legend>
@@ -155,12 +156,12 @@ export function QuoteForm({ open, account, sessionUnavailable = false }: { open:
                 </div>
               ) : (
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                  <label className="text-sm sm:col-span-2">Quién recibe<input name="addr_recipient" required minLength={2} maxLength={120} autoComplete="name" className="field mt-1" /></label>
-                  <label className="text-sm">Teléfono de contacto<input name="addr_phone" type="tel" required minLength={6} maxLength={30} autoComplete="tel" className="field mt-1" /></label>
+                  <label className="text-sm sm:col-span-2">Quién recibe<ContactInput format="name" name="addr_recipient" required minLength={2} maxLength={120} autoComplete="name" className="field mt-1" /></label>
+                  <label className="text-sm">Celular de contacto<PhoneInput name="addr_phone" required className="field mt-1"/></label>
                   <label className="text-sm">Región<select name="addr_region" required defaultValue="Metropolitana" className="field mt-1">{REGIONES.map((r) => <option key={r}>{r}</option>)}</select></label>
-                  <label className="text-sm">Comuna<input name="addr_comuna" required minLength={2} maxLength={60} className="field mt-1" /></label>
-                  <label className="text-sm">Calle<input name="addr_street" required minLength={2} maxLength={120} autoComplete="address-line1" className="field mt-1" /></label>
-                  <label className="text-sm">Número<input name="addr_street_number" required maxLength={20} className="field mt-1" /></label>
+                  <label className="text-sm">Comuna<ContactInput format="name" name="addr_comuna" required minLength={2} maxLength={60} autoComplete="address-level2" placeholder="Ej.: Quilicura" className="field mt-1" /></label>
+                  <label className="text-sm">Calle<ContactInput name="addr_street" required minLength={2} maxLength={120} autoComplete="address-line1" placeholder="Ej.: Av. Las Torres" className="field mt-1" /></label>
+                  <label className="text-sm">Número<ContactInput format="number" name="addr_street_number" required maxLength={20} placeholder="Ej.: 1234 o S/N" className="field mt-1" /></label>
                   <label className="text-sm">Depto. / casa (opcional)<input name="addr_unit" maxLength={40} className="field mt-1" /></label>
                   <input type="hidden" name="addr_notes" value="" />
                 </div>

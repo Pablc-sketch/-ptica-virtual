@@ -11,7 +11,7 @@ export function CheckoutColor({ variants, initial, fallback, formId }: { variant
   const img = v?.front ?? fallback;
   return (
     <>
-      <div className="relative aspect-[4/3] overflow-hidden border border-line bg-white">
+      <div className="checkout-preview relative aspect-[4/3] overflow-hidden border border-line">
         {img && <Image src={img.url} alt={img.alt} fill sizes="(min-width:1024px) 40vw,100vw" className="object-contain" />}
       </div>
       {variants.length > 1 && (

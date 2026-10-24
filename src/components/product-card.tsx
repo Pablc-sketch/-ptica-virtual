@@ -4,11 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import type { CatalogProduct } from "@/lib/catalog-types";
 import { productPrice } from "@/lib/product-price";
+import {screenPairPrice, screenInquiry} from "@/lib/screen-lenses";
+import {clp} from "@/lib/format";
 import { CompareButton } from "@/components/compare-button";
 import { useState } from "react";
 import { toggleFavorite, toggleSelection, useFavorites, useSelection } from "@/lib/local-store";
 
-export function ProductCard({ p, priority = false }: { p: CatalogProduct; priority?: boolean }) {
+export function ProductCard({ p, priority = false, screen = false }: { p: CatalogProduct; priority?: boolean; screen?: boolean }) {
   const isFav = useFavorites().includes(p.id);
   const inSel = useSelection().some((x) => x.id === p.id);
   const variants = p.variants ?? [];
@@ -16,11 +18,13 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
   const variant = variants[colorIdx];
   const img = variant?.front ?? p.images[0];
   const href = `/marcos/${p.slug}${colorIdx > 0 && variant ? `?color=${variant.id}` : ""}`;
-  const price = productPrice(p);
+  const screenAmount = screenPairPrice(p);
+  const price = screen ? {text: screenAmount ? `Desde ${clp(screenAmount)}` : 'Precio por confirmar', label:'marco + filtro azul · sin aumento'} : productPrice(p);
+  const inquiry = screenInquiry(p, variant?.name);
   return (
     <article className="product-card group flex flex-col">
       <div className="product-image relative aspect-[4/3] overflow-hidden !bg-white">
-        <Link href={href} aria-label={`Ver ${p.name}${variant ? `, ${variant.name}` : ""}`}>
+        <Link href={screen ? inquiry : href} aria-label={`Ver ${p.name}${variant ? `, ${variant.name}` : ""}${screen ? ', para pantallas sin aumento' : ''}`}>
           <Image
             src={img.url}
             alt={img.alt}
@@ -46,7 +50,7 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
         <div className="min-w-0">
           {p.brand && <p className="eyebrow">{p.brand}</p>}
           <h3 className="truncate text-lg">
-            <Link href={href}>{p.name}</Link>
+            <Link href={screen ? inquiry : href}>{p.name}</Link>
           </h3>
           <p className="text-xs text-muted">{[p.frameShape, variant?.name ?? p.color].filter(Boolean).join(" · ")}</p>
           {variants.length > 1 ? (
@@ -66,19 +70,19 @@ export function ProductCard({ p, priority = false }: { p: CatalogProduct; priori
         </p>
       </div>
       {p.isSample && <p className="mt-2 text-[11px] text-muted">Imagen retocada · disponibilidad por confirmar</p>}
-      {p.use === "solar"
+      {screen ? <><p className="mt-2 text-sm text-muted">Cristales neutros 0.00 · sin receta.</p><Link href={inquiry} className="btn mt-3">Quiero este par ↗</Link></> : p.use === "solar"
         ? <Link href={href} className="btn mt-3">Ver colores y detalle</Link>
         : <Link href={`/cotizar-receta?marco=${p.slug}`} className="btn mt-3">Elegir cristales</Link>}
       <Link href={`/probador?marco=${p.slug}`} className="rx-change">Probar en mi foto →</Link>
-      <button
+      {!screen && <button
         type="button"
         onClick={() => toggleSelection(p.id)}
         aria-pressed={inSel}
         className="compare-toggle"
       >
         {inSel ? "En tu selección ✓" : "+ Guardar en selección"}
-      </button>
-      <CompareButton id={p.id}/>
+      </button>}
+      {!screen && <CompareButton id={p.id}/>}
     </article>
   );
 }

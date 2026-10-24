@@ -45,3 +45,11 @@ export async function getPublishedProduct(slug: string): Promise<CatalogProduct 
   const p = adapt(data);
   return p.images.length > 0 ? p : null;
 }
+
+// Conserva los enlaces antiguos cuando una variante pasa a una publicación propia.
+export async function getPublishedVariantProductSlug(id:string):Promise<string|null>{
+  if(!/^[0-9a-f-]{36}$/i.test(id))return null;
+  const supabase=await createClient();
+  const {data,error}=await supabase.from('product_variants').select('products!inner(slug,status)').eq('id',id).eq('status','published').eq('products.status','published').maybeSingle().overrideTypes<{products:{slug:string}},{merge:false}>();
+  return error?null:data?.products.slug??null;
+}

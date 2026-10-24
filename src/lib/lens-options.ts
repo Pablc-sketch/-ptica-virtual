@@ -3,7 +3,7 @@
 export const LENS_OPTIONS = [
   { id: "blanco", name: "Lente básico", extraClp: 0, fromClp: 28000, note: "Transparente, para el día a día con tu receta." },
   { id: "antirreflejo", name: "Antirreflejo", extraClp: 10000, fromClp: 38000, note: "Tratamiento para reducir reflejos en el cristal." },
-  { id: "azul", name: "Filtro azul", extraClp: 20000, fromClp: 48000, note: "Una alternativa con filtro de luz azul." },
+  { id: "azul", name: "Filtro azul con receta", extraClp: 20000, fromClp: 48000, note: "Cristales con filtro de luz azul preparados según tu graduación." },
 ] as const;
 export type LensOptionId = typeof LENS_OPTIONS[number]["id"];
 export const LENS_BASE_FROM_CLP = 28000;

@@ -2,7 +2,7 @@
 // El monto siempre viene de la base (store_orders.total_clp); el estado del pago se consulta a la API de Mercado Pago.
 const API = "https://api.mercadopago.com";
 
-export const paymentsEnabled = () => Boolean(process.env.MP_ACCESS_TOKEN && process.env.PAYMENTS_SECRET);
+export const paymentsEnabled = () => Boolean(process.env.MP_ACCESS_TOKEN && process.env.PAYMENTS_SECRET && process.env.MP_WEBHOOK_SECRET);
 
 export type PreferenceInput = {
   orderId: string;

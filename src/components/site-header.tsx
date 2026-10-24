@@ -7,6 +7,7 @@ import { useFavorites, useSelection } from "@/lib/local-store";
 
 const NAV = [
   { href: "/marcos", label: "Marcos" },
+  { href: "/sin-aumento", label: "Sin aumento" },
   { href: "/configurar", label: "Arma tus lentes" },
   { href: "/probador", label: "Probador" },
   { href: "/comparar", label: "Comparar" },
@@ -49,7 +50,7 @@ export function SiteHeader() {
         <Link href="/" aria-label="Óptica Global, Visión sin fronteras, inicio" className="shrink-0">
           <Brand />
         </Link>
-        <nav aria-label="Principal" className="site-nav hidden gap-7 lg:flex">
+        <nav aria-label="Principal" className="site-nav hidden gap-4 xl:gap-7 xl:flex">
           {NAV.map((n) => (
             <Link key={n.href} href={n.href} className="hover:text-olive">
               {n.label}
@@ -67,7 +68,7 @@ export function SiteHeader() {
           <Link href="/cotizar" aria-label={`Selección${sel>0 ? `, ${sel} ${sel === 1 ? "marco" : "marcos"}` : ""}`} className="btn header-selection !min-h-11 !px-3 sm:!px-4">
             <svg className="selection-icon" width="18" height="20" viewBox="0 0 20 22" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="M3 7h14l1 13H2L3 7Z"/><path d="M6 8V5a4 4 0 0 1 8 0v3"/></svg><span className="selection-label">Selección</span>{sel > 0 && <span className="header-count">{sel}</span>}
           </Link>
-          <div ref={wrap} className="relative lg:hidden">
+          <div ref={wrap} className="relative xl:hidden">
             <button
               ref={toggle}
               type="button"

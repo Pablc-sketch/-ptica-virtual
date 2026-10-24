@@ -1,3 +1,4 @@
+import {cleanText,formatName,normalizeMobile} from './contact-format';
 // Direcciones de despacho: validación compartida (servidor) y regiones de Chile.
 export const REGIONES = [
   "Arica y Parinacota", "Tarapacá", "Antofagasta", "Atacama", "Coquimbo", "Valparaíso", "Metropolitana",
@@ -18,13 +19,16 @@ export function parseAddress(get: (k: string) => unknown): { ok: true; value: Ad
   const v = {} as Record<keyof AddressInput, string | null>;
   for (const k of Object.keys(LIMITS) as (keyof AddressInput)[]) {
     const raw = get(k);
-    const s = typeof raw === "string" ? raw.trim() : "";
+    const s = typeof raw === "string" ? cleanText(raw) : "";
     const [min, max] = LIMITS[k];
     if (s.length > max || (min > 0 && s.length < min)) return { ok: false, error: k };
     v[k] = s || null;
   }
   if (!(REGIONES as readonly string[]).includes(v.region!)) return { ok: false, error: "region" };
-  if (!/^[+\d][\d\s-]{5,29}$/.test(v.phone!)) return { ok: false, error: "phone" };
+  const phone = normalizeMobile(v.phone!);
+  if (!phone) return { ok: false, error: 'phone' };
+  v.phone=phone;v.recipient=formatName(v.recipient!);v.comuna=formatName(v.comuna!);v.street_number=v.street_number!.toUpperCase();
+  if (!/^[\p{L}\p{N} /.-]+$/u.test(v.street_number)) return {ok:false,error:'street_number'};
   return { ok: true, value: v as AddressInput };
 }
 

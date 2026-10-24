@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { REGIONES } from "@/lib/addresses";
 import { createPreference, paymentsEnabled } from "@/lib/mercadopago";
+import {parseAddress} from '@/lib/addresses';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LENSES = ["basico", "antirreflejo", "filtro-azul"];
@@ -22,13 +23,17 @@ export async function startCheckout(slug: string, formData: FormData) {
   if (!UUID.test(productId) || (variant && !UUID.test(variant)) || (lens && !LENSES.includes(lens))) back("producto");
   if (!(REGIONES as readonly string[]).includes(str("region"))) back("direccion");
   if (formData.get("acepto") !== "on") back("acepto");
+  const parsed=parseAddress(k=>k==='recipient'?str('name'):k==='street_number'?str('street_number'):str(k));
+  if(!parsed.ok)back(parsed.error==='phone'?'telefono':'direccion');
+  if(!parsed.ok)return;
+  const address=parsed.value;
 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("place_store_order", {
     p_product: productId, p_variant: variant || null, p_lens: lens || null, p_quantity: 1,
-    p_name: str("name"), p_email: str("email"), p_phone: str("phone"),
-    p_region: str("region"), p_comuna: str("comuna"), p_street: str("street"), p_number: str("street_number"),
-    p_unit: str("unit") || null, p_notes: str("notes") || null,
+    p_name: address.recipient, p_email: str("email").toLowerCase(), p_phone: address.phone,
+    p_region: address.region, p_comuna: address.comuna, p_street: address.street, p_number: address.street_number,
+    p_unit: address.unit, p_notes: address.notes,
   });
   const row = Array.isArray(data) ? data[0] : data;
   if (error || !row) back(ERRORS[Object.keys(ERRORS).find((k) => error?.message.includes(k)) ?? ""] ?? "error");

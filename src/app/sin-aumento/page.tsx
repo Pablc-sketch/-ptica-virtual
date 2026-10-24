@@ -2,13 +2,28 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {Suspense} from 'react';
 import {getPublishedProducts} from '@/lib/catalog';
-import {frameDesign} from '@/lib/frame-design';
+import {CatalogClient} from '@/components/catalog-client';
 import {clp} from '@/lib/format';
-export const metadata={title:'Filtro azul sin aumento',description:'Elige tu marco con cristales de filtro azul sin graduación.'};
+import {SCREEN_LENSES} from '@/lib/screen-lenses';
+export const metadata={title:'Lentes para pantallas · Sin aumento',description:'Tu estilo también frente a la pantalla. Marco + cristales con filtro de luz azul sin aumento, desde $38.000. Elige tu marco sin enviar receta.'};
 async function Frames(){
  let products;
  try{products=await getPublishedProducts();}catch{return <p role="alert">No pudimos cargar los marcos. <Link href="/sin-aumento">Reintentar</Link></p>;}
- const frames=products.filter(p=>frameDesign(p.slug)?.use==='optical');
- return <div className="discovery-grid">{frames.map(p=><article key={p.id} className="discovery-card"><div><Image src={p.images[0].url} alt={p.name} fill sizes="(min-width:768px) 25vw,50vw"/></div><h2 className="mt-4 text-xl">{p.name}</h2><p>{p.color}</p><p className="mt-4 text-lg">{p.pairBasePriceClp?`Desde ${clp(p.pairBasePriceClp+20000)}`:'Consultar precio'}</p><p>Marco + filtro azul sin aumento.</p><Link className="btn mt-4" href={'https://wa.me/56975512281?text='+encodeURIComponent(`Hola, quisiera consultar disponibilidad de ${p.name} (${p.slug}), color ${p.color??'de la foto'}, con filtro azul SIN AUMENTO (0.00).`)}>Consultar este par ↗</Link><Link className="arrow-link mt-3" href={`/marcos/${p.slug}`}>Ver el marco →</Link></article>)}</div>;
+ return <CatalogClient products={products} screen/>;
 }
-export default function Page(){return <main className="container-page py-10"><p className="eyebrow">Con tu estilo. Sin graduación.</p><h1 className="text-4xl mt-4">Filtro azul sin aumento.</h1><p className="mt-4 mb-8 max-w-xl">Elige el marco que te gusta. Para un par sin aumento no necesitas completar una receta. Consulta disponibilidad con nuestro equipo por WhatsApp.</p><Suspense fallback={<p role="status">Cargando marcos…</p>}><Frames/></Suspense></main>;}
+export default function Page(){return <main className="container-page py-10">
+ <section className="screen-hero" aria-labelledby="screen-title">
+  <div className="screen-hero-copy"><p className="eyebrow">Lentes para pantallas · Sin aumento</p>
+   <h1 id="screen-title">Tu estilo también<br/>frente a la pantalla.</h1>
+   <p>Para trabajar, estudiar o disfrutar de tus contenidos. Elige un marco que vaya contigo y combínalo con cristales transparentes con filtro de luz azul, sin graduación.</p>
+   <p className="screen-hero-price"><span>El par completo desde</span><strong>{clp(SCREEN_LENSES.fromClp)}</strong></p>
+   <p>Marco + cristales con filtro azul · 0.00 de aumento · Sin enviar receta.</p>
+   <a href="#elige-tu-marco" className="btn mt-5">Encuentra tu estilo ↓</a>
+  </div>
+  <div className="screen-hero-photo"><Image src="/img/cat-filtro-azul.webp" alt="Estilo para tus horas de pantalla, imagen ambientada" fill priority sizes="(min-width:768px) 45vw,100vw" className="object-cover"/></div>
+ </section>
+ <section id="elige-tu-marco" className="screen-collection" aria-labelledby="screen-frames-title"><p className="eyebrow">Un par que va contigo</p><h2 id="screen-frames-title" className="text-3xl mt-3 mb-5">Elige el tuyo.</h2>
+  <Suspense fallback={<p role="status">Cargando marcos…</p>}><Frames/></Suspense>
+ </section>
+ <section className="screen-prescription-note"><h2 className="text-2xl">¿Ya usas lentes con aumento?</h2><p>También puedes elegir filtro azul con tu receta. Tenemos opciones para preparar tus cristales según tu graduación.</p><Link href="/marcos" className="arrow-link">Ver lentes con receta →</Link></section>
+</main>;}

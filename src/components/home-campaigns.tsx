@@ -7,6 +7,7 @@ const CAMPAIGNS=[
  {tag:'Óptica Global',title:'Una mirada.\nTodo tu estilo.',copy:'Marco + cristales básicos con tu receta, desde $28.000.',cta:'Encuentra tu marco',href:'/marcos?categoria=mujer',image:'/img/banner-optico.webp',alt:'Mujer con lentes ópticos junto a una ventana, imagen ambientada',theme:'amber'},
  {tag:'La colección de sol',title:'Días de sol.\nEstilo propio.',copy:'Lentes de sol desde $28.000 el par.',cta:'Ver lentes de sol',href:'/marcos?categoria=sol',image:'/img/banner-sol.webp',alt:'Mujer con lentes de sol leyendo en la playa, imagen ambientada',theme:'sand'},
  {tag:'Tu próximo par',title:'El detalle\nque te distingue.',copy:'Ópticos y de sol, con nombres que viajan contigo.',cta:'Ver la colección',href:'/marcos',image:'/img/banner-color.webp',alt:'Pareja caminando con lentes ópticos y de sol, imagen ambientada',theme:'blue'},
+ {tag:'Lentes para pantallas · Sin aumento',title:'Tu estilo también\nfrente a la pantalla.',copy:'Marco + cristales con filtro azul, desde $38.000 el par. Sin enviar receta.',cta:'Elige tu par',href:'/sin-aumento',image:'/img/cat-filtro-azul.webp',alt:'Persona con lentes ópticos frente a un computador, imagen ambientada',theme:'screen'},
 ];
 
 // Carrusel con desplazamiento lateral suave: todas las diapositivas viven en una pista que se traslada.

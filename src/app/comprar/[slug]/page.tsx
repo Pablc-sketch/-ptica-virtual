@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound,redirect } from "next/navigation";
 import { Suspense } from "react";
-import { getPublishedProduct } from "@/lib/catalog";
+import { getPublishedProduct,getPublishedVariantProductSlug } from "@/lib/catalog";
 import { REGIONES } from "@/lib/addresses";
 import { clp } from "@/lib/format";
 import { paymentsEnabled } from "@/lib/mercadopago";
 import { startCheckout } from "../actions";
 import { CheckoutColor } from "@/components/checkout-color";
+import {PhoneInput,ContactInput} from '@/components/contact-input';
 
 export const metadata: Metadata = { title: "Comprar", robots: { index: false } };
 
@@ -28,6 +29,10 @@ async function Checkout({ params, searchParams }: { params: PageProps<"/comprar/
   const q = await searchParams;
   const p = await getPublishedProduct(slug).catch(() => null);
   if (!p || !p.pairBasePriceClp) notFound();
+  if(typeof q.color==='string'&&!p.variants?.some(v=>v.id===q.color)){
+    const target=await getPublishedVariantProductSlug(q.color);
+    if(target&&target!==slug)redirect(`/comprar/${encodeURIComponent(target)}?color=${encodeURIComponent(q.color)}`);
+  }
   const optical = p.use !== "solar";
   const variants = p.variants ?? [];
   const chosen = variants.find((v) => v.id === q.color) ?? variants[0];
@@ -72,13 +77,13 @@ async function Checkout({ params, searchParams }: { params: PageProps<"/comprar/
 
         <fieldset className="grid gap-3 sm:grid-cols-2">
           <legend className="mb-2 font-medium">Tus datos y dirección de despacho</legend>
-          <label className="sm:col-span-2">Nombre y apellido<input name="name" required minLength={2} maxLength={120} autoComplete="name" className="field mt-1" /></label>
-          <label>Correo<input name="email" type="email" required maxLength={254} autoComplete="email" className="field mt-1" /></label>
-          <label>Teléfono<input name="phone" type="tel" required minLength={6} maxLength={30} autoComplete="tel" placeholder="+56 9 1234 5678" className="field mt-1" /></label>
+          <label className="sm:col-span-2">Nombre y apellido<ContactInput format="name" name="name" required minLength={2} maxLength={120} autoComplete="name" className="field mt-1" /></label>
+          <label>Correo<ContactInput format="email" name="email" type="email" required maxLength={254} autoComplete="email" placeholder="nombre@correo.cl" className="field mt-1" /></label>
+          <label>Celular<PhoneInput name="phone" required className="field mt-1"/></label>
           <label>Región<select name="region" required defaultValue="Metropolitana" autoComplete="address-level1" className="field mt-1">{REGIONES.map((r) => <option key={r}>{r}</option>)}</select></label>
-          <label>Comuna<input name="comuna" required minLength={2} maxLength={60} autoComplete="address-level2" className="field mt-1" /></label>
-          <label>Calle<input name="street" required minLength={2} maxLength={120} autoComplete="address-line1" className="field mt-1" /></label>
-          <label>Número<input name="street_number" required maxLength={20} className="field mt-1" /></label>
+          <label>Comuna<ContactInput format="name" name="comuna" required minLength={2} maxLength={60} autoComplete="address-level2" placeholder="Ej.: Quilicura" className="field mt-1" /></label>
+          <label>Calle<ContactInput name="street" required minLength={2} maxLength={120} autoComplete="address-line1" placeholder="Ej.: Av. Las Torres" className="field mt-1" /></label>
+          <label>Número<ContactInput format="number" name="street_number" required maxLength={20} placeholder="Ej.: 1234 o S/N" className="field mt-1" /></label>
           <label>Depto. / casa (opcional)<input name="unit" maxLength={40} autoComplete="address-line2" className="field mt-1" /></label>
           <label className="sm:col-span-2">Indicaciones para el despacho (opcional)<input name="notes" maxLength={300} className="field mt-1" /></label>
         </fieldset>
