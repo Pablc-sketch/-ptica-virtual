@@ -8,11 +8,24 @@ import { SiteShell } from "@/components/site-shell";
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-global", display: "swap" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://opticaglobal.cl"),
+  openGraph: {
+    type: "website",
+    locale: "es_CL",
+    siteName: "Óptica Global",
+    title: "Óptica Global — Tu forma de ver",
+    description: "Marcos ópticos y lentes de sol. Encuentra tu estilo y cotiza tus cristales con revisión profesional.",
+    images: [{ url: "/img/banner-optico.webp", width: 1536, height: 1024, alt: "Óptica Global: estilo y visión, imagen de campaña" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/img/banner-optico.webp"],
+  },
   robots: { index: false, follow: false },
   icons: { icon: "/brand/logo-original.png" },
   title: { default: "Óptica Global — Visión sin fronteras", template: "%s · Óptica Global" },
   description:
-    "Catálogo de marcos ópticos con fotografías reales y, cuando existe, vista 3D verificada. Cotiza el marco y revisa tu receta con nosotros.",
+    "Marcos ópticos y lentes de sol. Elige tu estilo, compara colores y cotiza tus cristales con revisión profesional de tu receta.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
