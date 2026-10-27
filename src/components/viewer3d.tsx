@@ -25,7 +25,7 @@ class Boundary extends Component<{ onError: () => void; children: ReactNode }, {
 export default function Viewer3D({ url, onError }: { url: string; onError: () => void }) {
   return (
     <Boundary onError={onError}>
-      <Canvas camera={{ position: [0, 0, 3], fov: 40 }} dpr={[1, 1.75]} onCreated={({ gl }) => {
+      <Canvas frameloop="demand" camera={{ position: [0, 0, 3], fov: 40 }} dpr={[1, 1.5]} onCreated={({ gl }) => {
         gl.domElement.addEventListener("webglcontextlost", onError);
       }}>
         <ambientLight intensity={1.1} />
