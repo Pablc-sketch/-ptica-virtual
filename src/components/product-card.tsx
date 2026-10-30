@@ -73,7 +73,7 @@ export function ProductCard({ p, priority = false, screen = false }: { p: Catalo
       {screen ? <><p className="mt-2 text-sm text-muted">Cristales neutros 0.00 · sin receta.</p><Link href={inquiry} className="btn mt-3">Quiero este par ↗</Link></> : p.use === "solar"
         ? <Link href={href} className="btn mt-3">Ver colores y detalle</Link>
         : <Link href={`/cotizar-receta?marco=${p.slug}`} className="btn mt-3">Elegir cristales</Link>}
-      <Link href={`/probador?marco=${p.slug}`} className="rx-change">Probar en mi foto →</Link>
+      <Link href={`/probador?marco=${encodeURIComponent(p.slug)}${variant ? `&color=${encodeURIComponent(variant.id)}` : ""}`} className="rx-change">Probar en mi foto →</Link>
       {!screen && <button
         type="button"
         onClick={() => toggleSelection(p.id)}

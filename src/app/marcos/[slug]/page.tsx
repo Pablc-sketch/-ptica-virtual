@@ -63,8 +63,8 @@ async function Detail({ params, searchParams }: { params: PageProps<"/marcos/[sl
           ))}
         </dl></details>
         {p.pairBasePriceClp && !solar && <div className="mt-6 grid grid-cols-3 gap-2 text-sm" aria-label="Precios iniciales del par"><div>Básico<p className="mt-1 font-semibold">${p.pairBasePriceClp.toLocaleString("es-CL")}</p></div><div>Antirreflejo<p className="mt-1 font-semibold">${(p.pairBasePriceClp+10000).toLocaleString("es-CL")}</p></div><div>Filtro azul con receta<p className="mt-1 font-semibold">${(p.pairBasePriceClp+20000).toLocaleString("es-CL")}</p></div></div>}
-        {!solar && <Link href={`/sin-aumento?q=${encodeURIComponent(p.name)}`} className="mt-4 inline-flex min-h-11 items-center text-sm underline">¿Sin aumento? Este estilo con filtro azul desde ${(p.pairBasePriceClp ? p.pairBasePriceClp+10000 : 38000).toLocaleString("es-CL")} →</Link>}
-        <Link href={`/comprar/${p.slug}${typeof color === "string" ? `?color=${encodeURIComponent(color)}` : ""}`} className="btn btn-mp mt-6 w-full">Comprar con Mercado Pago</Link>
+        {!solar && <Link href={`/sin-aumento?q=${encodeURIComponent(p.name)}`} className="mt-4 inline-flex min-h-11 items-center text-sm underline">{p.pairBasePriceClp ? `¿Sin aumento? Este estilo con filtro azul desde $${(p.pairBasePriceClp+10000).toLocaleString("es-CL")} →` : '¿Sin aumento? Consulta las opciones de este estilo →'}</Link>}
+        {p.pairBasePriceClp && <Link href={`/comprar/${p.slug}${typeof color === "string" ? `?color=${encodeURIComponent(color)}` : ""}`} className="btn btn-mp mt-6 w-full">Comprar con Mercado Pago</Link>}
         <Link href={`/cotizar-receta?marco=${p.slug}`} className="mt-3 inline-flex min-h-11 items-center text-sm underline">{solar ? "¿Los necesitas con aumento? Cotiza con tu receta →" : "Elegir mis cristales →"}</Link>
         <Link href={`/probador?marco=${p.slug}`} className="btn btn-ghost mt-4 w-full">Probar en mi foto</Link>
         <SelectionButtons id={p.id} />

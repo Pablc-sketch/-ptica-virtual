@@ -17,6 +17,18 @@ const P = [
 const base: Filters = { q: "", shape: "", material: "", onlyFavs: false, sort: "recomendado" };
 
 describe("filterProducts", () => {
+  it("encuentra colores de variantes sin duplicar el modelo ni alterar otros filtros", () => {
+    const model = mk({ id: "variantes", color: "Negro", frameShape: "Rectangular", variants: [
+      { id: "v1", name: "Lila translúcido", hex: "#aaa", hex2: null, front: null },
+      { id: "v2", name: "Lila opaco", hex: "#bbb", hex2: null, front: null },
+    ] });
+    expect(filterProducts([model, ...P], { ...base, q: "LILA TRANSLUCIDO" }, []).map(p => p.id)).toEqual(["variantes"]);
+    expect(filterProducts([model], { ...base, q: "lila" }, [])).toHaveLength(1);
+    expect(filterProducts([model], { ...base, q: "lila", shape: "Redondo" }, [])).toEqual([]);
+    expect(filterProducts([model], { ...base, q: "lila", onlyFavs: true }, [])).toEqual([]);
+    expect(filterProducts([model], { ...base, q: "lila", onlyFavs: true }, [model.id])).toEqual([model]);
+    expect(model.variants?.map(v => v.name)).toEqual(["Lila translúcido", "Lila opaco"]);
+  });
   it("combina búsqueda + forma + material", () => {
     expect(filterProducts(P, { ...base, shape: "Rectangular", material: "Acetato" }, []).map((p) => p.id)).toEqual(["3"]);
     expect(filterProducts(P, { ...base, q: "oliva", shape: "Rectangular" }, []).map((p) => p.id)).toEqual(["3"]);

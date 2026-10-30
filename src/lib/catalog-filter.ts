@@ -10,7 +10,7 @@ export function filterProducts(products: CatalogProduct[], f: Filters, favs: str
   const nq = norm(f.q.trim());
   const list = products.filter(
     (p) =>
-      (!nq || [p.name, p.brand, p.color, p.material, p.frameShape].some((v) => v && norm(v).includes(nq))) &&
+      (!nq || [p.name, p.brand, p.color, p.material, p.frameShape, ...(p.variants ?? []).map((v) => v.name)].some((v) => v && norm(v).includes(nq))) &&
       (!f.shape || p.frameShape === f.shape) &&
       (!f.material || p.material === f.material) &&
       (!f.onlyFavs || favs.includes(p.id)),
