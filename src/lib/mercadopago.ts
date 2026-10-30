@@ -36,13 +36,32 @@ export async function createPreference(i: PreferenceInput): Promise<{ id: string
 
 export type MpPayment = { id: string; status: string; externalReference: string | null; amount: number; currency: string };
 
-export async function getPayment(paymentId: string): Promise<MpPayment | null> {
-  if (!/^\d{1,20}$/.test(paymentId)) return null;
-  const res = await fetch(`${API}/v1/payments/${paymentId}`, {
-    headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` },
-    cache: "no-store",
-  });
-  if (!res.ok) return null;
-  const p = (await res.json()) as { id: number; status: string; external_reference: string | null; transaction_amount: number; currency_id: string };
-  return { id: String(p.id), status: p.status, externalReference: p.external_reference, amount: p.transaction_amount, currency: p.currency_id };
+export type MpPaymentLookup =
+  | { kind: "found"; payment: MpPayment }
+  | { kind: "ignored"; reason: "invalid_id" | "not_found" }
+  | { kind: "retry" };
+
+export async function getPayment(paymentId: string): Promise<MpPaymentLookup> {
+  if (!/^\d{1,20}$/.test(paymentId)) return { kind: "ignored", reason: "invalid_id" };
+  try {
+    const res = await fetch(`${API}/v1/payments/${paymentId}`, {
+      headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` },
+      cache: "no-store", redirect: "error", signal: AbortSignal.timeout(8000),
+    });
+    if (res.status === 404) return { kind: "ignored", reason: "not_found" };
+    if (!res.ok) return { kind: "retry" };
+    const p: unknown = await res.json();
+    if (!p || typeof p !== "object") return { kind: "retry" };
+    const raw = p as Record<string, unknown>;
+    const id = typeof raw.id === "string" ? raw.id : Number.isSafeInteger(raw.id) ? String(raw.id) : "";
+    if (id !== paymentId || typeof raw.status !== "string" || !raw.status
+      || typeof raw.transaction_amount !== "number" || !Number.isFinite(raw.transaction_amount) || raw.transaction_amount <= 0
+      || (raw.currency_id === "CLP" && !Number.isSafeInteger(raw.transaction_amount))
+      || typeof raw.currency_id !== "string"
+      || (raw.external_reference != null && typeof raw.external_reference !== "string")) return { kind: "retry" };
+    return { kind: "found", payment: { id, status: raw.status, externalReference: typeof raw.external_reference === "string" ? raw.external_reference : null, amount: raw.transaction_amount, currency: raw.currency_id } };
+  } catch {
+    // No confirmar la recepción de un evento que no se pudo consultar.
+    return { kind: "retry" };
+  }
 }
