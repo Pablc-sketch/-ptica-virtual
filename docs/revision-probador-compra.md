@@ -51,3 +51,5 @@ Integración con `main` 8b50379878b721d763615486e0559a8b972dba8d. Se conservó e
 - Pantalla de 390 × 844: sin desbordamiento horizontal. No se utilizó la cámara física ni se repitió hoy la simulación de cámara del día 27.
 - Credenciales de producción comprobadas solo por nombre: existen PAYMENTS_SECRET y NEXT_PUBLIC_SITE_URL; faltan MP_ACCESS_TOKEN y MP_WEBHOOK_SECRET. No se crearon cobros ni se consultó información de clientes.
 - Esta rama es una propuesta de revisión. La publicación en producción y una prueba de pago siguen pendientes.
+
+Comprobación adicional del cierre de compra: el botón de Mercado Pago permanece deshabilitado sin credenciales y ofrece contacto por WhatsApp. Un estado approved agregado a la URL no marca un pedido ficticio como pagado: la pantalla conserva Pago pendiente según la respuesta del almacenamiento simulado.
