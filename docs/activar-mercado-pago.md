@@ -21,10 +21,10 @@ El endpoint comprueba HMAC y tolerancia temporal, identifica el pago mediante `d
 
 ## Secreto interno
 
-`PAYMENTS_SECRET` debe coincidir con `private.app_settings['payments_secret']` en Supabase. No es una credencial proporcionada por Mercado Pago. Su configuración en Vercel quedó bloqueada por revisión automática, pendiente de autorización explícita para guardar ese secreto en este proyecto. No se incluye su valor en archivos ni en el chat.
+`PAYMENTS_SECRET` debe coincidir con `private.app_settings['payments_secret']` en Supabase. No es una credencial proporcionada por Mercado Pago. El 27 de octubre de 2026 se verificó que ya existe como variable sensible de Production en Vercel; no se leyó su valor ni se comprobó en esta revisión que coincida con el de la base. No se incluye su valor en archivos ni en el chat.
 
 `NEXT_PUBLIC_SITE_URL=https://opticaglobal.cl` ya está configurado en Production.
 
 ## Cierre de activación
 
-Después de guardar los tres secretos, generar un nuevo despliegue de producción. Verificar creación de preferencia y recepción de una notificación válida mediante las herramientas de prueba de Mercado Pago. Una compra real y su cargo requieren que el titular complete el pago. Hasta entonces, el botón de pago permanece desactivado.
+Después de guardar las credenciales de Mercado Pago y comprobar el secreto interno, generar un nuevo despliegue de producción. Verificar creación de preferencia y recepción de una notificación válida mediante las herramientas de prueba de Mercado Pago. Una compra real y su cargo requieren que el titular complete el pago. Hasta entonces, el botón de pago permanece desactivado.

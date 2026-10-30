@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { clp } from "@/lib/format";
 import { paymentsEnabled } from "@/lib/mercadopago";
 import { syncPayment } from "@/lib/store-orders";
+import { RefreshOrder } from '@/components/refresh-order';
 
 export const metadata: Metadata = { title: "Estado de tu compra", robots: { index: false } };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -23,7 +24,7 @@ async function Estado({ searchParams }: { searchParams: PageProps<"/comprar/esta
   const o = Array.isArray(data) ? data[0] : data;
   if (!o) return <p role="alert">No encontramos esa compra.</p>;
   const ref = id.slice(0, 8).toUpperCase();
-  const paid = !["pending_payment", "rejected", "cancelled"].includes(o.status);
+  const paid = ["paid", "ordered", "shipped", "delivered"].includes(o.status);
   return (
     <div className="max-w-xl border border-line bg-white/60 p-8">
       <p className="eyebrow">Compra {ref}</p>
@@ -40,7 +41,7 @@ async function Estado({ searchParams }: { searchParams: PageProps<"/comprar/esta
         </div>
       )}
       {paid && !o.needs_prescription && <p className="mt-4 text-sm text-muted">Te escribiremos para coordinar el despacho.</p>}
-      {!paid && <p className="mt-4 text-sm text-muted">{q.mp === "error" ? "No pudimos abrir Mercado Pago. Inténtalo de nuevo o escríbenos por WhatsApp." : "Si ya pagaste, esta página se actualiza cuando Mercado Pago confirme el pago."}</p>}
+      {!paid && <><p className="mt-4 text-sm text-muted">{q.mp === "error" ? "No pudimos abrir Mercado Pago. Escríbenos por WhatsApp e indica el número de compra." : "Si ya pagaste, actualiza el estado para consultar la confirmación de Mercado Pago."}</p><RefreshOrder/><a className="rx-change ml-4" href={`${WHATSAPP}${encodeURIComponent(`Hola, necesito ayuda con mi compra ${ref}.`)}`}>Ayuda con mi compra</a></>}
       <p className="mt-6 text-xs text-muted">Guarda este enlace para revisar el estado de tu compra.</p>
     </div>
   );

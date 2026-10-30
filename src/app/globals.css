@@ -470,3 +470,32 @@ input[type=checkbox] { accent-color:var(--olive); }
 .lens-photo{position:relative;aspect-ratio:4/3;margin:0 0 18px;overflow:hidden;border-radius:6px;background:#f2eee7}
 .campaign .campaign-photo img{object-fit:cover}
 .btn-mp{background:#009ee3;border-color:#009ee3;color:#fff}.btn-mp:hover{background:#0084bf}.btn-mp:disabled{opacity:.55}
+
+/* Clearer, calmer try-on controls on touch screens and desktop. */
+.tryon-controls { color:#24352e; }
+.tryon-steps { list-style:decimal; padding-left:22px; margin:18px 0; font-size:14px; line-height:1.8; color:#35473d; }
+.tryon-controls .rx-help,.tryon-about { font-size:13px; color:#465148; }
+.tryon-controls .rx-label { font-size:14px; }
+.tryon-controls .btn { font-size:14px; }
+.tryon-controls .btn-ghost { background:#fff; border-color:#68796d; }
+.tryon-controls .btn-ghost:hover { background:#e9eee8; }
+.tryon-products button { border-color:#829084; min-height:112px; }
+.tryon-products button[aria-pressed=true] { border:2px solid #294638; background:#eef4ed; box-shadow:none; padding:11px 7px; }
+.tryon-products strong { font-size:14px; color:#24352e; }
+.tryon-products small { font-size:12px; color:#465148; }
+.tryon-stage-note { font-size:12px; color:#24352e; pointer-events:none; }
+.tryon-mirror { display:flex; align-items:center; justify-content:center; gap:10px; flex-basis:100%; min-height:44px; color:#24352e; font-size:14px; }
+.tryon-mirror input { width:20px; height:20px; }
+.tryon-controls input[type=range] { accent-color:#294638; min-height:44px; }
+.tryon-camera .btn-ghost { background:white; border-color:#68796d; color:#24352e; }
+@media(max-width:767px){
+ .tryon-stage { height:clamp(300px,60svh,520px); max-height:none; aspect-ratio:auto; }
+ .tryon-grid:has(.tryon-face)>div:first-child { position:static; box-shadow:none; }
+ .tryon-grid:has(.tryon-face) .tryon-stage { height:clamp(300px,55svh,480px); max-height:none; }
+ .tryon-controls button,.tryon-controls input,.tryon-controls summary { scroll-margin-top:100px; }
+ .tryon-products { gap:10px; }
+}
+@media(prefers-reduced-motion:reduce){
+ html { scroll-behavior:auto; }
+ .btn,.arrow-link span,.campaign-track { transition:none; }
+}

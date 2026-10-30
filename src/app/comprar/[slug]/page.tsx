@@ -7,6 +7,7 @@ import { REGIONES } from "@/lib/addresses";
 import { clp } from "@/lib/format";
 import { paymentsEnabled } from "@/lib/mercadopago";
 import { startCheckout } from "../actions";
+import { CheckoutSubmit } from '@/components/checkout-submit';
 import { CheckoutColor } from "@/components/checkout-color";
 import {PhoneInput,ContactInput} from '@/components/contact-input';
 
@@ -92,9 +93,9 @@ async function Checkout({ params, searchParams }: { params: PageProps<"/comprar/
           <input type="checkbox" name="acepto" required className="mt-1 h-5 w-5" />
           <span>Acepto que usen mis datos para procesar y despachar esta compra. Leí el <Link href="/privacidad" className="underline">aviso de privacidad</Link>.</span>
         </label>
-        <button className="btn btn-mp" disabled={!enabled}>Pagar con Mercado Pago</button>
-        {!enabled && <p role="status" className="text-sm text-muted">El pago en línea con Mercado Pago se está activando. Mientras tanto, escríbenos por WhatsApp para comprar este marco.</p>}
-        <p className="text-xs text-muted">Puedes comprar sin crear una cuenta. Te enviamos el detalle a tu correo.</p>
+        <CheckoutSubmit enabled={enabled}/>
+        {!enabled && <p role="status" className="text-sm text-muted">El pago en línea con Mercado Pago se está activando. Mientras tanto, <a className="underline font-medium" href={`https://wa.me/56975512281?text=${encodeURIComponent(`Hola, quiero comprar ${p.name}.`)}`}>escríbenos por WhatsApp para comprar este marco</a>.</p>}
+        <p className="text-xs text-muted">Puedes comprar sin crear una cuenta. Al volver del pago, guarda el enlace con el detalle de tu pedido.</p>
       </form>
     </div>
   );
