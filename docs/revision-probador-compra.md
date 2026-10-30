@@ -39,3 +39,15 @@ Con dependencias instaladas y Chrome disponible:
 2. node scripts/e2e-tryon.mjs
 
 Se usa un catálogo sintético en memoria. CHROMIUM_PATH permite elegir el ejecutable de Chrome. Las capturas se guardan en ../../outputs respecto a la raíz de este checkout.
+
+
+## Revisión del 30 de octubre de 2026
+
+Integración con `main` 8b50379878b721d763615486e0559a8b972dba8d. Se conservó el catálogo por producto y variante y la preparación local del frontal. `TryOnOverlay` administra el gesto; `TryOnFrameImage` prepara la imagen sin volver a renderizar todo el probador en cada movimiento.
+
+- 110 pruebas unitarias aprobadas; TypeScript y compilación de producción aprobados.
+- ESLint de los tres componentes: sin errores, dos avisos sobre la invalidación de solicitudes al desmontar (los contadores no son nodos DOM).
+- Comprobación de navegador con datos sintéticos: color inicial desde la URL, ajuste facial real sobre un modelo digital, arrastre del marco, cambio de variante y enlace conservando color. El frontal nuevo se prepara como imagen local en memoria.
+- Pantalla de 390 × 844: sin desbordamiento horizontal. No se utilizó la cámara física ni se repitió hoy la simulación de cámara del día 27.
+- Credenciales de producción comprobadas solo por nombre: existen PAYMENTS_SECRET y NEXT_PUBLIC_SITE_URL; faltan MP_ACCESS_TOKEN y MP_WEBHOOK_SECRET. No se crearon cobros ni se consultó información de clientes.
+- Esta rama es una propuesta de revisión. La publicación en producción y una prueba de pago siguen pendientes.

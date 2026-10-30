@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable @next/next/no-img-element */
 import {useEffect,useRef, type PointerEvent} from 'react';
 import {TryOnFrameImage} from './tryon-frame-image';
 import type {TryOnFrame} from '@/lib/tryon-catalog';
